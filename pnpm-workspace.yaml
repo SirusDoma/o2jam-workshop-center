@@ -1,0 +1,4 @@
+# Settings only — this is a single package, not a workspace.
+allowBuilds:
+  # Vite's bundler; its install script fetches the platform-native binary.
+  esbuild: true
