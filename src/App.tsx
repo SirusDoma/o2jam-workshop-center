@@ -1,5 +1,5 @@
 import { useRef, type ReactNode } from 'react';
-import { BrowserRouter, Navigate, useLocation } from 'react-router-dom';
+import { HashRouter, Navigate, useLocation } from 'react-router-dom';
 import { Shell } from './components/Shell';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
@@ -49,11 +49,11 @@ export default function App() {
     <ThemeProvider>
       <ToastProvider>
         <WorkspaceProvider>
-          <BrowserRouter>
+          <HashRouter>
             <Shell>
               <ToolStack />
             </Shell>
-          </BrowserRouter>
+          </HashRouter>
         </WorkspaceProvider>
       </ToastProvider>
     </ThemeProvider>
