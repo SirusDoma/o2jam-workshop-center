@@ -60,7 +60,9 @@ export function DownloadButton({
 
   const save = async () => {
     try {
-      if (await saveFile(data, filename)) onSaved?.();
+      if (await saveFile(data, filename)) {
+        onSaved?.();
+      }
     } catch (err) {
       notify(err instanceof Error ? err.message : 'Could not save the file.', 'warn');
     }

@@ -13,7 +13,10 @@ export function FrameGrid({
   children: ReactNode;
 }) {
   const [over, setOver] = useState(false);
-  if (!onAddFiles) return <div className={className}>{children}</div>;
+  if (!onAddFiles) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <div
       className={`${className}${over ? ' over' : ''}`}
@@ -26,7 +29,9 @@ export function FrameGrid({
         e.preventDefault();
         setOver(false);
         void collectDropped(e.dataTransfer).then((files) => {
-          if (files.length) onAddFiles(files);
+          if (files.length) {
+            onAddFiles(files);
+          }
         });
       }}
     >

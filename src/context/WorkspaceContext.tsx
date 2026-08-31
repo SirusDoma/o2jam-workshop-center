@@ -25,8 +25,8 @@ interface WorkspaceContextValue {
 const WorkspaceContext = createContext<WorkspaceContextValue>({
   files: [],
   add: async () => [],
-  remove: () => {},
-  clear: () => {},
+  remove: () => { },
+  clear: () => { },
   byKind: () => [],
   get: () => undefined,
 });
@@ -48,9 +48,12 @@ async function readWithProgress(file: File, onProgress: (loaded: number) => void
   const reader = file.stream().getReader();
   let at = 0;
   let last = 0;
-  for (;;) {
+  for (; ;) {
     const { done, value } = await reader.read();
-    if (done) break;
+    if (done) {
+      break;
+    }
+
     out.set(value, at);
     at += value.byteLength;
     const now = performance.now();
@@ -63,7 +66,7 @@ async function readWithProgress(file: File, onProgress: (loaded: number) => void
   return out.buffer;
 }
 
-export function classify(name: string): { kind: FileKind; ext: string } {
+export function classify(name: string): { kind: FileKind; ext: string; } {
   const ext = name.includes('.') ? name.slice(name.lastIndexOf('.') + 1).toLowerCase() : '';
   switch (ext) {
     case 'opi':
@@ -87,7 +90,7 @@ export function classify(name: string): { kind: FileKind; ext: string } {
   }
 }
 
-export function WorkspaceProvider({ children }: { children: ReactNode }) {
+export function WorkspaceProvider({ children }: { children: ReactNode; }) {
   const [files, setFiles] = useState<WorkspaceFile[]>([]);
   const [opening, setOpening] = useState<OpeningProgress | null>(null);
 

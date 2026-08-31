@@ -7,9 +7,9 @@ interface ThemeContextValue {
   toggle: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextValue>({ theme: 'light', toggle: () => {} });
+const ThemeContext = createContext<ThemeContextValue>({ theme: 'light', toggle: () => { } });
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
+export function ThemeProvider({ children }: { children: ReactNode; }) {
   const [theme, setTheme] = useState<Theme>(
     (document.documentElement.dataset.theme as Theme) || 'light'
   );

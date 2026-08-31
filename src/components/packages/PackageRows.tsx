@@ -80,7 +80,7 @@ export const AddedRow = memo(function AddedRow({
   onPick,
   onRemove,
 }: {
-  a: { name: string; data: Uint8Array };
+  a: { name: string; data: Uint8Array; };
   i: number;
   on: boolean;
   edited: boolean;

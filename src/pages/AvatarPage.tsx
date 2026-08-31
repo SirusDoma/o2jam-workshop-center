@@ -57,7 +57,7 @@ export default function AvatarPage() {
   const [addedItems, setAddedItems] = useState<Record<string, ItemEntry[]>>({});
   const [removedItems, setRemovedItems] = useState<Record<string, Set<number>>>({});
   const [addedFiles, setAddedFiles] = useState<Record<string, Uint8Array>>({});
-  const [confirmFile, setConfirmFile] = useState<{ kind: 'close' | 'switch'; id: string } | null>(null);
+  const [confirmFile, setConfirmFile] = useState<{ kind: 'close' | 'switch'; id: string; } | null>(null);
   const nextIndex = useRef(1_000_000);
 
   const file = files.find((f) => f.id === fileId) ?? null;
@@ -65,13 +65,21 @@ export default function AvatarPage() {
   const table = tables.find((t) => t.name === tableName) ?? tables[0] ?? null;
 
   useEffect(() => {
-    if (!file || !table) return;
+    if (!file || !table) {
+      return;
+    }
+
     const detected = detectItemDataVersion(readEntry(file.buffer, table));
-    if (detected) setVersionId(detected);
+    if (detected) {
+      setVersionId(detected);
+    }
   }, [file, table]);
 
   const detected = useMemo(() => {
-    if (!file || !table) return null;
+    if (!file || !table) {
+      return null;
+    }
+
     try {
       return detectItemDataEncoding(readEntry(file.buffer, table), versionId);
     } catch {
@@ -80,8 +88,11 @@ export default function AvatarPage() {
   }, [file, table, versionId]);
   const resolved: O2Encoding = encoding === 'auto' ? detected ?? 'ascii' : encoding;
 
-  const parsed = useMemo((): { data?: ItemDataResult; error?: string } => {
-    if (!file || !table) return {};
+  const parsed = useMemo((): { data?: ItemDataResult; error?: string; } => {
+    if (!file || !table) {
+      return {};
+    }
+
     try {
       return { data: parseItemData(readEntry(file.buffer, table), versionId, resolved) };
     } catch (err) {
@@ -127,7 +138,10 @@ export default function AvatarPage() {
   const item = picked === null ? null : items.find((i) => i.index === picked) ?? null;
 
   const setInfo = useMemo(() => {
-    if (!file) return null;
+    if (!file) {
+      return null;
+    }
+
     try {
       const arc = parseArchive(file.buffer, 'ascii');
       const entry = arc.entries.find((e) => e.name.toLowerCase() === 'setinfodata.ojs');
@@ -147,6 +161,7 @@ export default function AvatarPage() {
       setAddedSets((all) => all.map((s) => (s.index === index ? applySetEdit(s, patch, resolved) : s)));
       return;
     }
+
     setSetInfoEdits((all) => {
       const cur = all[index] ?? {};
       const merged: SetEdit = {
@@ -155,17 +170,24 @@ export default function AvatarPage() {
       };
       const orig = setInfo?.data.sets.find((s) => s.index === index);
       if (orig && setEditIsNoop(orig, merged, resolved)) {
-        if (!all[index]) return all;
+        if (!all[index]) {
+          return all;
+        }
+
         const next = { ...all };
         delete next[index];
         return next;
       }
+
       return { ...all, [index]: merged };
     });
   };
   const revertSetEntry = (index: number) => {
     setSetInfoEdits((all) => {
-      if (!all[index]) return all;
+      if (!all[index]) {
+        return all;
+      }
+
       const next = { ...all };
       delete next[index];
       return next;
@@ -173,7 +195,10 @@ export default function AvatarPage() {
   };
 
   const addSet = () => {
-    if (!setInfo) return;
+    if (!setInfo) {
+      return;
+    }
+
     const index = nextIndex.current++;
     const maxId = setsEff.reduce((m, s) => Math.max(m, s.id), 0);
     setAddedSets((all) => [...all, createSet(index, maxId + 1, resolved)]);
@@ -182,14 +207,19 @@ export default function AvatarPage() {
   const removeSet = (index: number) => {
     if (index >= 1_000_000) {
       setAddedSets((all) => all.filter((s) => s.index !== index));
-      if (pickedSet === index) setPickedSet(null);
+      if (pickedSet === index) {
+        setPickedSet(null);
+      }
     } else {
       setRemovedSets((all) => new Set(all).add(index));
     }
   };
   const restoreSet = (index: number) => {
     setRemovedSets((all) => {
-      if (!all.has(index)) return all;
+      if (!all.has(index)) {
+        return all;
+      }
+
       const next = new Set(all);
       next.delete(index);
       return next;
@@ -198,7 +228,10 @@ export default function AvatarPage() {
 
 
   const createSetFromBuilder = (wearing: ItemEntry[], gender: SetGender) => {
-    if (!setInfo || wearing.length === 0) return;
+    if (!setInfo || wearing.length === 0) {
+      return;
+    }
+
     const index = nextIndex.current++;
     const maxId = setsEff.reduce((m, s) => Math.max(m, s.id), 0);
     const base = createSet(index, maxId + 1, resolved);
@@ -220,17 +253,25 @@ export default function AvatarPage() {
 
   const usedAdded = useMemo(() => {
     const names = Object.keys(addedFiles);
-    if (names.length === 0) return new Set<string>();
+    if (names.length === 0) {
+      return new Set<string>();
+    }
+
     const refs = new Set<string>();
     for (const t of Object.values(edits))
       for (const e of Object.values(t))
-        if (e.slots)
+        if (e.slots) {
           for (const v of Object.values(e.slots))
-            if (v) refs.add(v.toLowerCase());
+            if (v) {
+              refs.add(v.toLowerCase());
+            }
+        }
     for (const list of Object.values(addedItems))
       for (const it of list)
         for (const sp of it.sprites)
-          if (sp.present) refs.add(sp.filename.toLowerCase());
+          if (sp.present) {
+            refs.add(sp.filename.toLowerCase());
+          }
     const existing = new Set((file ? archiveSpriteNames(file) : []).map((n) => n.toLowerCase()));
     return new Set(names.filter((n) => refs.has(n.toLowerCase()) || existing.has(n.toLowerCase())));
   }, [addedFiles, edits, addedItems, file]);
@@ -262,7 +303,10 @@ export default function AvatarPage() {
   };
 
   const addItem = () => {
-    if (!table) return;
+    if (!table) {
+      return;
+    }
+
     const name = table.name;
     const index = nextIndex.current++;
     const maxId = items.reduce((m, i) => Math.max(m, i.itemId), 0);
@@ -279,15 +323,21 @@ export default function AvatarPage() {
       spriteCache.delete(`${file.id}:${f.name}:true`);
       spriteCache.delete(`${file.id}:${f.name}:false`);
     }
+
     return f.name;
   };
 
   const removeItem = (index: number) => {
-    if (!table) return;
+    if (!table) {
+      return;
+    }
+
     const name = table.name;
     if (index >= 1_000_000) {
       setAddedItems((all) => ({ ...all, [name]: (all[name] ?? []).filter((i) => i.index !== index) }));
-      if (picked === index) setPicked(null);
+      if (picked === index) {
+        setPicked(null);
+      }
     } else {
       setRemovedItems((all) => {
         const s = new Set(all[name] ?? []);
@@ -298,10 +348,16 @@ export default function AvatarPage() {
   };
 
   const restoreItem = (index: number) => {
-    if (!table) return;
+    if (!table) {
+      return;
+    }
+
     const name = table.name;
     setRemovedItems((all) => {
-      if (!all[name]?.has(index)) return all;
+      if (!all[name]?.has(index)) {
+        return all;
+      }
+
       const s = new Set(all[name]);
       s.delete(index);
       return { ...all, [name]: s };
@@ -309,7 +365,10 @@ export default function AvatarPage() {
   };
 
   const editItem = (index: number, patch: Partial<ItemEdit>) => {
-    if (!table) return;
+    if (!table) {
+      return;
+    }
+
     const name = table.name;
     if (index >= 1_000_000) {
       setAddedItems((all) => ({
@@ -318,6 +377,7 @@ export default function AvatarPage() {
       }));
       return;
     }
+
     setEdits((all) => {
       const forTable = { ...(all[name] ?? {}) };
       const cur = forTable[index] ?? {};
@@ -330,10 +390,16 @@ export default function AvatarPage() {
   };
 
   const revertItem = (index: number) => {
-    if (!table) return;
+    if (!table) {
+      return;
+    }
+
     const name = table.name;
     setEdits((all) => {
-      if (!all[name]?.[index]) return all;
+      if (!all[name]?.[index]) {
+        return all;
+      }
+
       const forTable = { ...all[name] };
       delete forTable[index];
       return { ...all, [name]: forTable };
@@ -341,7 +407,10 @@ export default function AvatarPage() {
   };
 
   const exportArchive = async () => {
-    if (!file) return;
+    if (!file) {
+      return;
+    }
+
     try {
       const out = buildAvatarPackage({
         buffer: file.buffer,
@@ -357,10 +426,19 @@ export default function AvatarPage() {
         addedFiles,
         usedAddedFiles: usedAdded,
       });
-      if (!(await saveFile(out, file.name))) return;
+      if (!(await saveFile(out, file.name))) {
+        return;
+      }
+
       const [reopened] = await add([new File([out.slice().buffer as ArrayBuffer], file.name)]);
-      if (reopened && reopened.id !== file.id) remove(file.id);
-      if (reopened) setFileId(reopened.id);
+      if (reopened && reopened.id !== file.id) {
+        remove(file.id);
+      }
+
+      if (reopened) {
+        setFileId(reopened.id);
+      }
+
       notify(`Saved ${file.name}.`, 'ok');
     } catch (err) {
       notify(err instanceof Error ? err.message : 'Could not rebuild the archive.', 'warn');
@@ -370,58 +448,68 @@ export default function AvatarPage() {
   return (
     <>
       <div className="stickyhead">
-      <PageHead
-        title="Avatars"
-        sub="Build, modify and preview avatar items."
-        actions={
-          <>
-            <select className="selctl" value={versionId} aria-label="Item table layout" onChange={(e) => setVersionId(e.target.value as ItemDataVersionId)}>
-              {ITEM_DATA_VERSIONS.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.label}
-                </option>
-              ))}
-            </select>
-            <EncodingSelect
-              value={encoding}
-              autoLabel={`Auto — ${ENCODINGS.find((entry) => entry.id === (detected ?? 'ascii'))?.label}`}
-              onChange={(value) => setEncoding(value)}
-            />
-          </>
-        }
-      />
-
-      <FileInputCard>
-        <FilePicker
-          kinds={['archive']}
-          selected={fileId}
-          onSelect={(f) => {
-            setOpenError(null);
-            if (f.id === fileId) return;
-            if (dirty) setConfirmFile({ kind: 'switch', id: f.id });
-            else setFileId(f.id);
-          }}
-          onClose={(f) => {
-            if (dirty && f.id === fileId) {
-              setConfirmFile({ kind: 'close', id: f.id });
-              return;
-            }
-            remove(f.id);
-            if (f.id === fileId) setFileId(null);
-          }}
-          accept=".opa,.opi"
-          hint="Avatar package."
-          onError={setOpenError}
-          after={
-            file && parsed.data ? (
-              <button className="btn primary" type="button" onClick={() => void exportArchive()} disabled={!dirty}>
-                <Save size={14} />
-                SAVE
-              </button>
-            ) : null
+        <PageHead
+          title="Avatars"
+          sub="Build, modify and preview avatar items."
+          actions={
+            <>
+              <select className="selctl" value={versionId} aria-label="Item table layout" onChange={(e) => setVersionId(e.target.value as ItemDataVersionId)}>
+                {ITEM_DATA_VERSIONS.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.label}
+                  </option>
+                ))}
+              </select>
+              <EncodingSelect
+                value={encoding}
+                autoLabel={`Auto — ${ENCODINGS.find((entry) => entry.id === (detected ?? 'ascii'))?.label}`}
+                onChange={(value) => setEncoding(value)}
+              />
+            </>
           }
         />
-      </FileInputCard>
+
+        <FileInputCard>
+          <FilePicker
+            kinds={['archive']}
+            selected={fileId}
+            onSelect={(f) => {
+              setOpenError(null);
+              if (f.id === fileId) {
+                return;
+              }
+
+              if (dirty) {
+                setConfirmFile({ kind: 'switch', id: f.id });
+              }
+              else {
+                setFileId(f.id);
+              }
+            }}
+            onClose={(f) => {
+              if (dirty && f.id === fileId) {
+                setConfirmFile({ kind: 'close', id: f.id });
+                return;
+              }
+
+              remove(f.id);
+              if (f.id === fileId) {
+                setFileId(null);
+              }
+            }}
+            accept=".opa,.opi"
+            hint="Avatar package."
+            onError={setOpenError}
+            after={
+              file && parsed.data ? (
+                <button className="btn primary" type="button" onClick={() => void exportArchive()} disabled={!dirty}>
+                  <Save size={14} />
+                  SAVE
+                </button>
+              ) : null
+            }
+          />
+        </FileInputCard>
       </div>
 
       {openError && <WarningCard onClose={() => setOpenError(null)}>{openError}</WarningCard>}
@@ -474,80 +562,80 @@ export default function AvatarPage() {
             {pane === 'builder' ? (
               <AvatarBuilder file={file} items={items} hasSetInfo={!!setInfo} onCreateSet={createSetFromBuilder} />
             ) : (
-            <>
-            <div className="archive-listwrap">
-              {pane === 'items' ? (
-                <AvatarItemsTable
-                  items={items}
-                  sources={tables.map((entry) => ({ name: entry.name, count: chipCount(entry.name), selected: entry.name === table.name }))}
-                  query={query}
-                  selected={picked}
-                  edits={tableEdits}
-                  removed={removedSet}
-                  onPick={setPicked}
-                  onRemove={removeItem}
-                  onRestore={restoreItem}
-                  onSource={setTableName}
-                  onQuery={setQuery}
-                  onAdd={addItem}
-                />
-              ) : (
-                <AvatarSetsTable
-                  sets={setsEff}
-                  query={query}
-                  hasSetInfo={!!setInfo}
-                  selected={pickedSet}
-                  edits={setInfoEdits}
-                  removed={removedSets}
-                  source={{
-                    name: setInfo?.name ?? 'SetInfoData.ojs',
-                    count: (setInfo?.data.sets.length ?? 0) + addedSets.length - removedSets.size,
-                    selected: true,
-                  }}
-                  onQuery={setQuery}
-                  onAdd={addSet}
-                  onPick={setPickedSet}
-                  onRemove={removeSet}
-                  onRestore={restoreSet}
-                />
-              )}
-            </div>
+              <>
+                <div className="archive-listwrap">
+                  {pane === 'items' ? (
+                    <AvatarItemsTable
+                      items={items}
+                      sources={tables.map((entry) => ({ name: entry.name, count: chipCount(entry.name), selected: entry.name === table.name }))}
+                      query={query}
+                      selected={picked}
+                      edits={tableEdits}
+                      removed={removedSet}
+                      onPick={setPicked}
+                      onRemove={removeItem}
+                      onRestore={restoreItem}
+                      onSource={setTableName}
+                      onQuery={setQuery}
+                      onAdd={addItem}
+                    />
+                  ) : (
+                    <AvatarSetsTable
+                      sets={setsEff}
+                      query={query}
+                      hasSetInfo={!!setInfo}
+                      selected={pickedSet}
+                      edits={setInfoEdits}
+                      removed={removedSets}
+                      source={{
+                        name: setInfo?.name ?? 'SetInfoData.ojs',
+                        count: (setInfo?.data.sets.length ?? 0) + addedSets.length - removedSets.size,
+                        selected: true,
+                      }}
+                      onQuery={setQuery}
+                      onAdd={addSet}
+                      onPick={setPickedSet}
+                      onRemove={removeSet}
+                      onRestore={restoreSet}
+                    />
+                  )}
+                </div>
 
-            <div className="archive-view">
-              {pane === 'sets' ? (
-                setEntry ? (
-                  <AvatarSetDetail
-                  key={setEntry.index}
-                  file={file}
-                  set={setEntry}
-                  allItems={items}
-                  edited={!!setInfoEdits[setEntry.index]}
-                  onField={(fields) => editSetEntry(setEntry.index, { fields })}
-                  onItems={(list) => editSetEntry(setEntry.index, { items: list })}
-                  onRevert={() => revertSetEntry(setEntry.index)}
-                />
-                ) : (
-                  <div className="archive-empty">SELECT A SET</div>
-                )
-              ) : item ? (
-                <AvatarItemDetail
-                  key={item.index}
-                  file={file}
-                  item={item}
-                  allItems={items}
-                  spriteNames={spriteNames}
-                  version={version}
-                  edited={!!tableEdits?.[item.index]}
-                  onField={(patch) => editItem(item.index, { fields: patch })}
-                  onSlot={(idx, name) => editItem(item.index, { slots: { [idx]: name } })}
-                  onImport={importSprite}
-                  onRevert={() => revertItem(item.index)}
-                />
-              ) : (
-                <div className="archive-empty">SELECT AN ITEM</div>
-              )}
-            </div>
-            </>
+                <div className="archive-view">
+                  {pane === 'sets' ? (
+                    setEntry ? (
+                      <AvatarSetDetail
+                        key={setEntry.index}
+                        file={file}
+                        set={setEntry}
+                        allItems={items}
+                        edited={!!setInfoEdits[setEntry.index]}
+                        onField={(fields) => editSetEntry(setEntry.index, { fields })}
+                        onItems={(list) => editSetEntry(setEntry.index, { items: list })}
+                        onRevert={() => revertSetEntry(setEntry.index)}
+                      />
+                    ) : (
+                      <div className="archive-empty">SELECT A SET</div>
+                    )
+                  ) : item ? (
+                    <AvatarItemDetail
+                      key={item.index}
+                      file={file}
+                      item={item}
+                      allItems={items}
+                      spriteNames={spriteNames}
+                      version={version}
+                      edited={!!tableEdits?.[item.index]}
+                      onField={(patch) => editItem(item.index, { fields: patch })}
+                      onSlot={(idx, name) => editItem(item.index, { slots: { [idx]: name } })}
+                      onImport={importSprite}
+                      onRevert={() => revertItem(item.index)}
+                    />
+                  ) : (
+                    <div className="archive-empty">SELECT AN ITEM</div>
+                  )}
+                </div>
+              </>
             )}
           </section>
         </>

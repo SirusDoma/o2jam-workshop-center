@@ -6,15 +6,20 @@ import type { DecodedAt, Layer } from '../../features/avatar/utils';
 import { renderSprite } from '../../features/avatar/utils';
 
 // One clock keeps every layer in sync.
-export function AvatarFig({ layers, playing, fps }: { layers: Layer[]; playing: boolean; fps: number }) {
+export function AvatarFig({ layers, playing, fps }: { layers: Layer[]; playing: boolean; fps: number; }) {
   const [tick, setTick] = useState(0);
   const toolActive = useToolActive();
   useEffect(() => {
-    if (!playing || !toolActive) return;
+    if (!playing || !toolActive) {
+      return;
+    }
+
     let id = 0;
     const onVis = () => {
       window.clearInterval(id);
-      if (!document.hidden) id = window.setInterval(() => setTick((t) => t + 1), Math.max(30, 1000 / fps));
+      if (!document.hidden) {
+        id = window.setInterval(() => setTick((t) => t + 1), Math.max(30, 1000 / fps));
+      }
     };
     onVis();
     document.addEventListener('visibilitychange', onVis);
@@ -67,8 +72,11 @@ const AvatarLayer = memo(
   (a, b) => a.frames === b.frames && a.dx === b.dx && a.dy === b.dy && frameIx(a) === frameIx(b)
 );
 
-export function SlotThumb({ file, name }: { file: WorkspaceFile; name: string }) {
+export function SlotThumb({ file, name }: { file: WorkspaceFile; name: string; }) {
   const frame = renderSprite(file, name, true)?.[0];
-  if (!frame || frame.width <= 0) return null;
+  if (!frame || frame.width <= 0) {
+    return null;
+  }
+
   return <SpriteCanvas bitmap={frame} />;
 }

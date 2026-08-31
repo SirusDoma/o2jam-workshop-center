@@ -69,7 +69,10 @@ const TOKEN = /"[^"]*"|\S+/g;
 
 function tokenize(line: string): string[] {
   const stripped = line.trim();
-  if (stripped === '' || stripped.startsWith('//')) return [];
+  if (stripped === '' || stripped.startsWith('//')) {
+    return [];
+  }
+
   return stripped.match(TOKEN) ?? [];
 }
 
@@ -90,9 +93,15 @@ export function parseControlList(text: string): ControlList {
   let i = 0;
 
   const hex = (token: string | undefined): number => {
-    if (token === undefined) return 0;
+    if (token === undefined) {
+      return 0;
+    }
+
     const value = parseInt(token, 16);
-    if (!Number.isFinite(value)) return 0;
+    if (!Number.isFinite(value)) {
+      return 0;
+    }
+
     return value >>> 0;
   };
 
@@ -120,17 +129,22 @@ export function parseControlList(text: string): ControlList {
   };
 
   const consumeOpenBrace = (headerTokens: string[]): boolean => {
-    if (headerTokens[headerTokens.length - 1] === '{') return true;
+    if (headerTokens[headerTokens.length - 1] === '{') {
+      return true;
+    }
+
     while (i < lines.length) {
       const tokens = tokenize(lines[i] ?? '');
       if (tokens.length === 0) {
         i++;
         continue;
       }
+
       if (tokens[0] === '{') {
         i++;
         return true;
       }
+
       return false;
     }
     return false;
@@ -140,11 +154,15 @@ export function parseControlList(text: string): ControlList {
     const lineNo = i + 1;
     const tokens = tokenize(lines[i] ?? '');
     i++;
-    if (tokens.length === 0) continue;
+    if (tokens.length === 0) {
+      continue;
+    }
 
     const head = tokens[0] ?? '';
 
-    if (head === '{' || head === '}') continue;
+    if (head === '{' || head === '}') {
+      continue;
+    }
 
     if (head.startsWith('NUMBER_OF_')) {
       if (head === 'NUMBER_OF_STATE' || head === 'NUMBER_OF_STATES') {
@@ -154,6 +172,7 @@ export function parseControlList(text: string): ControlList {
         declaredDialogs = hex(tokens[1]);
         section = 'dialog';
       }
+
       continue;
     }
 
@@ -185,10 +204,14 @@ export function parseControlList(text: string): ControlList {
       const bodyLineNo = i + 1;
       const body = tokenize(lines[i] ?? '');
       i++;
-      if (body.length === 0) continue;
+      if (body.length === 0) {
+        continue;
+      }
 
       const token = body[0] ?? '';
-      if (token === '}') break;
+      if (token === '}') {
+        break;
+      }
 
       if (token === 'BOUND') {
         const file = unquote(body[1] ?? '');
@@ -205,17 +228,26 @@ export function parseControlList(text: string): ControlList {
         };
         state.sets.push(set);
 
-        if (!consumeOpenBrace(body)) continue;
+        if (!consumeOpenBrace(body)) {
+          continue;
+        }
 
         while (i < lines.length) {
           const setLineNo = i + 1;
           const setBody = tokenize(lines[i] ?? '');
           i++;
-          if (setBody.length === 0) continue;
+          if (setBody.length === 0) {
+            continue;
+          }
 
           const setToken = setBody[0] ?? '';
-          if (setToken === '}') break;
-          if (setToken === 'SET') continue;
+          if (setToken === '}') {
+            break;
+          }
+
+          if (setToken === 'SET') {
+            continue;
+          }
 
           const control = makeControl(setBody, setLineNo, set.id, state.controls.length);
           set.controls.push(control);
@@ -250,7 +282,10 @@ export function writeControlList(list: ControlList): string {
 
   const emitControl = (c: ControlEntry, indent: string) => {
     const parts = [c.token, id8(c.id)];
-    if (c.sprite) parts.push(quote(c.sprite));
+    if (c.sprite) {
+      parts.push(quote(c.sprite));
+    }
+
     out.push(indent + parts.join('\t'));
   };
 
@@ -259,8 +294,13 @@ export function writeControlList(list: ControlList): string {
     const setCount = new Set(block.controls.filter((c) => c.setId !== null).map((c) => c.setId)).size;
     out.push(block.kind === 'dialog' ? `${block.name}\t${cnt(nonSet)}` : `${block.name}\t${cnt(nonSet)}\t${cnt(setCount)}`);
     out.push('{');
-    if (block.boundFile) out.push(`\tBOUND\t${quote(block.boundFile)}`);
-    if (block.base) emitControl(block.base, '\t');
+    if (block.boundFile) {
+      out.push(`\tBOUND\t${quote(block.boundFile)}`);
+    }
+
+    if (block.base) {
+      emitControl(block.base, '\t');
+    }
 
     let i = 0;
     while (i < block.controls.length) {
@@ -270,6 +310,7 @@ export function writeControlList(list: ControlList): string {
         i++;
         continue;
       }
+
       const sid = c.setId;
       const members: ControlEntry[] = [];
       while (i < block.controls.length && block.controls[i]!.setId === sid) members.push(block.controls[i++]!);
@@ -306,7 +347,10 @@ export function pairBounds(state: ControlState, bounds: readonly Bound[]): Paire
 
   for (const control of state.controls) {
     const bound = bounds[consumed];
-    if (!bound) break;
+    if (!bound) {
+      break;
+    }
+
     paired.push({ id: control.id, control, bound });
     consumed++;
   }
@@ -314,7 +358,10 @@ export function pairBounds(state: ControlState, bounds: readonly Bound[]): Paire
   let id = state.baseId + consumed;
   for (let n = consumed; n < bounds.length; n++) {
     const bound = bounds[n];
-    if (!bound) continue;
+    if (!bound) {
+      continue;
+    }
+
     paired.push({ id: ++id, control: null, bound });
   }
 

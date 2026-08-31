@@ -84,14 +84,20 @@ export function SpriteEntryView({
     playback.fps = fps;
   }, [playing, fps]);
   useEffect(() => {
-    if (!playing || !toolActive || sprite.frameCount < 2) return;
+    if (!playing || !toolActive || sprite.frameCount < 2) {
+      return;
+    }
+
     const count = sprite.frameCount;
     const id = window.setInterval(() => setFrame((current) => (current + 1) % count), Math.max(60, 1000 / fps));
     return () => window.clearInterval(id);
   }, [playing, fps, sprite, toolActive]);
 
   const decoded = useMemo(() => {
-    if (sprite.frameCount === 0) return null;
+    if (sprite.frameCount === 0) {
+      return null;
+    }
+
     try {
       return decodeFrame(data, sprite, frame, { colorKey: keyOn ? undefined : null });
     } catch {
@@ -100,17 +106,26 @@ export function SpriteEntryView({
   }, [data, sprite, frame, keyOn]);
 
   const addFrames = async (files: File[]) => {
-    if (!files.length) return;
+    if (!files.length) {
+      return;
+    }
+
     const inputs = spriteToInputs(data, sprite);
     const before = inputs.length;
     for (const file of files) {
       const bitmap = decodeBmp(new Uint8Array(await file.arrayBuffer()));
-      if (bitmap) inputs.push({ width: bitmap.width, height: bitmap.height, rgba: bitmap.rgba });
+      if (bitmap) {
+        inputs.push({ width: bitmap.width, height: bitmap.height, rgba: bitmap.rgba });
+      }
     }
-    if (inputs.length > before) onReplace(writeSprite(inputs, sprite.colorKey, 8, codec));
+    if (inputs.length > before) {
+      onReplace(writeSprite(inputs, sprite.colorKey, 8, codec));
+    }
   };
 
-  if (!active) return null;
+  if (!active) {
+    return null;
+  }
 
   return (
     <>
@@ -203,9 +218,15 @@ export function SpriteEntryView({
             hidden
             onChange={async (event) => {
               const file = event.target.files?.[0];
-              if (!file) return;
+              if (!file) {
+                return;
+              }
+
               const bitmap = decodeBmp(new Uint8Array(await file.arrayBuffer()));
-              if (!bitmap) return;
+              if (!bitmap) {
+                return;
+              }
+
               const inputs = spriteToInputs(data, sprite);
               const original = sprite.frames[frame];
               inputs[frame] = {
@@ -227,13 +248,21 @@ export function SpriteEntryView({
             hidden
             onChange={async (event) => {
               const files = Array.from(event.target.files ?? []);
-              if (!files.length) return;
+              if (!files.length) {
+                return;
+              }
+
               const inputs: SpriteFrameInput[] = [];
               for (const file of files) {
                 const bitmap = decodeBmp(new Uint8Array(await file.arrayBuffer()));
-                if (bitmap) inputs.push({ width: bitmap.width, height: bitmap.height, rgba: bitmap.rgba });
+                if (bitmap) {
+                  inputs.push({ width: bitmap.width, height: bitmap.height, rgba: bitmap.rgba });
+                }
               }
-              if (inputs.length) onReplace(writeSprite(inputs, sprite.colorKey, 8, codec));
+              if (inputs.length) {
+                onReplace(writeSprite(inputs, sprite.colorKey, 8, codec));
+              }
+
               event.target.value = '';
             }}
           />

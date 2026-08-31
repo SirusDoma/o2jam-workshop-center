@@ -10,7 +10,7 @@ function GitHubMark() {
   );
 }
 
-export function Shell({ children }: { children: ReactNode }) {
+export function Shell({ children }: { children: ReactNode; }) {
   return (
     <div className="appframe">
       <Navbar />
@@ -74,7 +74,7 @@ export function Kpi({
   );
 }
 
-export function StackHead({ title, tally }: { title: string; tally?: string }) {
+export function StackHead({ title, tally }: { title: string; tally?: string; }) {
   return (
     <div className="stackhead">
       <span>{title}</span>

@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { X } from 'lucide-react';
 
-export function ConfirmDialog({ title, body, confirmLabel, onConfirm, onClose }: { title: string; body: string; confirmLabel: string; onConfirm: () => void; onClose: () => void }) {
+export function ConfirmDialog({ title, body, confirmLabel, onConfirm, onClose }: { title: string; body: string; confirmLabel: string; onConfirm: () => void; onClose: () => void; }) {
   const downOnScrim = useRef(false);
   return (
     <div
@@ -10,7 +10,9 @@ export function ConfirmDialog({ title, body, confirmLabel, onConfirm, onClose }:
         downOnScrim.current = e.target === e.currentTarget;
       }}
       onClick={(e) => {
-        if (downOnScrim.current && e.target === e.currentTarget) onClose();
+        if (downOnScrim.current && e.target === e.currentTarget) {
+          onClose();
+        }
       }}
     >
       <div className="overlay-panel narrow card" onClick={(e) => e.stopPropagation()}>

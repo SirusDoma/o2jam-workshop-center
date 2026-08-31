@@ -59,7 +59,7 @@ import {
 export default function ScenePage() {
   const { files, add, remove } = useWorkspace();
   const { notify } = useToast();
-  const [confirmFile, setConfirmFile] = useState<{ kind: 'close' | 'switch'; id: string } | null>(null);
+  const [confirmFile, setConfirmFile] = useState<{ kind: 'close' | 'switch'; id: string; } | null>(null);
   const [fileId, setFileId] = useState<string | null>(null);
   const [openError, setOpenError] = useState<string | null>(null);
   const [stateName, setStateName] = useState<string | null>(null);
@@ -72,7 +72,7 @@ export default function ScenePage() {
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [boundHidden, setBoundHidden] = useState<Set<string>>(new Set());
   const [posSource, setPosSource] = useState<Record<string, PosSource>>({});
-  const [spriteEdits, setSpriteEdits] = useState<Record<string, { x: number; y: number }>>({});
+  const [spriteEdits, setSpriteEdits] = useState<Record<string, { x: number; y: number; }>>({});
   const [spriteFrames, setSpriteFrames] = useState<Record<string, EditFrame[]>>({});
   const [newSprites, setNewSprites] = useState<Record<string, string>>({});
   const [removedSprites, setRemovedSprites] = useState<Set<string>>(new Set());
@@ -92,12 +92,12 @@ export default function ScenePage() {
   const [sceneDialog, setSceneDialog] = useState<'add' | 'rename' | null>(null);
   const [confirmScene, setConfirmScene] = useState(false);
   const [setIdEdits, setSetIdEdits] = useState<Record<string, number>>({});
-  const [setDialog, setSetDialog] = useState<{ sid: number } | null>(null);
+  const [setDialog, setSetDialog] = useState<{ sid: number; } | null>(null);
   const [orderKeys, setOrderKeys] = useState<Record<string, string[]>>({});
   const [setDelete, setSetDelete] = useState<number | null>(null);
   const [dissolvedSets, setDissolvedSets] = useState<Set<string>>(new Set());
   const [boundFiles, setBoundFiles] = useState<Record<string, string | null>>({});
-  const [panels, setPanels] = useState<Record<string, { sprite?: boolean; text?: boolean }>>({});
+  const [panels, setPanels] = useState<Record<string, { sprite?: boolean; text?: boolean; }>>({});
   const [picker, setPicker] = useState(false);
   const nextLine = useRef(1_000_001);
   const bgInit = useRef(new Set<string>());
@@ -138,7 +138,10 @@ export default function ScenePage() {
   }, [file]);
 
   const blocks = useMemo(() => {
-    if (!scene?.list) return [];
+    if (!scene?.list) {
+      return [];
+    }
+
     return [...scene.list.states, ...scene.list.dialogs, ...addedBlocks].filter((b) => !removedBlocks.has(b.name));
   }, [scene, addedBlocks, removedBlocks]);
   const active = blocks.find((b) => b.name === stateName) ?? blocks[0] ?? null;
@@ -151,7 +154,9 @@ export default function ScenePage() {
     if (active && !bgInit.current.has(active.name)) {
       bgInit.current.add(active.name);
       const bg = allControls(active)[1];
-      if (bg) setBoundHidden((h) => new Set(h).add(ckey(bg)));
+      if (bg) {
+        setBoundHidden((h) => new Set(h).add(ckey(bg)));
+      }
     }
   }, [active?.name]);
 
@@ -189,17 +194,25 @@ export default function ScenePage() {
     if (file) {
       try {
         for (const e of parseArchive(file.buffer, DEFAULT_ENCODING).entries) {
-          if (/\.(ojs|oji|ojt|oja)$/i.test(e.name) && !removedSprites.has(e.name.toLowerCase())) byLower.set(e.name.toLowerCase(), e.name);
+          if (/\.(ojs|oji|ojt|oja)$/i.test(e.name) && !removedSprites.has(e.name.toLowerCase())) {
+            byLower.set(e.name.toLowerCase(), e.name);
+          }
         }
       } catch {
       }
     }
-    for (const [lower, actual] of Object.entries(newSprites)) if (!removedSprites.has(lower)) byLower.set(lower, actual);
+
+    for (const [lower, actual] of Object.entries(newSprites)) if (!removedSprites.has(lower)) {
+      byLower.set(lower, actual);
+    }
     return [...byLower.values()].sort((a, b) => a.localeCompare(b));
   }, [file, newSprites, removedSprites]);
 
   const bndNames = useMemo(() => {
-    if (!file) return [];
+    if (!file) {
+      return [];
+    }
+
     try {
       return parseArchive(file.buffer, DEFAULT_ENCODING)
         .entries.filter((e) => /\.bnd$/i.test(e.name))
@@ -216,17 +229,17 @@ export default function ScenePage() {
     () =>
       active
         ? placeControls({
-            state: active,
-            decoded,
-            controls: effControls,
-            bounds: effBounds,
-            addedBounds,
-            hidden,
-            origin: blockOrigin,
-            sources: posSource,
-            spritePositions: spriteEdits,
-            setIdEdits,
-          })
+          state: active,
+          decoded,
+          controls: effControls,
+          bounds: effBounds,
+          addedBounds,
+          hidden,
+          origin: blockOrigin,
+          sources: posSource,
+          spritePositions: spriteEdits,
+          setIdEdits,
+        })
         : [],
     [active, decoded, effControls, effBounds, addedBounds, hidden, blockOrigin, posSource, spriteEdits, setIdEdits]
   );
@@ -235,14 +248,14 @@ export default function ScenePage() {
     () =>
       active
         ? createBoundRects({
-            state: active,
-            controls: effControls,
-            bounds: effBounds,
-            addedBounds,
-            leftovers,
-            origin: blockOrigin,
-            setIdEdits,
-          })
+          state: active,
+          controls: effControls,
+          bounds: effBounds,
+          addedBounds,
+          leftovers,
+          origin: blockOrigin,
+          setIdEdits,
+        })
         : [],
     [active, effControls, effBounds, addedBounds, leftovers, blockOrigin, setIdEdits]
   );
@@ -254,17 +267,26 @@ export default function ScenePage() {
 
   const editBound = (idx: number, patch: Partial<Bound>) =>
     setBoundEdits((e) => {
-      if (!active) return e;
+      if (!active) {
+        return e;
+      }
+
       const key = `${active.name}:${idx}`;
       const found = rawBounds.find((b) => b.index === idx);
-      if (!found) return e;
+      if (!found) {
+        return e;
+      }
+
       return { ...e, [key]: boundWithSize({ ...(e[key] ?? found), ...patch }) };
     });
 
   const editAddedBound = (key: string, patch: Partial<Bound>) =>
     setAddedBounds((e) => {
       const cur = e[key];
-      if (!cur) return e;
+      if (!cur) {
+        return e;
+      }
+
       return { ...e, [key]: boundWithSize({ ...cur, ...patch }) };
     });
 
@@ -273,7 +295,10 @@ export default function ScenePage() {
   const editField = (key: string, patch: FieldEdit) => setFieldEdits((e) => ({ ...e, [key]: { ...e[key], ...patch } }));
 
   const addRect = () => {
-    if (!active) return;
+    if (!active) {
+      return;
+    }
+
     setExtraRects((m) => {
       const cur = m[active.name] ?? [];
       return { ...m, [active.name]: [...cur, boundWithSize({ index: rawBounds.length + cur.length, left: 40, top: 40, right: 160, bottom: 90, width: 0, height: 0, offset: 0 })] };
@@ -282,15 +307,24 @@ export default function ScenePage() {
 
   const editExtraRect = (idx: number, patch: Partial<Bound>) =>
     setExtraRects((m) => {
-      if (!active) return m;
+      if (!active) {
+        return m;
+      }
+
       const pos = idx - rawBounds.length;
       const cur = m[active.name] ?? [];
-      if (!cur[pos]) return m;
+      if (!cur[pos]) {
+        return m;
+      }
+
       return { ...m, [active.name]: cur.map((b, i) => (i === pos ? boundWithSize({ ...b, ...patch }) : b)) };
     });
 
-  const removeRect = (row: { bound: Bound; control: ControlEntry | null }) => {
-    if (!active) return;
+  const removeRect = (row: { bound: Bound; control: ControlEntry | null; }) => {
+    if (!active) {
+      return;
+    }
+
     const { bound: b, control: c } = row;
     if (c && c.boundIndex < 0) {
       setAddedBounds((m) => {
@@ -307,7 +341,10 @@ export default function ScenePage() {
   };
 
   const addControl = (kind: 'image' | 'text' | 'scroll' = 'image') => {
-    if (!active) return;
+    if (!active) {
+      return;
+    }
+
     const line = nextLine.current++;
     const stateByte = (active.baseId >>> 24) & 0xff;
     const n = added[active.name]?.length ?? 0;
@@ -323,11 +360,17 @@ export default function ScenePage() {
   };
 
   const removeControl = (key: string) => {
-    if (!active) return;
+    if (!active) {
+      return;
+    }
+
     if ((added[active.name] ?? []).some((c) => ckey(c) === key)) {
       setAdded((a) => ({ ...a, [active.name]: (a[active.name] ?? []).filter((c) => ckey(c) !== key) }));
       const drop = <T,>(m: Record<string, T>): Record<string, T> => {
-        if (!(key in m)) return m;
+        if (!(key in m)) {
+          return m;
+        }
+
         const n = { ...m };
         delete n[key];
         return n;
@@ -341,7 +384,10 @@ export default function ScenePage() {
     } else {
       setRemoved((r) => new Set(r).add(key));
     }
-    if (selected === key) setSelected(null);
+
+    if (selected === key) {
+      setSelected(null);
+    }
   };
 
   const restoreControl = (key: string) =>
@@ -352,12 +398,16 @@ export default function ScenePage() {
     });
 
   const applySceneDialog = (nameInput: string) => {
-    if (!sceneDialog) return;
+    if (!sceneDialog) {
+      return;
+    }
+
     const name = nameInput.trim();
     if (!/^\S+$/.test(name)) {
       notify('Scene names cannot contain spaces.', 'warn');
       return;
     }
+
     const taken = new Set(
       blocks.filter((block) => !(sceneDialog === 'rename' && active && block.name === active.name)).map((block) => displayName(block.name).toLowerCase())
     );
@@ -365,6 +415,7 @@ export default function ScenePage() {
       notify(`${name} already exists.`, 'warn');
       return;
     }
+
     if (sceneDialog === 'add') {
       const stateByte = (Math.max(0, ...blocks.map((b) => (b.baseId >>> 24) & 0xff)) + 1) & 0xff;
       const kind: 'state' | 'dialog' = /^DIALOG/i.test(name) ? 'dialog' : 'state';
@@ -387,36 +438,57 @@ export default function ScenePage() {
       const key = active.name;
       setRenames((m) => {
         const n = { ...m };
-        if (name === key) delete n[key];
-        else n[key] = name;
+        if (name === key) {
+          delete n[key];
+        }
+        else {
+          n[key] = name;
+        }
+
         return n;
       });
     }
+
     setSceneDialog(null);
   };
 
   const applySetDialog = (value: string) => {
-    if (!setDialog || !active) return;
+    if (!setDialog || !active) {
+      return;
+    }
+
     const n = parseInt(value.replace(/^0x/i, '') || '', 16);
     if (!Number.isFinite(n)) {
       notify('Not a valid hex id.', 'warn');
       return;
     }
+
     const key = `${active.name}:${setDialog.sid}`;
     setSetIdEdits((m) => {
       const next = { ...m };
-      if ((n >>> 0) === setDialog.sid) delete next[key];
-      else next[key] = n >>> 0;
+      if ((n >>> 0) === setDialog.sid) {
+        delete next[key];
+      }
+      else {
+        next[key] = n >>> 0;
+      }
+
       return next;
     });
     setSetDialog(null);
   };
 
   const deleteScene = () => {
-    if (!active) return;
+    if (!active) {
+      return;
+    }
+
     const key = active.name;
     const dropKey = <T,>(m: Record<string, T>): Record<string, T> => {
-      if (!(key in m)) return m;
+      if (!(key in m)) {
+        return m;
+      }
+
       const n = { ...m };
       delete n[key];
       return n;
@@ -432,6 +504,7 @@ export default function ScenePage() {
     } else {
       setRemovedBlocks((s) => new Set(s).add(key));
     }
+
     setStateName(null);
     setSelected(null);
     setConfirmScene(false);
@@ -452,13 +525,18 @@ export default function ScenePage() {
     inp.accept = '.bmp,image/bmp';
     inp.onchange = () => {
       const f = inp.files?.[0];
-      if (!f) return;
+      if (!f) {
+        return;
+      }
+
       f.arrayBuffer().then((buf) => {
         const bmp = decodeBmp(new Uint8Array(buf));
         if (bmp) {
           setOpenError(null);
           onLoad(bmp);
-        } else setOpenError(`${f.name} is not a readable 24/32-bit BMP.`);
+        } else {
+          setOpenError(`${f.name} is not a readable 24/32-bit BMP.`);
+        }
       }).catch((error) => setOpenError(error instanceof Error ? error.message : `Could not open ${f.name}.`));
     };
     inp.click();
@@ -467,7 +545,10 @@ export default function ScenePage() {
   const replaceFrame = (sprite: string, i: number) =>
     pickBmp((bmp) =>
       mutateFrames(sprite, (fr) => {
-        if (fr[i]) fr[i] = { ...fr[i], width: bmp.width, height: bmp.height, rgba: bmp.rgba };
+        if (fr[i]) {
+          fr[i] = { ...fr[i], width: bmp.width, height: bmp.height, rgba: bmp.rgba };
+        }
+
         return fr;
       })
     );
@@ -480,14 +561,21 @@ export default function ScenePage() {
       for (const f of files) {
         try {
           const bmp = decodeBmp(new Uint8Array(await f.arrayBuffer()));
-          if (bmp) add.push(bmp);
-          else setOpenError(`${f.name} is not a readable 24/32-bit BMP.`);
+          if (bmp) {
+            add.push(bmp);
+          }
+          else {
+            setOpenError(`${f.name} is not a readable 24/32-bit BMP.`);
+          }
         } catch (error) {
           setOpenError(error instanceof Error ? error.message : `Could not open ${f.name}.`);
         }
       }
       if (add.length) {
-        if (add.length === files.length) setOpenError(null);
+        if (add.length === files.length) {
+          setOpenError(null);
+        }
+
         mutateFrames(sprite, (fr) => [...fr, ...add.map((b) => ({ width: b.width, height: b.height, x: 0, y: 0, rgba: b.rgba }))]);
       }
     })();
@@ -495,10 +583,16 @@ export default function ScenePage() {
 
   const addOjs = (name: string) => {
     const nm = name.trim();
-    if (!nm) return;
+    if (!nm) {
+      return;
+    }
+
     const lower = nm.toLowerCase();
     setRemovedSprites((s) => {
-      if (!s.has(lower)) return s;
+      if (!s.has(lower)) {
+        return s;
+      }
+
       const n = new Set(s);
       n.delete(lower);
       return n;
@@ -511,18 +605,26 @@ export default function ScenePage() {
     const lower = name.toLowerCase();
     const wasNew = !!newSprites[lower];
     setNewSprites((m) => {
-      if (!m[lower]) return m;
+      if (!m[lower]) {
+        return m;
+      }
+
       const n = { ...m };
       delete n[lower];
       return n;
     });
     setSpriteFrames((m) => {
-      if (!m[lower]) return m;
+      if (!m[lower]) {
+        return m;
+      }
+
       const n = { ...m };
       delete n[lower];
       return n;
     });
-    if (!wasNew) setRemovedSprites((s) => new Set(s).add(lower));
+    if (!wasNew) {
+      setRemovedSprites((s) => new Set(s).add(lower));
+    }
   };
 
   const extent = useMemo(() => sceneExtent(placed, boundRects), [placed, boundRects]);
@@ -537,12 +639,18 @@ export default function ScenePage() {
   const nonBaseOrdered = active ? treeControls.slice(active.base ? 1 : 0) : [];
 
   const reorderRow = (dragKey: string, dragScope: 'unit' | 'member', targetKey: string, after: boolean) => {
-    if (!active || dragKey === targetKey) return;
+    if (!active || dragKey === targetKey) {
+      return;
+    }
+
     const list = nonBaseOrdered;
     const keys = list.map(ckey);
     const di = keys.indexOf(dragKey);
     const ti = keys.indexOf(targetKey);
-    if (di < 0 || ti < 0) return;
+    if (di < 0 || ti < 0) {
+      return;
+    }
+
     const dragC = list[di]!;
     if (dragScope === 'unit' && dragC.setId !== null) {
       const runOf = (i: number): [number, number] => {
@@ -553,11 +661,15 @@ export default function ScenePage() {
           while (s > 0 && list[s - 1]!.setId === sid) s--;
           while (e < list.length - 1 && list[e + 1]!.setId === sid) e++;
         }
+
         return [s, e];
       };
       const [ds, de] = runOf(di);
       const [ts, te] = runOf(ti);
-      if (ti >= ds && ti <= de) return;
+      if (ti >= ds && ti <= de) {
+        return;
+      }
+
       const slice = keys.slice(ds, de + 1);
       const rest = [...keys.slice(0, ds), ...keys.slice(de + 1)];
       const anchor = after ? keys[te]! : keys[ts]!;
@@ -565,15 +677,22 @@ export default function ScenePage() {
       setOrderKeys((m) => ({ ...m, [active.name]: [...rest.slice(0, pos), ...slice, ...rest.slice(pos)] }));
       return;
     }
+
     const destSid = list[ti]!.setId;
-    if (destSid !== dragC.setId) editField(dragKey, { setId: destSid });
+    if (destSid !== dragC.setId) {
+      editField(dragKey, { setId: destSid });
+    }
+
     const without = keys.filter((k) => k !== dragKey);
     const pos = without.indexOf(targetKey) + (after ? 1 : 0);
     setOrderKeys((m) => ({ ...m, [active.name]: [...without.slice(0, pos), dragKey, ...without.slice(pos)] }));
   };
 
   const addSet = () => {
-    if (!active) return null;
+    if (!active) {
+      return null;
+    }
+
     const line = nextLine.current++;
     const stateByte = (active.baseId >>> 24) & 0xff;
     const n = added[active.name]?.length ?? 0;
@@ -589,17 +708,26 @@ export default function ScenePage() {
   };
 
   const applySetDelete = (mode: 'delete' | 'dissolve') => {
-    if (setDelete === null || !active) return;
+    if (setDelete === null || !active) {
+      return;
+    }
+
     if (mode === 'dissolve') {
       setDissolvedSets((s) => new Set(s).add(`${active.name}:${setDelete}`));
     } else {
-      for (const c of nonBaseOrdered) if (c.setId === setDelete) removeControl(ckey(c));
+      for (const c of nonBaseOrdered) if (c.setId === setDelete) {
+        removeControl(ckey(c));
+      }
     }
+
     setSetDelete(null);
   };
 
   const restoreSet = (sid: number) => {
-    if (!active) return;
+    if (!active) {
+      return;
+    }
+
     const dk = `${active.name}:${sid}`;
     if (dissolvedSets.has(dk)) {
       setDissolvedSets((s) => {
@@ -609,7 +737,10 @@ export default function ScenePage() {
       });
       return;
     }
-    for (const c of nonBaseOrdered) if (c.setId === sid && removed.has(ckey(c))) restoreControl(ckey(c));
+
+    for (const c of nonBaseOrdered) if (c.setId === sid && removed.has(ckey(c))) {
+      restoreControl(ckey(c));
+    }
   };
 
   const orderEdited =
@@ -619,9 +750,15 @@ export default function ScenePage() {
       treeControls.some((c) => fieldEdits[ckey(c)]?.setId !== undefined));
 
   const revertOrder = () => {
-    if (!active) return;
+    if (!active) {
+      return;
+    }
+
     setOrderKeys((m) => {
-      if (!(active.name in m)) return m;
+      if (!(active.name in m)) {
+        return m;
+      }
+
       const n = { ...m };
       delete n[active.name];
       return n;
@@ -633,8 +770,12 @@ export default function ScenePage() {
       for (const [k, v] of Object.entries(m)) {
         if (keys.has(k) && v.setId !== undefined) {
           const { setId: _drop, ...rest } = v;
-          if (Object.keys(rest).length) n[k] = rest;
-        } else n[k] = v;
+          if (Object.keys(rest).length) {
+            n[k] = rest;
+          }
+        } else {
+          n[k] = v;
+        }
       }
       return n;
     });
@@ -645,18 +786,21 @@ export default function ScenePage() {
   const selectedBound = selectedControl ? boundOfIn(selectedControl, effBounds, addedBounds) : undefined;
   const selectedDecoded = decoded.find((d) => ckey(d.control) === selected) ?? null;
   const selDelta = (() => {
-    if (!selectedControl?.sprite || !selectedDecoded) return { x: 0, y: 0 };
+    if (!selectedControl?.sprite || !selectedDecoded) {
+      return { x: 0, y: 0 };
+    }
+
     const e = spriteEdits[selectedControl.sprite.toLowerCase()];
     return e ? { x: e.x - selectedDecoded.fx, y: e.y - selectedDecoded.fy } : { x: 0, y: 0 };
   })();
   const selSpriteRows =
     selectedControl?.sprite && selectedDecoded
       ? selectedDecoded.fpos.map((p, i) => ({
-          x: p.x + selDelta.x,
-          y: p.y + selDelta.y,
-          w: selectedDecoded.frames[i]?.width ?? 0,
-          h: selectedDecoded.frames[i]?.height ?? 0,
-        }))
+        x: p.x + selDelta.x,
+        y: p.y + selDelta.y,
+        w: selectedDecoded.frames[i]?.width ?? 0,
+        h: selectedDecoded.frames[i]?.height ?? 0,
+      }))
       : null;
   const selCanSwitch = !!(selectedControl && selectedControl.setId === null && selectedControl.sprite);
   const selSource: PosSource = selectedControl && selectedControl.setId === null ? posSource[selected!] ?? defaultSource(selectedControl) : 'bound';
@@ -673,9 +817,15 @@ export default function ScenePage() {
       selSpriteKeys.some((k) => spriteFrames[k] || spriteEdits[k] || newSprites[k] || removedSprites.has(k)));
 
   const revertControl = () => {
-    if (!selected) return;
+    if (!selected) {
+      return;
+    }
+
     const drop = <T,>(m: Record<string, T>, k: string) => {
-      if (!(k in m)) return m;
+      if (!(k in m)) {
+        return m;
+      }
+
       const n = { ...m };
       delete n[k];
       return n;
@@ -687,18 +837,25 @@ export default function ScenePage() {
     if (selBoundKey) {
       setBoundEdits((e) => drop(e, selBoundKey));
       setRemovedRects((s) => {
-        if (!s.has(selBoundKey)) return s;
+        if (!s.has(selBoundKey)) {
+          return s;
+        }
+
         const n = new Set(s);
         n.delete(selBoundKey);
         return n;
       });
     }
+
     for (const k of selSpriteKeys) {
       setSpriteFrames((m) => drop(m, k));
       setSpriteEdits((m) => drop(m, k));
       setNewSprites((m) => drop(m, k));
       setRemovedSprites((s) => {
-        if (!s.has(k)) return s;
+        if (!s.has(k)) {
+          return s;
+        }
+
         const n = new Set(s);
         n.delete(k);
         return n;
@@ -742,17 +899,26 @@ export default function ScenePage() {
       boundFiles[active.name] !== undefined);
 
   const revertBounds = () => {
-    if (!active) return;
+    if (!active) {
+      return;
+    }
+
     setBoundEdits((e) => Object.fromEntries(Object.entries(e).filter(([k]) => !k.startsWith(`${active.name}:`))));
     setExtraRects((m) => {
-      if (!(active.name in m)) return m;
+      if (!(active.name in m)) {
+        return m;
+      }
+
       const n = { ...m };
       delete n[active.name];
       return n;
     });
     setRemovedRects((s) => new Set([...s].filter((k) => !k.startsWith(`${active.name}:`))));
     setBoundFiles((m) => {
-      if (!(active.name in m)) return m;
+      if (!(active.name in m)) {
+        return m;
+      }
+
       const n = { ...m };
       delete n[active.name];
       return n;
@@ -765,7 +931,10 @@ export default function ScenePage() {
   }, [dirty]);
 
   const exportArchive = async () => {
-    if (!file || !scene?.list) return;
+    if (!file || !scene?.list) {
+      return;
+    }
+
     try {
       const out = buildScenePackage({
         file,
@@ -790,10 +959,19 @@ export default function ScenePage() {
         newSprites,
         removedSprites,
       });
-      if (!(await saveFile(out, file.name))) return;
+      if (!(await saveFile(out, file.name))) {
+        return;
+      }
+
       const [reopened] = await add([new File([out.slice().buffer as ArrayBuffer], file.name)]);
-      if (reopened && reopened.id !== file.id) remove(file.id);
-      if (reopened) setFileId(reopened.id);
+      if (reopened && reopened.id !== file.id) {
+        remove(file.id);
+      }
+
+      if (reopened) {
+        setFileId(reopened.id);
+      }
+
       notify(`Saved ${file.name}.`, 'ok');
     } catch (err) {
       notify(err instanceof Error ? err.message : 'Could not rebuild the archive.', 'warn');
@@ -822,7 +1000,7 @@ export default function ScenePage() {
     setPosSource((s) => ({ ...s, [key]: next }));
   };
 
-  const editSpriteRow = (sprite: string, i: number, patch: { x?: number; y?: number }) => {
+  const editSpriteRow = (sprite: string, i: number, patch: { x?: number; y?: number; }) => {
     const name = sprite.toLowerCase();
     const d = { ...selDelta };
     mutateFrames(sprite, (fr) =>
@@ -832,24 +1010,28 @@ export default function ScenePage() {
         y: k === i && patch.y !== undefined ? patch.y : f.y + d.y,
       }))
     );
-    if (d.x || d.y)
+    if (d.x || d.y) {
       setSpriteEdits((e) => {
         const n = { ...e };
         delete n[name];
         return n;
       });
+    }
   };
 
   const drag = useRef<
-    | { mode: 'bound'; control: ControlEntry; wx: number; wy: number; base: { left: number; top: number; right: number; bottom: number } }
-    | { mode: 'sprite'; sprite: string; wx: number; wy: number; base: { x: number; y: number } }
+    | { mode: 'bound'; control: ControlEntry; wx: number; wy: number; base: { left: number; top: number; right: number; bottom: number; }; }
+    | { mode: 'sprite'; sprite: string; wx: number; wy: number; base: { x: number; y: number; }; }
     | null
   >(null);
 
   const onGrab = (key: string, wx: number, wy: number) => {
     setSelected(key);
     const c = effControls.find((k) => ckey(k) === key) ?? null;
-    if (!c) return;
+    if (!c) {
+      return;
+    }
+
     const src: PosSource = c.setId === null ? posSource[key] ?? defaultSource(c) : 'bound';
     if (src === 'sprite' && c.sprite) {
       const d = decoded.find((dd) => ckey(dd.control) === key);
@@ -857,12 +1039,17 @@ export default function ScenePage() {
       drag.current = { mode: 'sprite', sprite: c.sprite, wx, wy, base: { ...cur } };
     } else {
       const b = boundOfIn(c, effBounds, addedBounds);
-      if (b) drag.current = { mode: 'bound', control: c, wx, wy, base: { left: b.left, top: b.top, right: b.right, bottom: b.bottom } };
+      if (b) {
+        drag.current = { mode: 'bound', control: c, wx, wy, base: { left: b.left, top: b.top, right: b.right, bottom: b.bottom } };
+      }
     }
   };
   const onDrag = (wx: number, wy: number) => {
     const d = drag.current;
-    if (!d) return;
+    if (!d) {
+      return;
+    }
+
     const dx = Math.round(wx - d.wx);
     const dy = Math.round(wy - d.wy);
     if (d.mode === 'sprite') {
@@ -886,17 +1073,27 @@ export default function ScenePage() {
             selected={fileId}
             onSelect={(workspaceFile) => {
               setOpenError(null);
-              if (workspaceFile.id === fileId) return;
-              if (dirty) setConfirmFile({ kind: 'switch', id: workspaceFile.id });
-              else setFileId(workspaceFile.id);
+              if (workspaceFile.id === fileId) {
+                return;
+              }
+
+              if (dirty) {
+                setConfirmFile({ kind: 'switch', id: workspaceFile.id });
+              }
+              else {
+                setFileId(workspaceFile.id);
+              }
             }}
             onClose={(workspaceFile) => {
               if (dirty && workspaceFile.id === fileId) {
                 setConfirmFile({ kind: 'close', id: workspaceFile.id });
                 return;
               }
+
               remove(workspaceFile.id);
-              if (workspaceFile.id === fileId) setFileId(null);
+              if (workspaceFile.id === fileId) {
+                setFileId(null);
+              }
             }}
             accept=".opi,.opa"
             hint="Interface or Playing package."
@@ -995,6 +1192,7 @@ export default function ScenePage() {
                       delete next[active.name];
                       return next;
                     }
+
                     return { ...current, [active.name]: name };
                   }),
                 onEdit: (row, patch) =>

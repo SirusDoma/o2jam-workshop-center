@@ -14,13 +14,19 @@ const TEXT_DECODER = new TextDecoder();
 const SAFE_TOKEN_ALPHABET = '0123456789';
 
 export function modPow(value: number, exp: number, mod: number): number {
-  if (mod <= 1) return 0;
+  if (mod <= 1) {
+    return 0;
+  }
+
   const m = BigInt(mod);
   let result = 1n;
   let base = BigInt(value) % m;
   let e = BigInt(exp);
   while (e > 0n) {
-    if (e & 1n) result = (result * base) % m;
+    if (e & 1n) {
+      result = (result * base) % m;
+    }
+
     base = (base * base) % m;
     e >>= 1n;
   }
@@ -28,11 +34,19 @@ export function modPow(value: number, exp: number, mod: number): number {
 }
 
 export function logCeil(value: number, mod: number): number {
-  if (value <= 1 || mod <= 1) return 0;
+  if (value <= 1 || mod <= 1) {
+    return 0;
+  }
+
   for (let k = 1; k <= 4096; k++) {
     const raised = Math.pow(value, k);
-    if (!Number.isFinite(raised) || raised === mod) return 0;
-    if (raised > mod) return k;
+    if (!Number.isFinite(raised) || raised === mod) {
+      return 0;
+    }
+
+    if (raised > mod) {
+      return k;
+    }
   }
   return 0;
 }
@@ -55,11 +69,17 @@ export function bugCompatibleModExp(value: number, exp: number, mod: number): nu
 
   while (!completed && current !== 1) {
     const k = logCeil(current, mod);
-    if (k === 0) return 0;
+    if (k === 0) {
+      return 0;
+    }
+
     const r = remaining % k;
     remaining = (remaining - r) / k;
     acc = mulMod32(acc, toUint32(Math.pow(current, r)), mod);
-    if (remaining === 0) return acc;
+    if (remaining === 0) {
+      return acc;
+    }
+
     completed = remaining === 1;
     current = toUint32(Math.pow(current, k) % mod);
   }
@@ -69,9 +89,18 @@ export function bugCompatibleModExp(value: number, exp: number, mod: number): nu
 
 function hexDigit(char: string): number {
   const code = char.charCodeAt(0);
-  if (code >= 0x30 && code <= 0x39) return code - 0x30;
-  if (code >= 0x41 && code <= 0x46) return code - 0x41 + 10;
-  if (code >= 0x61 && code <= 0x66) return code - 0x61 + 10;
+  if (code >= 0x30 && code <= 0x39) {
+    return code - 0x30;
+  }
+
+  if (code >= 0x41 && code <= 0x46) {
+    return code - 0x41 + 10;
+  }
+
+  if (code >= 0x61 && code <= 0x66) {
+    return code - 0x61 + 10;
+  }
+
   return 0;
 }
 
@@ -83,9 +112,15 @@ function unpackWord(value: number): [number, number] {
 
 function hexByteAt(hex: string, offset: number): number {
   const high = hex[offset];
-  if (high === undefined) return 0;
+  if (high === undefined) {
+    return 0;
+  }
+
   const low = hex[offset + 1];
-  if (low === undefined) return hexDigit(high);
+  if (low === undefined) {
+    return hexDigit(high);
+  }
+
   return ((hexDigit(high) << 4) | hexDigit(low)) & 0xff;
 }
 
@@ -130,24 +165,38 @@ export function createCipher(options: CipherOptions): Cipher {
   let preimages: Int32Array | null = null;
 
   function inverseTable(): Int32Array {
-    if (preimages) return preimages;
+    if (preimages) {
+      return preimages;
+    }
+
     const table = new Int32Array(n).fill(NO_PREIMAGE);
     for (let cipher = 0; cipher < n; cipher++) {
       const plain = pow(cipher, d, n);
-      if (table[plain] === NO_PREIMAGE) table[plain] = cipher;
+      if (table[plain] === NO_PREIMAGE) {
+        table[plain] = cipher;
+      }
     }
     preimages = table;
     return table;
   }
 
   function hasPreimage(word: number): boolean {
-    if (!bugCompatible) return true;
-    if (word < 0 || word >= n) return false;
+    if (!bugCompatible) {
+      return true;
+    }
+
+    if (word < 0 || word >= n) {
+      return false;
+    }
+
     return (inverseTable()[word] ?? NO_PREIMAGE) !== NO_PREIMAGE;
   }
 
   function encryptWord(word: number): number {
-    if (!bugCompatible) return pow(word, e, n);
+    if (!bugCompatible) {
+      return pow(word, e, n);
+    }
+
     const found = word >= 0 && word < n ? inverseTable()[word] ?? NO_PREIMAGE : NO_PREIMAGE;
     return found !== NO_PREIMAGE ? found : pow(word, e, n);
   }
@@ -157,7 +206,9 @@ export function createCipher(options: CipherOptions): Cipher {
     const length = raw.length + (raw.length % 2);
     const bytes = new Uint8Array(length);
     bytes.set(raw);
-    if (length > raw.length) bytes[raw.length] = padByte;
+    if (length > raw.length) {
+      bytes[raw.length] = padByte;
+    }
 
     let out = '';
     for (let i = 0; i < length; i += 2) {
@@ -179,6 +230,7 @@ export function createCipher(options: CipherOptions): Cipher {
       if (!/^[0-9a-fA-F]{6}$/.test(block)) {
         throw new FormatError(`block ${i / 6} ("${block}") is not six hex digits`, undefined, i);
       }
+
       const [high, low] = unpackWord(pow(parseInt(block, 16), d, n));
       bytes[out] = high;
       bytes[out + 1] = low;
@@ -187,8 +239,12 @@ export function createCipher(options: CipherOptions): Cipher {
     let end = bytes.length;
     while (end > 0) {
       const byte = bytes[end - 1];
-      if (byte === 0 || (trimsSpace && byte === 0x20)) end--;
-      else break;
+      if (byte === 0 || (trimsSpace && byte === 0x20)) {
+        end--;
+      }
+      else {
+        break;
+      }
     }
     return TEXT_DECODER.decode(bytes.subarray(0, end));
   }
@@ -203,7 +259,10 @@ export function createCipher(options: CipherOptions): Cipher {
   }
 
   function generateSafeToken(length: number, rng: () => number = Math.random): string {
-    if (length <= 0) return '';
+    if (length <= 0) {
+      return '';
+    }
+
     let out = '';
     let previous = -1;
     for (let i = 0; i < length; i++) {
@@ -248,7 +307,10 @@ export function getCipher(options: CipherOptions): Cipher {
     options.d ?? RSA_D,
   ].join(':');
   const existing = cipherCache.get(key);
-  if (existing) return existing;
+  if (existing) {
+    return existing;
+  }
+
   const created = createCipher(options);
   cipherCache.set(key, created);
   return created;

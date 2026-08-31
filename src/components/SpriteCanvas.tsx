@@ -21,9 +21,15 @@ export function SpriteCanvas({
   // Layout timing prevents a stale-frame flash in Firefox.
   useLayoutEffect(() => {
     const canvas = ref.current;
-    if (!canvas || !bitmap || bitmap.width <= 0 || bitmap.height <= 0) return;
+    if (!canvas || !bitmap || bitmap.width <= 0 || bitmap.height <= 0) {
+      return;
+    }
+
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      return;
+    }
+
     canvas.width = bitmap.width;
     canvas.height = bitmap.height;
     let image = imageCache.get(bitmap);
@@ -32,6 +38,7 @@ export function SpriteCanvas({
       image.data.set(bitmap.rgba);
       imageCache.set(bitmap, image);
     }
+
     ctx.putImageData(image, 0, 0);
   }, [bitmap]);
 

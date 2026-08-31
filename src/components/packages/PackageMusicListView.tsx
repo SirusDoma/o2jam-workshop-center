@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 import type { OjnHeader } from '../../o2jam';
 import { SONG_COLS } from '../../features/packages/constants';
 
-export function PackageMusicListView({ songs }: { songs: OjnHeader[] }) {
+export function PackageMusicListView({ songs }: { songs: OjnHeader[]; }) {
   return (
     <>
       <div className="reg-head" style={{ '--cols': SONG_COLS } as CSSProperties}>

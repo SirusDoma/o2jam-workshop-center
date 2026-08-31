@@ -404,7 +404,10 @@ export const MUSIC_LIST_VERSIONS: readonly MusicListVersion[] = [
 
 export function musicListVersion(id: MusicListVersionId): MusicListVersion {
   const found = MUSIC_LIST_VERSIONS.find((v) => v.id === id);
-  if (!found) throw new FormatError(`unknown music list version "${id}"`);
+  if (!found) {
+    throw new FormatError(`unknown music list version "${id}"`);
+  }
+
   return found;
 }
 
@@ -512,7 +515,9 @@ function walkSections(
     };
     sections.push(result);
 
-    if (pos + 4 > reader.size) continue;
+    if (pos + 4 > reader.size) {
+      continue;
+    }
 
     const count = reader.view.getUint32(pos, true);
     const body = pos + 4;
@@ -616,9 +621,15 @@ function writeField(
   }
 
   const n = typeof value === 'number' && Number.isFinite(value) ? value : 0;
-  if (field.type === 'int32') view.setInt32(at, n | 0, true);
-  else if (field.type === 'int16') view.setInt16(at, n | 0, true);
-  else view.setUint8(at, n & 0xff);
+  if (field.type === 'int32') {
+    view.setInt32(at, n | 0, true);
+  }
+  else if (field.type === 'int16') {
+    view.setInt16(at, n | 0, true);
+  }
+  else {
+    view.setUint8(at, n & 0xff);
+  }
 }
 
 export function buildMusicList(
@@ -645,12 +656,16 @@ export function buildMusicList(
   const supplied = new Map(sections.map((s) => [s.key, s.entries]));
   let last = -1;
   version.sections.forEach((section, i) => {
-    if (supplied.has(section.key)) last = i;
+    if (supplied.has(section.key)) {
+      last = i;
+    }
   });
 
   for (let i = 0; i <= last; i++) {
     const section = version.sections[i];
-    if (!section) continue;
+    if (!section) {
+      continue;
+    }
 
     const entries = supplied.get(section.key) ?? [];
     writer.u32(entries.length);
@@ -673,8 +688,13 @@ const AMBIGUOUS_DEFAULTS: readonly MusicListVersionId[] = ['3.82', '8.02'];
 
 export function detectMusicListVersion(source: BinarySource, filename = ''): MusicListVersionId | null {
   const reader = new ByteReader(source);
-  if (reader.size < 4) return null;
-  if (/(^|[\\/])X2OJNList\.dat$/i.test(filename)) return '2.33';
+  if (reader.size < 4) {
+    return null;
+  }
+
+  if (/(^|[\\/])X2OJNList\.dat$/i.test(filename)) {
+    return '2.33';
+  }
 
   const declared = reader.view.getUint32(0, true);
   const capacity = Math.max(0, Math.floor((reader.size - 4) / OJN_HEADER_SIZE));
@@ -695,7 +715,6 @@ export function detectMusicListVersion(source: BinarySource, filename = ''): Mus
       } else {
         score -= 0.15;
       }
-
     }
 
     return {

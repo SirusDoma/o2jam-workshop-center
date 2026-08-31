@@ -46,9 +46,9 @@ export type ArgumentsFieldKey =
 
 export type ArgumentsField = FieldDescriptor<ArgumentsFieldKey>;
 
-export type PairHalf = { readonly field: ArgumentsFieldKey } | { readonly random: number };
+export type PairHalf = { readonly field: ArgumentsFieldKey; } | { readonly random: number; };
 
-export type SlotSource = { readonly field: ArgumentsFieldKey } | { readonly literal: string };
+export type SlotSource = { readonly field: ArgumentsFieldKey; } | { readonly literal: string; };
 
 export interface SlotMapping {
   readonly userId: SlotSource;
@@ -75,7 +75,7 @@ export interface ArgumentsPreset {
   readonly clientVersionId: ClientVersionId;
   readonly fields: readonly ArgumentsField[];
   readonly tokenEncoding: TokenEncoding;
-  readonly pair?: { readonly first: PairHalf; readonly second: PairHalf };
+  readonly pair?: { readonly first: PairHalf; readonly second: PairHalf; };
   readonly slots?: SlotMapping;
   readonly cipher?: CipherOptions;
   readonly blob?: Partial<Record<AuthParamKey, BlobFieldOverride>>;
@@ -86,7 +86,10 @@ export interface ArgumentsPreset {
 export const UNRANKED_FREE_PASS_RANK = -999999;
 
 export function encodeRanking(ranking: number, freePass: boolean): number {
-  if (!freePass) return ranking;
+  if (!freePass) {
+    return ranking;
+  }
+
   return ranking > 0 ? -ranking : UNRANKED_FREE_PASS_RANK;
 }
 
@@ -324,7 +327,7 @@ export interface ResolvedBlobField {
   readonly hint: string;
   readonly default: string;
   readonly required: boolean;
-  readonly options?: readonly { readonly value: string; readonly label: string }[];
+  readonly options?: readonly { readonly value: string; readonly label: string; }[];
   readonly inert?: boolean;
   readonly maxLength: number;
 }
@@ -356,6 +359,9 @@ export function findPreset(id: string): ArgumentsPreset | undefined {
 
 export function getPreset(id: string): ArgumentsPreset {
   const preset = findPreset(id);
-  if (!preset) throw new Error(`unknown launch preset "${id}"`);
+  if (!preset) {
+    throw new Error(`unknown launch preset "${id}"`);
+  }
+
   return preset;
 }

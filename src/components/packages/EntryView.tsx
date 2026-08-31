@@ -15,7 +15,7 @@ import { classifyEntryContent, type EntryContent } from '../../features/packages
 import { download, extOf } from '../../features/packages/packageUtils';
 import { PackageIcon } from './PackageIcon';
 
-function ImagePreview({ data, mime, name }: { data: Uint8Array; mime: string; name: string }) {
+function ImagePreview({ data, mime, name }: { data: Uint8Array; mime: string; name: string; }) {
   const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,7 +24,10 @@ function ImagePreview({ data, mime, name }: { data: Uint8Array; mime: string; na
     return () => URL.revokeObjectURL(next);
   }, [data, mime]);
 
-  if (!url) return null;
+  if (!url) {
+    return null;
+  }
+
   return (
     <div className="pad">
       <div className="spriteframe" style={{ minHeight: 180 }}>
@@ -86,7 +89,9 @@ export function EntryView({
   const mime = content.kind === 'image' ? content.mime : null;
 
   useEffect(() => {
-    if (!previewable && tab === 'preview') onTab('meta');
+    if (!previewable && tab === 'preview') {
+      onTab('meta');
+    }
   }, [previewable, tab, onTab]);
 
   return (
@@ -130,7 +135,9 @@ export function EntryView({
             hidden
             onChange={async (event) => {
               const file = event.target.files?.[0];
-              if (file) onReplace(new Uint8Array(await file.arrayBuffer()));
+              if (file) {
+                onReplace(new Uint8Array(await file.arrayBuffer()));
+              }
             }}
           />
         </div>

@@ -9,7 +9,7 @@ import { ControlTree } from './ControlTree';
 import { filterRows } from '../../features/scene/sceneUtils';
 import type { PosSource, Row } from '../../features/scene/model';
 
-type BoundRow = { key: string; token: string; bound: Bound; control: ControlEntry | null };
+type BoundRow = { key: string; token: string; bound: Bound; control: ControlEntry | null; };
 type EditableBoundRow = Pick<BoundRow, 'bound' | 'control'>;
 
 interface ControlPanelProps {
@@ -97,7 +97,9 @@ export function ScenePanel({
                     label: 'Add SET',
                     onClick: () => {
                       const setId = controls.onAddSet();
-                      if (setId !== null) setExpanded((current) => ({ ...current, [setId]: true }));
+                      if (setId !== null) {
+                        setExpanded((current) => ({ ...current, [setId]: true }));
+                      }
                     },
                   },
                 ]}

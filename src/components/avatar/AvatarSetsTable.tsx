@@ -35,7 +35,11 @@ export function AvatarSetsTable({ sets, query, hasSetInfo, selected, edits, remo
               const isRemoved = removed.has(set.index);
               return (
                 <li key={set.index}>
-                  <div className={`reg-row${selected === set.index ? ' selrow' : ''}`} style={{ '--cols': SET_COLS, opacity: isRemoved ? 0.4 : 1 } as CSSProperties} role="button" tabIndex={0} onClick={() => onPick(set.index)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onPick(set.index); } }}>
+                  <div className={`reg-row${selected === set.index ? ' selrow' : ''}`} style={{ '--cols': SET_COLS, opacity: isRemoved ? 0.4 : 1 } as CSSProperties} role="button" tabIndex={0} onClick={() => onPick(set.index)} onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault(); onPick(set.index);
+                    }
+                  }}>
                     <span className="cell-mono">{set.id}</span>
                     <div className="cell-lead"><span className="ico"><Layers size={15} /></span><div className="nm-stack"><span className="nm-text" title={set.name} style={{ textDecoration: isRemoved ? 'line-through' : undefined }}>{set.name || '—'}</span><span className="nm-sub">{set.planetLabel}</span></div>{set.index >= 1_000_000 && <span className="chip ok">ADDED</span>}{edits[set.index] && <span className="chip warn">EDITED</span>}</div>
                     <span className="chips"><span className="chip">{set.itemCount}</span></span>

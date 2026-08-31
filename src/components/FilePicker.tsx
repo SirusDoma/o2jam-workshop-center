@@ -59,8 +59,12 @@ export function FilePicker({
                 aria-label={`Close ${f.name}`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (onClose) onClose(f);
-                  else remove(f.id);
+                  if (onClose) {
+                    onClose(f);
+                  }
+                  else {
+                    remove(f.id);
+                  }
                 }}
               >
                 <X size={12} />
@@ -87,7 +91,9 @@ export function FilePicker({
             const first = opened.find(
               (f) => kinds.includes(f.kind) || (allowUnknown && f.kind === 'unknown')
             );
-            if (first) onSelect(first);
+            if (first) {
+              onSelect(first);
+            }
           }}
         >
           {actions}

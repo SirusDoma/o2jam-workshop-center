@@ -3,8 +3,8 @@ export async function saveFile(data: Uint8Array | Blob | string, filename: strin
     data instanceof Blob
       ? data
       : new Blob([typeof data === 'string' ? data : (data.slice().buffer as ArrayBuffer)], {
-          type: 'application/octet-stream',
-        });
+        type: 'application/octet-stream',
+      });
 
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

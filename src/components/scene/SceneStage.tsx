@@ -35,14 +35,14 @@ export function SceneStage({
   onDrag,
   onDrop,
 }: {
-  scenes: { name: string; label: string }[];
+  scenes: { name: string; label: string; }[];
   active: string;
   placed: Placed[];
   boundRects: BoundRect[];
   hitRects: BoundRect[];
   labelDraws: LabelDraw[];
   selectedRects: Rect[];
-  extent: { w: number; h: number };
+  extent: { w: number; h: number; };
   zoom: number;
   playing: boolean;
   fps: number;
@@ -70,7 +70,10 @@ export function SceneStage({
   const animated = useMemo(() => placed.some((entry) => entry.frames.length > 1), [placed]);
 
   useEffect(() => {
-    if (!playing || !animated || !toolActive) return;
+    if (!playing || !animated || !toolActive) {
+      return;
+    }
+
     const id = window.setInterval(() => setTick((current) => current + 1), Math.max(60, 1000 / fps));
     return () => window.clearInterval(id);
   }, [playing, fps, animated, toolActive]);

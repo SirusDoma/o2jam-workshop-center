@@ -4,7 +4,7 @@ import { buildArguments, type ArgumentsPreset } from '../../o2jam';
 import { CopyButton } from '../../components/CopyButton';
 import { StackHead } from '../../components/Shell';
 
-export function ArgumentOutput({ result }: { result: ReturnType<typeof buildArguments> }) {
+export function ArgumentOutput({ result }: { result: ReturnType<typeof buildArguments>; }) {
   const [escape, setEscape] = useState(true);
   const command = escape ? result.command.replace(/\|/g, '^|') : result.command;
   const escapable = result.command.includes('|');
@@ -70,7 +70,7 @@ export function ArgumentOutput({ result }: { result: ReturnType<typeof buildArgu
   );
 }
 
-export function GrammarPanel({ preset }: { preset: ArgumentsPreset }) {
+export function GrammarPanel({ preset }: { preset: ArgumentsPreset; }) {
   return (
     <>
       <StackHead title="template" />

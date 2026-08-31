@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 
-export function WarningCard({ children, onClose }: { children: ReactNode; onClose?: () => void }) {
+export function WarningCard({ children, onClose }: { children: ReactNode; onClose?: () => void; }) {
   return (
     <section className="card">
       <div className="callout warn">

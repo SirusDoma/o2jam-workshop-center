@@ -20,10 +20,14 @@ export interface LabelledId {
 export type BinarySource = ArrayBuffer | ArrayBufferView;
 
 export function asBytes(source: BinarySource): Uint8Array {
-  if (source instanceof Uint8Array) return source;
+  if (source instanceof Uint8Array) {
+    return source;
+  }
+
   if (ArrayBuffer.isView(source)) {
     return new Uint8Array(source.buffer, source.byteOffset, source.byteLength);
   }
+
   return new Uint8Array(source);
 }
 
@@ -72,6 +76,7 @@ export class ByteReader {
     if (this.pos < 0 || this.pos + n > this.size) {
       throw new FormatError(`read of ${n} byte(s) past end of ${this.size}-byte buffer`, this.pos);
     }
+
     const at = this.pos;
     this.pos += n;
     return at;
@@ -121,17 +126,26 @@ export class ByteReader {
   }
 
   peekU32(pos: number): number | null {
-    if (pos < 0 || pos + 4 > this.size) return null;
+    if (pos < 0 || pos + 4 > this.size) {
+      return null;
+    }
+
     return this.view.getUint32(pos, true);
   }
 
   peekI32(pos: number): number | null {
-    if (pos < 0 || pos + 4 > this.size) return null;
+    if (pos < 0 || pos + 4 > this.size) {
+      return null;
+    }
+
     return this.view.getInt32(pos, true);
   }
 
   peekI16(pos: number): number | null {
-    if (pos < 0 || pos + 2 > this.size) return null;
+    if (pos < 0 || pos + 2 > this.size) {
+      return null;
+    }
+
     return this.view.getInt16(pos, true);
   }
 }
@@ -165,6 +179,7 @@ export class ByteWriter {
       this.buf = next;
       this.view = new DataView(next.buffer);
     }
+
     this.len = at + n;
     return at;
   }
@@ -233,7 +248,10 @@ export class ByteWriter {
   }
 
   patchU32(pos: number, value: number): this {
-    if (pos >= 0 && pos + 4 <= this.len) this.view.setUint32(pos, value >>> 0, true);
+    if (pos >= 0 && pos + 4 <= this.len) {
+      this.view.setUint32(pos, value >>> 0, true);
+    }
+
     return this;
   }
 

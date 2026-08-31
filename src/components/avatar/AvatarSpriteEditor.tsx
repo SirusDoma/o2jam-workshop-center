@@ -38,13 +38,17 @@ export function AvatarSpriteEditor({
                 }
               }}
               onDragLeave={(e) => {
-                if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOver((v) => (v === s.slot.index ? null : v));
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                  setDragOver((v) => (v === s.slot.index ? null : v));
+                }
               }}
               onDrop={(e) => {
                 e.preventDefault();
                 setDragOver(null);
                 const f = [...e.dataTransfer.files].find((x) => /\.(ojs|oji|ojt|oja)$/i.test(x.name));
-                if (f) void onImport(f).then((n) => onSet(s.slot.index, n));
+                if (f) {
+                  void onImport(f).then((n) => onSet(s.slot.index, n));
+                }
               }}
             >
               <div className="slot-head">
@@ -158,7 +162,9 @@ function SpritePicker({
             accept=".ojs,.oja,.oji,.ojt"
             onChange={(e) => {
               const f = e.target.files?.[0];
-              if (f) void onImport(f).then(onPick);
+              if (f) {
+                void onImport(f).then(onPick);
+              }
             }}
           />
         </label>

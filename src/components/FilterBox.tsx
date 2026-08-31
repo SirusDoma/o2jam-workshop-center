@@ -32,10 +32,17 @@ export function FilterBox({
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         onKeyDown={(e) => {
-          if (e.key !== 'Escape') return;
+          if (e.key !== 'Escape') {
+            return;
+          }
+
           e.stopPropagation();
-          if (value) onChange('');
-          else ref.current?.blur();
+          if (value) {
+            onChange('');
+          }
+          else {
+            ref.current?.blur();
+          }
         }}
       />
       <span
@@ -44,9 +51,15 @@ export function FilterBox({
         style={{ cursor: 'pointer' }}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => {
-          if (value) onChange('');
-          else if (focused) ref.current?.blur();
-          else ref.current?.focus();
+          if (value) {
+            onChange('');
+          }
+          else if (focused) {
+            ref.current?.blur();
+          }
+          else {
+            ref.current?.focus();
+          }
         }}
       >
         {focused || value ? 'esc' : '/'}

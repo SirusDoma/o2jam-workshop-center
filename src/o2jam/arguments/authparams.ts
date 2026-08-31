@@ -36,7 +36,7 @@ export interface AuthParamField {
   readonly default: string;
   readonly hint: string;
   readonly maxLength: typeof AUTH_PARAM_MAX_LENGTH;
-  readonly options?: readonly { readonly value: string; readonly label: string }[];
+  readonly options?: readonly { readonly value: string; readonly label: string; }[];
   readonly inert?: boolean;
 }
 
@@ -152,10 +152,15 @@ export const AUTH_PARAM_DEFAULTS: AuthParams = Object.freeze(
 
 export function resolveAuthParams(values: Partial<AuthParams> | undefined): AuthParams {
   const resolved = { ...AUTH_PARAM_DEFAULTS };
-  if (!values) return resolved;
+  if (!values) {
+    return resolved;
+  }
+
   for (const key of AUTH_PARAM_KEYS) {
     const value = values[key];
-    if (value !== undefined) resolved[key] = value;
+    if (value !== undefined) {
+      resolved[key] = value;
+    }
   }
   return resolved;
 }
@@ -171,6 +176,7 @@ export function serialiseAuthParams(values: Partial<AuthParams>): string {
         field.index,
       );
     }
+
     out += String(value.length).padStart(2, '0') + value;
   }
   return out;
@@ -188,6 +194,7 @@ export function parseAuthParams(plaintext: string): AuthParams {
         position,
       );
     }
+
     const prefix = plaintext.slice(position, position + 2);
     const length = Number.parseInt(prefix, 10);
     if (!/^[0-9]{2}$/.test(prefix) || Number.isNaN(length)) {
@@ -197,6 +204,7 @@ export function parseAuthParams(plaintext: string): AuthParams {
         position,
       );
     }
+
     position += 2;
 
     if (position + length > plaintext.length) {
@@ -206,6 +214,7 @@ export function parseAuthParams(plaintext: string): AuthParams {
         position,
       );
     }
+
     parsed[field.key] = plaintext.slice(position, position + length);
     position += length;
   }
@@ -231,6 +240,7 @@ export function validateAuthParams(values: Partial<AuthParams>): ValidationIssue
         ),
       );
     }
+
     if (!PRINTABLE_ASCII.test(value)) {
       issues.push(
         validationError(

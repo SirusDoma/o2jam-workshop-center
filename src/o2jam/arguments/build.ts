@@ -39,20 +39,29 @@ function gatewayPairs(gateways: readonly Gateway[]): string[] {
 function resolveFields(preset: ArgumentsPreset, input: ArgumentsInput): Fields {
   const merged: Fields = {};
   for (const field of preset.fields) {
-    if (field.default !== undefined) merged[field.key] = field.default;
+    if (field.default !== undefined) {
+      merged[field.key] = field.default;
+    }
   }
   for (const [key, value] of Object.entries(preset.defaults.fields)) {
-    if (value !== undefined) merged[key as ArgumentsFieldKey] = value;
+    if (value !== undefined) {
+      merged[key as ArgumentsFieldKey] = value;
+    }
   }
   for (const [key, value] of Object.entries(input.fields ?? {})) {
-    if (value !== undefined) merged[key as ArgumentsFieldKey] = value;
+    if (value !== undefined) {
+      merged[key as ArgumentsFieldKey] = value;
+    }
   }
   return merged;
 }
 
 function requireFields(preset: ArgumentsPreset, fields: Fields, errors: ValidationIssue[]): void {
   for (const field of preset.fields) {
-    if (!field.required || field.kind === 'gateways') continue;
+    if (!field.required || field.kind === 'gateways') {
+      continue;
+    }
+
     if ((fields[field.key] ?? '').trim() === '') {
       errors.push(validationError('required', `${field.label} is required.`, field.key));
     }
@@ -60,8 +69,14 @@ function requireFields(preset: ArgumentsPreset, fields: Fields, errors: Validati
 }
 
 function parseInteger(value: string | undefined, fallback: number): number | null {
-  if (value === undefined || value.trim() === '') return fallback;
-  if (!/^-?[0-9]+$/.test(value.trim())) return null;
+  if (value === undefined || value.trim() === '') {
+    return fallback;
+  }
+
+  if (!/^-?[0-9]+$/.test(value.trim())) {
+    return null;
+  }
+
   return Number.parseInt(value.trim(), 10);
 }
 
@@ -70,10 +85,12 @@ function validateGateways(gateways: readonly Gateway[], errors: ValidationIssue[
     errors.push(validationError('no-gateways', 'At least one gateway address and port is required.', 'gateways'));
     return;
   }
+
   gateways.forEach((gateway, index) => {
     if (gateway.address.trim() === '') {
       errors.push(validationError('gateway-address-empty', `Gateway ${index + 1} has no address.`, 'gateways', index));
     }
+
     const port = parseInteger(String(gateway.port), Number.NaN);
     if (port === null || !Number.isInteger(port) || port < 1 || port > 65535) {
       errors.push(validationError('gateway-port-invalid', `Gateway ${index + 1} port "${gateway.port}" is not in 1-65535.`, 'gateways', index));
@@ -88,17 +105,24 @@ function randomHex(length: number): string {
 }
 
 function resolvePairHalf(half: PairHalf, fields: Fields, errors: ValidationIssue[], preset: ArgumentsPreset): string {
-  if ('random' in half) return randomHex(half.random);
+  if ('random' in half) {
+    return randomHex(half.random);
+  }
+
   const value = fields[half.field] ?? '';
   if (value.includes('#')) {
     const label = preset.fields.find((f) => f.key === half.field)?.label ?? half.field;
     errors.push(validationError('hash-in-half', `${label} cannot contain # — it separates the two halves.`, half.field));
   }
+
   return value;
 }
 
 function resolveSlot(source: SlotSource, fields: Fields, encodedToken: string): string {
-  if ('literal' in source) return source.literal;
+  if ('literal' in source) {
+    return source.literal;
+  }
+
   return source.field === 'token' ? encodedToken : fields[source.field] ?? '';
 }
 
@@ -120,7 +144,9 @@ function buildAuthParams(
   const withDefaults: Partial<AuthParams> = { ...preset.defaults.authParams };
   for (const field of AUTH_PARAM_FIELDS) {
     const override = preset.blob?.[field.key];
-    if (override?.default !== undefined) withDefaults[field.key] = override.default;
+    if (override?.default !== undefined) {
+      withDefaults[field.key] = override.default;
+    }
   }
 
   const primary = gateways[0];
@@ -132,7 +158,9 @@ function buildAuthParams(
   const ftpDefault = withDefaults.ftpAddresses ?? AUTH_PARAM_DEFAULTS.ftpAddresses;
 
   for (const [key, value] of Object.entries(input.authParams ?? {})) {
-    if (value !== undefined && value !== '') withDefaults[key as AuthParamKey] = value;
+    if (value !== undefined && value !== '') {
+      withDefaults[key as AuthParamKey] = value;
+    }
   }
 
   const typedFtp = input.authParams?.ftpAddresses;
@@ -194,13 +222,17 @@ export function buildArguments(preset: ArgumentsPreset, input: ArgumentsInput = 
         ? `The following fields could not be decrypted back: ${fields.join(', ')}.`
         : 'The encrypted block is unreliable. Consider to enter different parameters.';
     }
+
     plaintext = check.decrypted;
 
     argv = [blob, gateways.map((gateway) => `|test|??|${gateway.address}|${gateway.port}`).join('')];
   } else if (preset.slots) {
     validateGateways(gateways, errors);
     const ranking = parseInteger(fields.ranking, 0);
-    if (ranking === null) errors.push(validationError('ranking-invalid', `Ranking "${fields.ranking}" is not an integer.`, 'ranking'));
+    if (ranking === null) {
+      errors.push(validationError('ranking-invalid', `Ranking "${fields.ranking}" is not an integer.`, 'ranking'));
+    }
+
     const rank = encodeRanking(ranking ?? 0, fields.freePass === 'true');
     const mode = fields.mode ?? 'INET';
     const alphaGender = /^(0|O2_INET)$/i.test(mode.trim());

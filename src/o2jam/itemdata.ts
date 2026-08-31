@@ -25,14 +25,14 @@ export interface SpriteSlot {
 
 export const SPRITE_SLOT_COUNT = 42;
 
-const REGIONS: readonly { key: SpriteRegion; label: string }[] = [
+const REGIONS: readonly { key: SpriteRegion; label: string; }[] = [
   { key: 'body', label: 'Body' },
   { key: 'leftArm', label: 'Left Arm' },
   { key: 'rightArm', label: 'Right Arm' },
   { key: 'back', label: 'Back' },
 ];
 
-const INSTRUMENTS: readonly { key: SpriteInstrument; label: string }[] = [
+const INSTRUMENTS: readonly { key: SpriteInstrument; label: string; }[] = [
   { key: 'none', label: 'Default' },
   { key: 'guitar', label: 'Guitar' },
   { key: 'bass', label: 'Bass' },
@@ -192,7 +192,7 @@ export interface ItemPrefixLayout {
   itemType: number;
   planetOrigin: number;
   bitflag: number;
-  quantity: { offset: number; type: 'byte' | 'int16' };
+  quantity: { offset: number; type: 'byte' | 'int16'; };
   attributiveEffect: number;
   attributiveCategory: number;
   paymentMethod: number;
@@ -307,7 +307,10 @@ export const ITEM_DATA_VERSIONS: readonly ItemDataVersion[] = [
 
 export function itemDataVersion(id: ItemDataVersionId): ItemDataVersion {
   const found = ITEM_DATA_VERSIONS.find((v) => v.id === id);
-  if (!found) throw new FormatError(`unknown item data version "${id}"`);
+  if (!found) {
+    throw new FormatError(`unknown item data version "${id}"`);
+  }
+
   return found;
 }
 
@@ -369,8 +372,14 @@ export interface ItemDataResult {
 
 function genderOf(bitflag: number): ItemGender {
   const value = (bitflag >> 7) & 0x0f;
-  if (value === 0) return 'female';
-  if (value === 1) return 'male';
+  if (value === 0) {
+    return 'female';
+  }
+
+  if (value === 1) {
+    return 'male';
+  }
+
   return 'any';
 }
 
@@ -391,20 +400,30 @@ export function parseItemData(
 
   const itemCount = reader.u32();
 
-  const readString = (): { text: string; bytes: Uint8Array } | null => {
-    if (!reader.has(4)) return null;
+  const readString = (): { text: string; bytes: Uint8Array; } | null => {
+    if (!reader.has(4)) {
+      return null;
+    }
+
     const length = reader.i32();
-    if (length < 0 || !reader.has(length)) return null;
+    if (length < 0 || !reader.has(length)) {
+      return null;
+    }
+
     const start = reader.tell();
     return { text: reader.fixedString(length, encoding), bytes: raw.subarray(start, start + length) };
   };
 
   for (let index = 0; index < itemCount; index++) {
     const offset = reader.tell();
-    if (reader.eof()) break;
+    if (reader.eof()) {
+      break;
+    }
 
     try {
-      if (!reader.has(layout.nameLength)) break;
+      if (!reader.has(layout.nameLength)) {
+        break;
+      }
 
       const view = reader.view;
       const itemId = view.getInt32(offset + layout.itemId, true);
@@ -432,9 +451,14 @@ export function parseItemData(
 
       reader.seek(offset + layout.nameLength);
       const name = readString();
-      if (name === null) break;
+      if (name === null) {
+        break;
+      }
+
       const description = readString();
-      if (description === null) break;
+      if (description === null) {
+        break;
+      }
 
       const sprites: ItemSpriteRef[] = [];
       let desynced = false;
@@ -456,6 +480,7 @@ export function parseItemData(
           desynced = true;
           break;
         }
+
         const length = reader.i32();
         if (length < 0 || !reader.has(length)) {
           desynced = true;
@@ -543,21 +568,36 @@ export function writeItemData(
     v.setUint8(layout.itemType, item.itemType & 0xff);
     v.setUint8(layout.planetOrigin, item.planetOrigin & 0xff);
     v.setInt16(layout.bitflag, item.bitflag, true);
-    if (layout.quantity.type === 'byte') v.setUint8(layout.quantity.offset, item.quantity & 0xff);
-    else v.setInt16(layout.quantity.offset, item.quantity, true);
+    if (layout.quantity.type === 'byte') {
+      v.setUint8(layout.quantity.offset, item.quantity & 0xff);
+    }
+    else {
+      v.setInt16(layout.quantity.offset, item.quantity, true);
+    }
+
     v.setUint8(layout.attributiveEffect, item.attributiveEffect & 0xff);
     v.setUint8(layout.attributiveCategory, item.attributiveCategory & 0xff);
     v.setUint8(layout.paymentMethod, item.paymentMethod & 0xff);
     v.setInt32(layout.priceGem, item.priceGem, true);
     v.setInt32(layout.priceEPoint, item.priceEPoint, true);
     v.setUint8(layout.itemPart, item.itemPart & 0xff);
-    if (layout.specialItemFlagMale !== null) v.setInt32(layout.specialItemFlagMale, item.specialItemFlagMale ?? 0, true);
-    if (layout.specialItemFlagFemale !== null) v.setInt32(layout.specialItemFlagFemale, item.specialItemFlagFemale ?? 0, true);
+    if (layout.specialItemFlagMale !== null) {
+      v.setInt32(layout.specialItemFlagMale, item.specialItemFlagMale ?? 0, true);
+    }
+
+    if (layout.specialItemFlagFemale !== null) {
+      v.setInt32(layout.specialItemFlagFemale, item.specialItemFlagFemale ?? 0, true);
+    }
+
     chunks.push(prefix, lstr(item.name, item.nameBytes), lstr(item.description, item.descriptionBytes));
 
     for (const s of item.sprites) {
-      if (s.present) chunks.push(Uint8Array.of(1), lstr(s.filename, s.filenameBytes));
-      else chunks.push(Uint8Array.of(s.status & 0xff));
+      if (s.present) {
+        chunks.push(Uint8Array.of(1), lstr(s.filename, s.filenameBytes));
+      }
+      else {
+        chunks.push(Uint8Array.of(s.status & 0xff));
+      }
     }
   }
 
@@ -583,9 +623,15 @@ export function detectItemDataEncoding(
   for (const item of parseItemData(bytes, versionId, 'ascii').items) {
     let at = item.offset + layout.nameLength;
     for (let field = 0; field < 2; field++) {
-      if (at + 4 > bytes.byteLength) break;
+      if (at + 4 > bytes.byteLength) {
+        break;
+      }
+
       const length = view.getInt32(at, true);
-      if (length < 0 || at + 4 + length > bytes.byteLength) break;
+      if (length < 0 || at + 4 + length > bytes.byteLength) {
+        break;
+      }
+
       samples.push(bytes.subarray(at + 4, at + 4 + length));
       at += 4 + length;
     }
@@ -595,7 +641,10 @@ export function detectItemDataEncoding(
 
 export function detectItemDataVersion(source: BinarySource): ItemDataVersionId | null {
   const reader = new ByteReader(source);
-  if (reader.size < 4) return null;
+  if (reader.size < 4) {
+    return null;
+  }
+
   const size = reader.size;
 
   const scored = ITEM_DATA_VERSIONS.map((v) => {

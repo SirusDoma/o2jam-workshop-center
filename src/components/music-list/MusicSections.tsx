@@ -18,10 +18,14 @@ export function MusicSections({ version, songId, sections, setSections, detected
   const toggle = (key: string, enabled: boolean) => setSections((current) => {
     const rows = current[key] ?? [];
     if (enabled) {
-      if (rows.some((row) => Number(row.musicId) === songId)) return current;
+      if (rows.some((row) => Number(row.musicId) === songId)) {
+        return current;
+      }
+
       const section = version.sections.find((entry) => entry.key === key)!;
       return { ...current, [key]: [...rows, seedSectionRow(section.fields, songId)] };
     }
+
     return { ...current, [key]: rows.filter((row) => Number(row.musicId) !== songId) };
   });
   const setField = (key: string, field: string, value: ListValue) => setSections((current) => ({

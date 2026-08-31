@@ -1,6 +1,6 @@
 import { ITEM_PARTS, type ItemDataVersion, type ItemGender, type SpriteGender, type SpriteInstrument, type SpriteRegion } from '../../o2jam';
 
-export const INSTRUMENTS: { id: SpriteInstrument; label: string }[] = [
+export const INSTRUMENTS: { id: SpriteInstrument; label: string; }[] = [
   { id: 'none', label: 'Default' },
   { id: 'bass', label: 'Bass' },
   { id: 'guitar', label: 'Guitar' },
@@ -16,13 +16,19 @@ export function baseBodyIds(gender: SpriteGender): number[] {
 export const COLS = '46px minmax(0, 1fr) 140px 76px 30px';
 export const playback = { playing: true, fps: 12 };
 
-const labelOf = (list: readonly { id: number; label: string }[], id: number) => list.find((entry) => entry.id === id)?.label ?? `Unknown (${id})`;
+const labelOf = (list: readonly { id: number; label: string; }[], id: number) => list.find((entry) => entry.id === id)?.label ?? `Unknown (${id})`;
 
 export const GENDER_CODE: Record<ItemGender, number> = { female: 0, male: 1, any: 2 };
 
 export const partForType = (version: ItemDataVersion, t: number): number => {
-  if (t >= 15 && t <= 18) return 0;
-  if (t <= 4) return 255;
+  if (t >= 15 && t <= 18) {
+    return 0;
+  }
+
+  if (t <= 4) {
+    return 255;
+  }
+
   const label = labelOf(version.itemTypes, t);
   return ITEM_PARTS.find((p) => p.label === label)?.id ?? 255;
 };

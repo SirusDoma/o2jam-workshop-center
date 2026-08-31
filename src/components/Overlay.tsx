@@ -17,7 +17,9 @@ export function Overlay({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -33,7 +35,9 @@ export function Overlay({
         downOnScrim.current = e.target === e.currentTarget;
       }}
       onClick={(e) => {
-        if (downOnScrim.current && e.target === e.currentTarget) onClose();
+        if (downOnScrim.current && e.target === e.currentTarget) {
+          onClose();
+        }
       }}
     >
       <div className={`card overlay-panel${width === 'wide' ? '' : ` ${width}`}`}>{children}</div>
@@ -41,7 +45,7 @@ export function Overlay({
   );
 }
 
-export function CloseButton({ onClose }: { onClose: () => void }) {
+export function CloseButton({ onClose }: { onClose: () => void; }) {
   return (
     <button className="icon-btn" type="button" onClick={onClose} aria-label="Close">
       <X size={15} />

@@ -34,7 +34,10 @@ export function DropZone({
 
   const keep = useCallback(
     (files: File[]) => {
-      if (!onlyExt) return files;
+      if (!onlyExt) {
+        return files;
+      }
+
       const set = onlyExt.map((e) => e.toLowerCase());
       return files.filter((f) => set.includes(f.name.slice(f.name.lastIndexOf('.') + 1).toLowerCase()));
     },
@@ -46,10 +49,17 @@ export function DropZone({
       const wanted = keep(files);
       const rejected = files.filter((f) => !wanted.includes(f));
       if (wanted.length === 0) {
-        if (rejected.length) onRejected?.(rejected, 0);
-        if (input.current) input.current.value = '';
+        if (rejected.length) {
+          onRejected?.(rejected, 0);
+        }
+
+        if (input.current) {
+          input.current.value = '';
+        }
+
         return;
       }
+
       setBusy(true);
       try {
         if (onFiles) {
@@ -58,12 +68,17 @@ export function DropZone({
           const opened = await add(wanted);
           onOpened?.(opened);
         }
-        if (rejected.length) onRejected?.(rejected, wanted.length);
+
+        if (rejected.length) {
+          onRejected?.(rejected, wanted.length);
+        }
       } catch (error) {
         onError?.(error);
       } finally {
         setBusy(false);
-        if (input.current) input.current.value = '';
+        if (input.current) {
+          input.current.value = '';
+        }
       }
     },
     [add, keep, onOpened, onRejected, onError, onFiles]
@@ -140,7 +155,9 @@ export async function collectDropped(dt: DataTransfer): Promise<File[]> {
     .map((item) => (item.webkitGetAsEntry ? item.webkitGetAsEntry() : null))
     .filter((e): e is FileSystemEntry => e !== null);
 
-  if (entries.length === 0) return Array.from(dt.files);
+  if (entries.length === 0) {
+    return Array.from(dt.files);
+  }
 
   const out: File[] = [];
   await Promise.all(entries.map((entry) => walkEntry(entry, out)));
@@ -155,13 +172,17 @@ async function walkEntry(entry: FileSystemEntry, out: File[]): Promise<void> {
     out.push(file);
     return;
   }
+
   const reader = (entry as FileSystemDirectoryEntry).createReader();
   // readEntries() is batched and ends with an empty batch.
-  for (;;) {
+  for (; ;) {
     const batch = await new Promise<FileSystemEntry[]>((resolve, reject) =>
       reader.readEntries(resolve, reject)
     );
-    if (batch.length === 0) break;
+    if (batch.length === 0) {
+      break;
+    }
+
     await Promise.all(batch.map((e) => walkEntry(e, out)));
   }
 }

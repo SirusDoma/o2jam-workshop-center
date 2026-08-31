@@ -20,30 +20,30 @@ export default function ArgsBuilderPage() {
       preset={preset}
       header={
         <>
-        <PageHead
-          title="Arguments Builder"
-          sub="Generate a client's launch command."
-          actions={
-            <select
-              className="selctl"
-              value={versionId}
-              aria-label="Client version"
-              onChange={(event) => {
-                const id = event.target.value as ClientVersionId;
-                setVersionId(id);
-                setPresetId(presetsForVersion(id)[0]?.id ?? '');
-              }}
-            >
-              {CLIENT_VERSIONS.map((version) => (
-                <option key={version.id} value={version.id}>
-                  v{version.clientVersion} — {version.label}
-                </option>
-              ))}
-            </select>
-          }
-        />
+          <PageHead
+            title="Arguments Builder"
+            sub="Generate a client's launch command."
+            actions={
+              <select
+                className="selctl"
+                value={versionId}
+                aria-label="Client version"
+                onChange={(event) => {
+                  const id = event.target.value as ClientVersionId;
+                  setVersionId(id);
+                  setPresetId(presetsForVersion(id)[0]?.id ?? '');
+                }}
+              >
+                {CLIENT_VERSIONS.map((version) => (
+                  <option key={version.id} value={version.id}>
+                    v{version.clientVersion} — {version.label}
+                  </option>
+                ))}
+              </select>
+            }
+          />
 
-        <PresetSelector presets={presets} selected={presetId} onSelect={setPresetId} />
+          <PresetSelector presets={presets} selected={presetId} onSelect={setPresetId} />
         </>
       }
     />

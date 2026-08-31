@@ -8,7 +8,7 @@ export function ToolTile({
   sub,
 }: {
   to: string;
-  icon: ComponentType<{ size?: number }>;
+  icon: ComponentType<{ size?: number; }>;
   title: string;
   sub: string;
 }) {

@@ -6,8 +6,11 @@ const COLS = '30px 74px minmax(0, 1.6fr) 70px 60px 70px 130px';
 const DIFFICULTY_LABEL: Record<number, string> = { 0: 'EX', 1: 'NX', 2: 'HX' };
 const DIFFICULTY_CLASS: Record<number, string> = { 0: 'diff-ex', 1: 'diff-nx', 2: 'diff-hx' };
 
-function SongSummary({ songs }: { songs: AlbumSongRef[] }) {
-  if (songs.length === 0) return <>—</>;
+function SongSummary({ songs }: { songs: AlbumSongRef[]; }) {
+  if (songs.length === 0) {
+    return <>—</>;
+  }
+
   const counts = new Map<number, number>();
   for (const song of songs) counts.set(song.difficulty, (counts.get(song.difficulty) ?? 0) + 1);
 
@@ -27,9 +30,11 @@ function SongSummary({ songs }: { songs: AlbumSongRef[] }) {
   );
 }
 
-export function AlbumEntryView({ active, album }: { active: boolean; album: AlbumListResult }) {
+export function AlbumEntryView({ active, album }: { active: boolean; album: AlbumListResult; }) {
   const [openAlbum, setOpenAlbum] = useState<number | null>(null);
-  if (!active) return null;
+  if (!active) {
+    return null;
+  }
 
   return (
     <>

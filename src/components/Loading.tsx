@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-export function SkeletonRows({ cols, rows = 5 }: { cols: string; rows?: number }) {
+export function SkeletonRows({ cols, rows = 5 }: { cols: string; rows?: number; }) {
   const cellCount = cols.split(' ').length;
   return (
     <ul className="rows">
@@ -17,7 +17,7 @@ export function SkeletonRows({ cols, rows = 5 }: { cols: string; rows?: number }
   );
 }
 
-export function PanelLoading({ label = 'READING' }: { label?: string }) {
+export function PanelLoading({ label = 'READING' }: { label?: string; }) {
   return (
     <div className="paneloading">
       <span className="spin" />

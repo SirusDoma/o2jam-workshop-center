@@ -73,7 +73,10 @@ const clampByte = new Uint8ClampedArray(1);
 function rasterLut(key: Rgb | null, threshold: number): Uint32Array {
   const id = key && threshold > 0 ? `${key.r},${key.g},${key.b}:${threshold}` : 'opaque';
   const hit = rasterLuts.get(id);
-  if (hit) return hit;
+  if (hit) {
+    return hit;
+  }
+
   const lut = new Uint32Array(65536);
   for (let word = 0; word < 65536; word++) {
     const r = expandScaled((word >> 10) & 0x1f);
@@ -90,17 +93,27 @@ function rasterLut(key: Rgb | null, threshold: number): Uint32Array {
         a = clampByte[0];
       }
     }
+
     lut[word] = ((a << 24) | (b << 16) | (g << 8) | r) >>> 0;
   }
-  if (rasterLuts.size >= 8) rasterLuts.clear();
+  if (rasterLuts.size >= 8) {
+    rasterLuts.clear();
+  }
+
   rasterLuts.set(id, lut);
   return lut;
 }
 
 function codecFor(format: number, filename: string): SpriteCodec {
   const name = filename.toLowerCase();
-  if (name.endsWith('.oji')) return 'masked-runlist';
-  if (name.endsWith('.ojt')) return 'rgb555';
+  if (name.endsWith('.oji')) {
+    return 'masked-runlist';
+  }
+
+  if (name.endsWith('.ojt')) {
+    return 'rgb555';
+  }
+
   return format === FORMAT_RUNLIST ? 'runlist' : 'rgb555';
 }
 
@@ -139,11 +152,18 @@ export function parseSprite(source: BinarySource, filename: string): Sprite {
   const format = view.getUint16(2, true);
   const frameCount = view.getUint16(4, true);
   const colorKey = view.getUint16(6, true);
-  if (signature !== 0 && signature !== 1) throw new FormatError(`invalid sprite signature ${signature}`, 0);
-  if (format !== FORMAT_RGB555 && format !== FORMAT_RUNLIST) throw new FormatError(`unsupported sprite format 0x${format.toString(16)}`, 2);
+  if (signature !== 0 && signature !== 1) {
+    throw new FormatError(`invalid sprite signature ${signature}`, 0);
+  }
+
+  if (format !== FORMAT_RGB555 && format !== FORMAT_RUNLIST) {
+    throw new FormatError(`unsupported sprite format 0x${format.toString(16)}`, 2);
+  }
 
   const capacity = Math.floor((bytes.byteLength - SPRITE_HEADER_SIZE) / FRAME_HEADER_SIZE);
-  if (frameCount > capacity) throw new FormatError(`sprite declares ${frameCount} frames but only ${capacity} headers fit`, 4);
+  if (frameCount > capacity) {
+    throw new FormatError(`sprite declares ${frameCount} frames but only ${capacity} headers fit`, 4);
+  }
 
   // Bitmap offsets are relative to the end of the frame headers.
   const dataBase = SPRITE_HEADER_SIZE + FRAME_HEADER_SIZE * frameCount;
@@ -162,11 +182,15 @@ export function parseSprite(source: BinarySource, filename: string): Sprite {
     if (dataOffset > bytes.byteLength || bitmapSize > bytes.byteLength - dataOffset) {
       throw new FormatError(`frame ${i} bitmap exceeds the sprite data`, at + 8);
     }
+
     if (codec === 'rgb555' && bitmapSize < width * height * 2) {
       throw new FormatError(`frame ${i} needs ${width * height * 2} bitmap bytes, got ${bitmapSize}`, at + 12);
     }
+
     const frameNpot = width > 0 && !isPowerOfTwo(width);
-    if (frameNpot) npot = true;
+    if (frameNpot) {
+      npot = true;
+    }
 
     frames.push({
       index: i,
@@ -254,7 +278,10 @@ function decodeRaster(
       const dst = y * width;
       for (let x = 0; x < width; x++) {
         const idx = row + x;
-        if (idx >= words.length) return;
+        if (idx >= words.length) {
+          return;
+        }
+
         out[dst + x] = lut[words[idx]!]!;
       }
     }
@@ -265,7 +292,10 @@ function decodeRaster(
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const src = y * stride + x * 2;
-      if (src + 2 > data.byteLength) return;
+      if (src + 2 > data.byteLength) {
+        return;
+      }
+
       out[y * width + x] = lut[view.getUint16(src, true)]!;
     }
   }
@@ -285,7 +315,9 @@ function decodeRunList(
 
   while (pos + 6 <= data.byteLength) {
     const count = view.getUint16(pos, true);
-    if (count === 0) break;
+    if (count === 0) {
+      break;
+    }
 
     const x = view.getUint16(pos + 2, true);
     const y = view.getUint16(pos + 4, true);
@@ -298,9 +330,15 @@ function decodeRunList(
 
     for (let i = 0; i < count; i++) {
       const src = pos + i * 2;
-      if (src + 2 > data.byteLength) return;
+      if (src + 2 > data.byteLength) {
+        return;
+      }
+
       const px = x + i;
-      if (px >= width || y >= height) break;
+      if (px >= width || y >= height) {
+        break;
+      }
+
       applyKey(rgba, (y * width + px) * 4, rgb555(view.getUint16(src, true), true), key, threshold);
     }
 
@@ -316,7 +354,10 @@ export function decodeFrame(
 ): DecodedFrame {
   const frame = sprite.frames[index];
 
-  if (!frame) return { width: 0, height: 0, rgba: new Uint8ClampedArray(0) };
+  if (!frame) {
+    return { width: 0, height: 0, rgba: new Uint8ClampedArray(0) };
+  }
+
   if (frame.width <= 0 || frame.height <= 0) {
     return {
       width: 0,
@@ -324,6 +365,7 @@ export function decodeFrame(
       rgba: new Uint8ClampedArray(0),
     };
   }
+
   const bytes = asBytes(source);
   const start = frame.dataOffset;
   const end = start + frame.bitmapSize;
@@ -342,7 +384,9 @@ export function decodeFrame(
     const flat = frame.width * 2 * frame.height;
     const padded = ((frame.width * 2 + 3) & ~3) * frame.height;
     scanlinePad = opts.scanlinePad ?? (padded !== flat && frame.bitmapSize >= padded);
-    if (data.byteLength < (scanlinePad ? padded : flat)) return { width: 0, height: 0, rgba: new Uint8ClampedArray(0) };
+    if (data.byteLength < (scanlinePad ? padded : flat)) {
+      return { width: 0, height: 0, rgba: new Uint8ClampedArray(0) };
+    }
   }
 
   const rgba = new Uint8ClampedArray(rgbaSize);
@@ -395,7 +439,10 @@ function encodeRunList(f: SpriteFrameInput, w: number, h: number, alphaThreshold
     let x = 0;
     while (x < w) {
       while (x < w && (f.rgba[(y * w + x) * 4 + 3] ?? 0) < alphaThreshold) x++;
-      if (x >= w) break;
+      if (x >= w) {
+        break;
+      }
+
       const start = x;
       while (x < w && (f.rgba[(y * w + x) * 4 + 3] ?? 0) >= alphaThreshold) x++;
       words.push(x - start, start, y);
@@ -417,7 +464,10 @@ export function writeSprite(
   alphaThreshold = 8,
   codec: SpriteWriteCodec = 'rgb555',
 ): Uint8Array {
-  if (frames.length > 0xffff) throw new FormatError(`sprite has ${frames.length} frames; uint16 allows 65535`);
+  if (frames.length > 0xffff) {
+    throw new FormatError(`sprite has ${frames.length} frames; uint16 allows 65535`);
+  }
+
   const key = colorKey === 0 ? ((31 << 10) | (9 << 5) | 31) : colorKey;
   const dimensions = frames.map((f, i) => {
     const w = Math.trunc(f.width);
@@ -425,8 +475,12 @@ export function writeSprite(
     if (!Number.isFinite(w) || !Number.isFinite(h) || w < 0 || w > 0xffff || h < 0 || h > 0xffff) {
       throw new FormatError(`frame ${i} dimensions must fit uint16`);
     }
+
     const needed = w * h * 4;
-    if (f.rgba.byteLength < needed) throw new FormatError(`frame ${i} needs ${needed} RGBA bytes, got ${f.rgba.byteLength}`);
+    if (f.rgba.byteLength < needed) {
+      throw new FormatError(`frame ${i} needs ${needed} RGBA bytes, got ${f.rgba.byteLength}`);
+    }
+
     return { w, h };
   });
   const blobs = frames.map((f, i) => {

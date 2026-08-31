@@ -29,7 +29,9 @@ export function SceneNameDialog({
           aria-label="Scene name"
           onChange={(event) => setName(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === 'Enter') onSubmit(name);
+            if (event.key === 'Enter') {
+              onSubmit(name);
+            }
           }}
         />
         <div className="confirm-actions">
@@ -66,7 +68,9 @@ export function SetIdDialog({
           aria-label="SET id"
           onChange={(event) => setValue(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === 'Enter') onSubmit(value);
+            if (event.key === 'Enter') {
+              onSubmit(value);
+            }
           }}
         />
         <div className="confirm-actions">

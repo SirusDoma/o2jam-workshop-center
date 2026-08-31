@@ -37,17 +37,25 @@ export function encodeBmp(bmp: Bitmap): Uint8Array {
 }
 
 export function decodeBmp(data: Uint8Array): Bitmap | null {
-  if (data.length < 54 || data[0] !== 0x42 || data[1] !== 0x4d) return null;
+  if (data.length < 54 || data[0] !== 0x42 || data[1] !== 0x4d) {
+    return null;
+  }
+
   const dv = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const dataOffset = dv.getUint32(10, true);
   const width = dv.getInt32(18, true);
   const rawHeight = dv.getInt32(22, true);
   const bpp = dv.getUint16(28, true);
-  if (width <= 0 || rawHeight === 0 || (bpp !== 24 && bpp !== 32)) return null;
+  if (width <= 0 || rawHeight === 0 || (bpp !== 24 && bpp !== 32)) {
+    return null;
+  }
 
   const topDown = rawHeight < 0;
   const height = Math.abs(rawHeight);
-  if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) return null;
+  if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+    return null;
+  }
+
   const bytesPP = bpp / 8;
   const rowBytes = ((width * bytesPP + 3) & ~3) >>> 0;
   const rgba = new Uint8ClampedArray(width * height * 4);

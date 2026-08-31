@@ -7,16 +7,29 @@ export function looksLikeMusicList(data: Uint8Array): boolean {
 
 export function quickTextish(data: Uint8Array): boolean {
   const sample = data.subarray(0, Math.min(256, data.length));
-  if (sample.length === 0 || sample.indexOf(0) !== -1) return false;
+  if (sample.length === 0 || sample.indexOf(0) !== -1) {
+    return false;
+  }
+
   let printable = 0;
-  for (const b of sample) if (b === 9 || b === 10 || b === 13 || b >= 0x20) printable++;
+  for (const b of sample) if (b === 9 || b === 10 || b === 13 || b >= 0x20) {
+    printable++;
+  }
   return printable / sample.length > 0.95;
 }
 
 export function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
-  if (a === b) return true;
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  if (a === b) {
+    return true;
+  }
+
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) {
+    return false;
+  }
   return true;
 }
 
@@ -41,7 +54,10 @@ export function download(data: Uint8Array, filename: string) {
 
 export function extractBmp(data: Uint8Array, sprite: Sprite, index: number, filename: string, keyOn: boolean) {
   const f = decodeFrame(data, sprite, index, { colorKey: keyOn ? undefined : null });
-  if (f.width <= 0) return;
+  if (f.width <= 0) {
+    return;
+  }
+
   download(encodeBmp({ width: f.width, height: f.height, rgba: f.rgba }), filename);
 }
 

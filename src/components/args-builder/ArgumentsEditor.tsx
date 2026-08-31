@@ -17,7 +17,7 @@ import { Tabs } from '../Tabs';
 import { ArgumentOutput, GrammarPanel } from './ArgumentOutput';
 import { FTP_ROW_KEYS, FtpServersField, GatewayField, PresetField, RankBlobField } from './ArgumentFields';
 
-export function ArgumentsEditor({ preset, header }: { preset: ArgumentsPreset; header: ReactNode }) {
+export function ArgumentsEditor({ preset, header }: { preset: ArgumentsPreset; header: ReactNode; }) {
   const [fields, setFields] = useState<Partial<Record<ArgumentsFieldKey, string>>>({});
   const [gateways, setGateways] = useState<Gateway[]>([]);
   const [blob, setBlob] = useState<Partial<AuthParams>>({});
@@ -48,6 +48,7 @@ export function ArgumentsEditor({ preset, header }: { preset: ArgumentsPreset; h
         setImportError('Not a valid encoded launch token.');
         return;
       }
+
       setFields((current) => ({ ...current, token: decoded }));
       setTab('form');
     } else {
@@ -60,14 +61,20 @@ export function ArgumentsEditor({ preset, header }: { preset: ArgumentsPreset; h
         for (let i = 0; i + 3 < pipes.length; i += 4) {
           imported.push({ address: pipes[i + 2] ?? '', port: pipes[i + 3] ?? '' });
         }
-        if (imported.length > 0) setGateways(imported);
-        else if (gatewayAddress !== '') setGateways([{ address: gatewayAddress, port: gatewayPort }]);
+        if (imported.length > 0) {
+          setGateways(imported);
+        }
+        else if (gatewayAddress !== '') {
+          setGateways([{ address: gatewayAddress, port: gatewayPort }]);
+        }
+
         setTab('form');
       } catch {
         setImportError('Unable to decrypt or parse the parameters.');
         return;
       }
     }
+
     setImportText('');
     setImportError(null);
   };

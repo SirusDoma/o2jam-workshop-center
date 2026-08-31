@@ -16,7 +16,7 @@ import { buildLayers, instrumentOf } from '../../features/avatar/utils';
 import { AvatarItemIcon } from './AvatarItemIcon';
 
 const BUILD_COLS = '56px minmax(0, 1fr) 80px 30px';
-const BUILDER_CATEGORIES: { id: string; label: string; types: number[] }[] = [
+const BUILDER_CATEGORIES: { id: string; label: string; types: number[]; }[] = [
   { id: 'special', label: 'Special', types: [28, 20, 22] },
   { id: 'fashion', label: 'Fashion', types: [19, 13, 10, 14] },
   { id: 'accessory', label: 'Accessory', types: [11, 8, 9, 7, 12] },
@@ -41,7 +41,10 @@ const BuilderCard = memo(function BuilderCard({
   const thumbRef = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const el = thumbRef.current;
-    if (!el || seen) return;
+    if (!el || seen) {
+      return;
+    }
+
     const io = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {
@@ -101,9 +104,14 @@ export function AvatarBuilder({
   }, [playing, fps]);
 
   useEffect(() => {
-    if (!planetFilterOpen) return;
+    if (!planetFilterOpen) {
+      return;
+    }
+
     const close = (event: MouseEvent) => {
-      if (!planetRef.current?.contains(event.target as Node)) setPlanetFilterOpen(false);
+      if (!planetRef.current?.contains(event.target as Node)) {
+        setPlanetFilterOpen(false);
+      }
     };
     document.addEventListener('mousedown', close);
     return () => document.removeEventListener('mousedown', close);
@@ -112,14 +120,19 @@ export function AvatarBuilder({
   const byIndex = useMemo(() => new Map(items.map((item) => [item.index, item])), [items]);
   const byId = useMemo(() => {
     const result = new Map<number, ItemEntry>();
-    for (const item of items) if (!result.has(item.itemId)) result.set(item.itemId, item);
+    for (const item of items) if (!result.has(item.itemId)) {
+      result.set(item.itemId, item);
+    }
     return result;
   }, [items]);
   const presentTypes = useMemo(() => {
     const result = new Map<number, string>();
     const baseIds = new Set([...baseBodyIds('male'), ...baseBodyIds('female')]);
     for (const item of items) {
-      if (baseIds.has(item.itemId) || item.itemType === 24 || result.has(item.itemType)) continue;
+      if (baseIds.has(item.itemId) || item.itemType === 24 || result.has(item.itemType)) {
+        continue;
+      }
+
       result.set(item.itemType, item.itemTypeLabel);
     }
     return result;
@@ -129,7 +142,10 @@ export function AvatarBuilder({
     [presentTypes]
   );
   const subTabs = useMemo(() => {
-    if (category === 'all') return [];
+    if (category === 'all') {
+      return [];
+    }
+
     const current = BUILDER_CATEGORIES.find((entry) => entry.id === category);
     return (current?.types ?? []).filter((itemType) => presentTypes.has(itemType)).map((itemType) => presentTypes.get(itemType)!);
   }, [category, presentTypes]);
@@ -162,10 +178,15 @@ export function AvatarBuilder({
   useEffect(() => {
     const grid = gridRef.current;
     const card = grid?.querySelector('.bcard');
-    if (!grid || !card) return;
+    if (!grid || !card) {
+      return;
+    }
+
     const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
     const pitch = (card as HTMLElement).offsetHeight + 8;
-    if (cols !== gridMetrics.cols || Math.abs(pitch - gridMetrics.pitch) > 1) setGridMetrics({ cols, pitch });
+    if (cols !== gridMetrics.cols || Math.abs(pitch - gridMetrics.pitch) > 1) {
+      setGridMetrics({ cols, pitch });
+    }
   });
 
   const rowCount = Math.ceil(shown.length / gridMetrics.cols);
@@ -179,8 +200,14 @@ export function AvatarBuilder({
   const toggle = (item: ItemEntry) => {
     const isInstrument = (itemType: number) => itemType >= 15 && itemType <= 18;
     setSelected((current) => {
-      if (current.includes(item.index)) return current.filter((index) => index !== item.index);
-      if (item.itemType === 28) return [item.index];
+      if (current.includes(item.index)) {
+        return current.filter((index) => index !== item.index);
+      }
+
+      if (item.itemType === 28) {
+        return [item.index];
+      }
+
       return [
         ...current.filter((index) => {
           const selectedItem = byIndex.get(index);
@@ -190,7 +217,9 @@ export function AvatarBuilder({
       ];
     });
     const equipped = instrumentOf(item);
-    if (equipped !== 'none') setInstrument(equipped);
+    if (equipped !== 'none') {
+      setInstrument(equipped);
+    }
   };
   const pickGender = (value: SpriteGender) => {
     setGender(value);
@@ -201,15 +230,26 @@ export function AvatarBuilder({
   };
   const cyclePlanet = (value: string) => {
     setHiddenPlanets((current) => {
-      if (current.size === 0) return new Set(planetOptions.filter((planet) => planet !== value));
+      if (current.size === 0) {
+        return new Set(planetOptions.filter((planet) => planet !== value));
+      }
+
       const next = new Set(current);
-      if (next.has(value)) next.delete(value);
-      else next.add(value);
+      if (next.has(value)) {
+        next.delete(value);
+      }
+      else {
+        next.add(value);
+      }
+
       return next.size >= planetOptions.length ? new Set<string>() : next;
     });
   };
   const createSet = () => {
-    if (wearing.length === 0 || !canCreateSet) return;
+    if (wearing.length === 0 || !canCreateSet) {
+      return;
+    }
+
     const genders = new Set(wearing.map((item) => item.gender));
     const setGender: SetGender = genders.has('male') ? 'male' : genders.has('female') ? 'female' : 'any';
     onCreateSet(wearing, setGender);

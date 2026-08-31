@@ -26,5 +26,5 @@ export interface ItemEdit {
 
 export interface SetEdit {
   fields?: Partial<Pick<SetInfoEntry, 'name' | 'description' | 'planet' | 'gender' | 'isNew' | 'currency'>>;
-  items?: { itemId: number; price: number; salePrice: number }[];
+  items?: { itemId: number; price: number; salePrice: number; }[];
 }

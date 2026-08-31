@@ -32,7 +32,7 @@ import { bytesEqual, looksLikeMusicList, quickTextish } from '../features/packag
 interface Edits {
   removed: Set<number>;
   replaced: Map<number, Uint8Array>;
-  added: { name: string; data: Uint8Array; original: Uint8Array }[];
+  added: { name: string; data: Uint8Array; original: Uint8Array; }[];
 }
 
 export default function PackagesPage() {
@@ -47,13 +47,16 @@ export default function PackagesPage() {
   const [creating, setCreating] = useState(false);
   const [newEntry, setNewEntry] = useState<NewEntryKind | null>(null);
   const [confirm, setConfirm] = useState<
-    { kind: 'close' | 'switch'; id: string } | { kind: 'create'; name: string } | null
+    { kind: 'close' | 'switch'; id: string; } | { kind: 'create'; name: string; } | null
   >(null);
 
   const file = files.find((f) => f.id === fileId) ?? null;
 
   const detected = useMemo(() => {
-    if (!file) return null;
+    if (!file) {
+      return null;
+    }
+
     try {
       return detectArchiveEncoding(file.buffer);
     } catch {
@@ -62,8 +65,11 @@ export default function PackagesPage() {
   }, [file]);
   const resolved: O2Encoding = encoding === 'auto' ? detected ?? 'ascii' : encoding;
 
-  const archive = useMemo((): { data?: Archive; error?: string } => {
-    if (!file) return {};
+  const archive = useMemo((): { data?: Archive; error?: string; } => {
+    if (!file) {
+      return {};
+    }
+
     try {
       return { data: parseArchive(file.buffer, resolved) };
     } catch (err) {
@@ -86,8 +92,11 @@ export default function PackagesPage() {
   }, [dirty]);
 
   const contentType = useMemo(() => {
-    const m = new Map<number, { label: string; img: boolean }>();
-    if (!file) return m;
+    const m = new Map<number, { label: string; img: boolean; }>();
+    if (!file) {
+      return m;
+    }
+
     const bytes = new Uint8Array(file.buffer);
     for (const e of entries) {
       const entryBytes = bytes.subarray(e.offset, e.offset + e.size);
@@ -96,20 +105,29 @@ export default function PackagesPage() {
         m.set(e.index, { label: mime.split('/')[1]!.toUpperCase(), img: true });
         continue;
       }
-      if (isSpriteData(entryBytes, e.name)) continue;
+
+      if (isSpriteData(entryBytes, e.name)) {
+        continue;
+      }
+
       if (isAlbumListData(entryBytes)) {
         m.set(e.index, { label: 'ALBUM LIST', img: false });
         continue;
       }
+
       if (/^itemdata/i.test(e.name) && e.ext === 'dat') {
         m.set(e.index, { label: 'ITEM LIST', img: false });
         continue;
       }
+
       if (looksLikeMusicList(entryBytes)) {
         m.set(e.index, { label: 'MUSIC LIST', img: false });
         continue;
       }
-      if (quickTextish(entryBytes)) m.set(e.index, { label: 'TXT', img: false });
+
+      if (quickTextish(entryBytes)) {
+        m.set(e.index, { label: 'TXT', img: false });
+      }
     }
     return m;
   }, [file, entries]);
@@ -134,18 +152,25 @@ export default function PackagesPage() {
   const removeAdded = (i: number) => setEdits((s) => ({ ...s, added: s.added.filter((_, n) => n !== i) }));
 
   const exportArchive = async () => {
-    if (!file || !archive.data) return;
+    if (!file || !archive.data) {
+      return;
+    }
+
     try {
       const kept = entries
         .filter((e) => !edits.removed.has(e.index))
         .map((e) => ({ name: e.name, data: dataOf(e.index, e) }));
       const out = buildArchive(archive.data.kind, [...kept, ...edits.added], resolved);
-      if (!(await saveFile(out, file.name))) return;
+      if (!(await saveFile(out, file.name))) {
+        return;
+      }
+
       const [reopened] = await add([new File([out.slice().buffer as ArrayBuffer], file.name)]);
       if (reopened && reopened.id !== file.id) {
         remove(file.id);
         setFileId(reopened.id);
       }
+
       notify(`Saved ${file.name} — ${kept.length + edits.added.length} entries.`, 'ok');
     } catch (err) {
       notify(err instanceof Error ? err.message : 'Could not rebuild the package.', 'warn');
@@ -153,19 +178,27 @@ export default function PackagesPage() {
   };
 
   const addFiles = async (list: FileList | File[] | null) => {
-    if (!list) return;
+    if (!list) {
+      return;
+    }
+
     const read = await Promise.all(
       Array.from(list).map(async (f) => {
         const data = new Uint8Array(await f.arrayBuffer());
         return { name: f.name, data, original: data };
       })
     );
-    if (read.length) setEdits((e) => ({ ...e, added: [...e.added, ...read] }));
+    if (read.length) {
+      setEdits((e) => ({ ...e, added: [...e.added, ...read] }));
+    }
   };
 
   const createArchive = async (rawName: string) => {
     let name = rawName.trim() || 'Interface.opi';
-    if (!/\.(opi|opa)$/i.test(name)) name += '.opi';
+    if (!/\.(opi|opa)$/i.test(name)) {
+      name += '.opi';
+    }
+
     const kind = name.toLowerCase().endsWith('.opa') ? 'opa' : 'opi';
     const bytes = buildArchive(kind, [], 'ascii');
     const [opened] = await add([new File([bytes.slice().buffer as ArrayBuffer], name)]);
@@ -173,13 +206,20 @@ export default function PackagesPage() {
       setOpenError(null);
       setFileId(opened.id);
     }
+
     setCreating(false);
   };
 
   const createEntry = (kind: NewEntryKind, rawName: string) => {
     let name = rawName.trim() || (kind === 'sprite' ? 'Sprite.ojs' : 'Bounds.bnd');
-    if (kind === 'sprite' && !/\.(ojs|oji|ojt|oja)$/i.test(name)) name += '.ojs';
-    if (kind === 'bound' && !/\.bnd$/i.test(name)) name += '.bnd';
+    if (kind === 'sprite' && !/\.(ojs|oji|ojt|oja)$/i.test(name)) {
+      name += '.ojs';
+    }
+
+    if (kind === 'bound' && !/\.bnd$/i.test(name)) {
+      name += '.bnd';
+    }
+
     const data = kind === 'sprite' ? writeSprite([], 0, 8, /\.oji$/i.test(name) ? 'runlist' : 'rgb555') : writeBounds([]);
     const idx = edits.added.length;
     setEdits((s) => ({ ...s, added: [...s.added, { name, data, original: data }] }));
@@ -199,55 +239,65 @@ export default function PackagesPage() {
   return (
     <>
       <div className="stickyhead">
-      <PageHead
-        title="Packages"
-        sub="Inspect, edit and repack an OPI or OPA package."
-        actions={
-          <EncodingSelect
-            value={encoding}
-            autoLabel={`Auto — ${ENCODINGS.find((entry) => entry.id === (detected ?? 'ascii'))?.label}`}
-            onChange={(value) => setEncoding(value)}
-          />
-        }
-      />
-
-      <FileInputCard>
-        <FilePicker
-          kinds={['archive']}
-          selected={fileId}
-          onSelect={(f) => {
-            setOpenError(null);
-            if (f.id === fileId) return;
-            if (dirty) setConfirm({ kind: 'switch', id: f.id });
-            else setFileId(f.id);
-          }}
-          onClose={(f) => {
-            if (dirty && f.id === fileId) {
-              setConfirm({ kind: 'close', id: f.id });
-              return;
-            }
-            remove(f.id);
-            if (f.id === fileId) setFileId(null);
-          }}
-          accept=".opi,.opa"
-          hint="Interface, Playing or Avatar package."
-          onError={setOpenError}
+        <PageHead
+          title="Packages"
+          sub="Inspect, edit and repack an OPI or OPA package."
           actions={
-            <button className="btn" type="button" onClick={() => setCreating(true)}>
-              <FilePlus2 size={14} />
-              CREATE
-            </button>
-          }
-          after={
-            file && archive.data ? (
-              <button className="btn primary" type="button" onClick={() => void exportArchive()} disabled={!dirty}>
-                <Save size={14} />
-                SAVE
-              </button>
-            ) : null
+            <EncodingSelect
+              value={encoding}
+              autoLabel={`Auto — ${ENCODINGS.find((entry) => entry.id === (detected ?? 'ascii'))?.label}`}
+              onChange={(value) => setEncoding(value)}
+            />
           }
         />
-      </FileInputCard>
+
+        <FileInputCard>
+          <FilePicker
+            kinds={['archive']}
+            selected={fileId}
+            onSelect={(f) => {
+              setOpenError(null);
+              if (f.id === fileId) {
+                return;
+              }
+
+              if (dirty) {
+                setConfirm({ kind: 'switch', id: f.id });
+              }
+              else {
+                setFileId(f.id);
+              }
+            }}
+            onClose={(f) => {
+              if (dirty && f.id === fileId) {
+                setConfirm({ kind: 'close', id: f.id });
+                return;
+              }
+
+              remove(f.id);
+              if (f.id === fileId) {
+                setFileId(null);
+              }
+            }}
+            accept=".opi,.opa"
+            hint="Interface, Playing or Avatar package."
+            onError={setOpenError}
+            actions={
+              <button className="btn" type="button" onClick={() => setCreating(true)}>
+                <FilePlus2 size={14} />
+                CREATE
+              </button>
+            }
+            after={
+              file && archive.data ? (
+                <button className="btn primary" type="button" onClick={() => void exportArchive()} disabled={!dirty}>
+                  <Save size={14} />
+                  SAVE
+                </button>
+              ) : null
+            }
+          />
+        </FileInputCard>
       </div>
 
       {openError && <WarningCard onClose={() => setOpenError(null)}>{openError}</WarningCard>}
@@ -290,8 +340,13 @@ export default function PackagesPage() {
                     const original = file ? readEntry(file.buffer, selectedOrig) : null;
                     setEdits((s) => {
                       const r = new Map(s.replaced);
-                      if (original && bytesEqual(bytes, original)) r.delete(selectedOrig.index);
-                      else r.set(selectedOrig.index, bytes);
+                      if (original && bytesEqual(bytes, original)) {
+                        r.delete(selectedOrig.index);
+                      }
+                      else {
+                        r.set(selectedOrig.index, bytes);
+                      }
+
                       return { ...s, replaced: r };
                     });
                   }}

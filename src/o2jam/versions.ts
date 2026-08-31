@@ -74,6 +74,9 @@ export const CLIENT_VERSIONS: readonly ClientVersion[] = [
 
 export function clientVersion(id: ClientVersionId): ClientVersion {
   const found = CLIENT_VERSIONS.find((v) => v.id === id);
-  if (!found) throw new FormatError(`unknown client version "${id}"`);
+  if (!found) {
+    throw new FormatError(`unknown client version "${id}"`);
+  }
+
   return found;
 }

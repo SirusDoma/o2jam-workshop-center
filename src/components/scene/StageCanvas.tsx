@@ -4,14 +4,23 @@ import { ckey, frameOff, type BoundRect, type LabelDraw, type Placed, type Rect 
 
 const frameCanvasCache = new WeakMap<DecodedFrame, HTMLCanvasElement>();
 function frameCanvas(f: DecodedFrame): HTMLCanvasElement | null {
-  if (f.width <= 0 || f.height <= 0) return null;
+  if (f.width <= 0 || f.height <= 0) {
+    return null;
+  }
+
   let cv = frameCanvasCache.get(f);
-  if (cv) return cv;
+  if (cv) {
+    return cv;
+  }
+
   cv = document.createElement('canvas');
   cv.width = f.width;
   cv.height = f.height;
   const ctx = cv.getContext('2d');
-  if (!ctx) return null;
+  if (!ctx) {
+    return null;
+  }
+
   const img = ctx.createImageData(f.width, f.height);
   img.data.set(f.rgba);
   ctx.putImageData(img, 0, 0);
@@ -26,6 +35,7 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxW: number): st
       out.push('');
       continue;
     }
+
     let line = '';
     for (const word of para.split(' ')) {
       const test = line ? `${line} ${word}` : word;
@@ -63,10 +73,14 @@ function drawLabel(ctx: CanvasRenderingContext2D, l: LabelDraw): void {
     ctx.lineWidth = Math.max(2, s.size / 5);
     ctx.strokeStyle = 'rgba(0,0,0,0.92)';
   }
+
   ctx.fillStyle = s.color;
   for (let i = 0; i < lines.length; i++) {
     const cy = top + i * lineH + lineH / 2;
-    if (s.outline) ctx.strokeText(lines[i]!, x, cy);
+    if (s.outline) {
+      ctx.strokeText(lines[i]!, x, cy);
+    }
+
     ctx.fillText(lines[i]!, x, cy);
   }
   ctx.restore();
@@ -94,7 +108,7 @@ export function StageCanvas({
   hitRects: BoundRect[];
   labelDraws: LabelDraw[];
   selectedRects: Rect[];
-  extent: { w: number; h: number };
+  extent: { w: number; h: number; };
   zoom: number;
   tick: number;
   playing: boolean;
@@ -110,13 +124,19 @@ export function StageCanvas({
 
   useEffect(() => {
     const canvas = ref.current;
-    if (!canvas) return;
+    if (!canvas) {
+      return;
+    }
+
     const dpr = window.devicePixelRatio || 1;
     const scale = zoom * dpr;
     canvas.width = Math.max(1, Math.round(extent.w * scale));
     canvas.height = Math.max(1, Math.round(extent.h * scale));
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      return;
+    }
+
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, extent.w, extent.h);
@@ -124,10 +144,15 @@ export function StageCanvas({
     for (const p of placed) {
       const n = p.frames.length;
       let idx = playing && n > 1 ? tick % n : Math.min(frameSel[ckey(p.control)] ?? 0, n - 1);
-      if (!p.frames[idx]) idx = 0;
+      if (!p.frames[idx]) {
+        idx = 0;
+      }
+
       const cv = frameCanvas(p.frames[idx]!);
       const o = frameOff(p, idx);
-      if (cv) ctx.drawImage(cv, p.x + o.x, p.y + o.y);
+      if (cv) {
+        ctx.drawImage(cv, p.x + o.x, p.y + o.y);
+      }
     }
 
     if (boundRects.length) {
@@ -163,17 +188,27 @@ export function StageCanvas({
     for (const p of placed) {
       const n = p.frames.length;
       let idx = playing && n > 1 ? tick % n : Math.min(frameSel[ckey(p.control)] ?? 0, n - 1);
-      if (!p.frames[idx]) idx = 0;
+      if (!p.frames[idx]) {
+        idx = 0;
+      }
+
       const f = p.frames[idx]!;
       const o = frameOff(p, idx);
-      if (inside(p.x + o.x, p.y + o.y, f.width, f.height)) top = ckey(p.control);
+      if (inside(p.x + o.x, p.y + o.y, f.width, f.height)) {
+        top = ckey(p.control);
+      }
     }
-    if (top) return top;
+    if (top) {
+      return top;
+    }
 
     let best: string | null = null;
     let bestArea = Infinity;
     for (const r of hitRects) {
-      if (!r.key || !inside(r.left, r.top, r.width, r.height)) continue;
+      if (!r.key || !inside(r.left, r.top, r.width, r.height)) {
+        continue;
+      }
+
       const area = Math.max(1, r.width) * Math.max(1, r.height);
       if (area < bestArea) {
         bestArea = area;
@@ -184,28 +219,45 @@ export function StageCanvas({
   };
 
   const onClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (moveOn) return;
+    if (moveOn) {
+      return;
+    }
+
     const { wx, wy } = toWorld(e);
     const key = pick(wx, wy);
-    if (key) onSelect(key);
+    if (key) {
+      onSelect(key);
+    }
   };
 
   const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!moveOn) return;
+    if (!moveOn) {
+      return;
+    }
+
     const { wx, wy } = toWorld(e);
     const key = pick(wx, wy);
-    if (!key) return;
+    if (!key) {
+      return;
+    }
+
     dragging.current = true;
     e.currentTarget.setPointerCapture(e.pointerId);
     onGrab(key, wx, wy);
   };
   const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!dragging.current) return;
+    if (!dragging.current) {
+      return;
+    }
+
     const { wx, wy } = toWorld(e);
     onDrag(wx, wy);
   };
   const onPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!dragging.current) return;
+    if (!dragging.current) {
+      return;
+    }
+
     dragging.current = false;
     e.currentTarget.releasePointerCapture(e.pointerId);
     onDrop();

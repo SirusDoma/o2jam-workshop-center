@@ -26,7 +26,7 @@ export function MusicListTable({
   setSections: Dispatch<SetStateAction<SectionRows>>;
   changedSongs: ReadonlySet<number>;
 }) {
-  const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 } | null>(null);
+  const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1; } | null>(null);
   const [query, setQuery] = useState('');
   const [openSong, setOpenSong] = useState<number | null>(null);
   const headers = useMemo(
@@ -39,7 +39,10 @@ export function MusicListTable({
       ({ header }) =>
         !queryText || `${header.id} ${header.title} ${header.artist} ${header.noteDesigner}`.toLowerCase().includes(queryText)
     );
-    if (sort) list = [...list].sort((a, b) => sort.dir * compare(sortValue(a.header, sort.key), sortValue(b.header, sort.key)));
+    if (sort) {
+      list = [...list].sort((a, b) => sort.dir * compare(sortValue(a.header, sort.key), sortValue(b.header, sort.key)));
+    }
+
     return list;
   }, [headers, query, sort]);
   const clickSort = (key: SortKey) =>
@@ -162,7 +165,7 @@ export function MusicListTable({
 function Sortable({ label, k, sort, onClick, right }: {
   label: string;
   k: SortKey;
-  sort: { key: SortKey; dir: 1 | -1 } | null;
+  sort: { key: SortKey; dir: 1 | -1; } | null;
   onClick: (key: SortKey) => void;
   right?: boolean;
 }) {
@@ -191,6 +194,9 @@ function sortValue(header: OjnHeader, key: SortKey): number | string {
 }
 
 function compare(a: number | string, b: number | string): number {
-  if (typeof a === 'number' && typeof b === 'number') return a - b;
+  if (typeof a === 'number' && typeof b === 'number') {
+    return a - b;
+  }
+
   return String(a).localeCompare(String(b));
 }

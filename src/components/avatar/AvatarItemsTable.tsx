@@ -61,17 +61,26 @@ export function AvatarItemsTable({
   const end = Math.min(visible.length, Math.ceil((view.top + view.h) / ITEM_ROW_PITCH) + 8);
 
   useEffect(() => {
-    if (!filterOpen) return;
+    if (!filterOpen) {
+      return;
+    }
+
     const withinPopup = (target: Node) =>
       !!typeRef.current?.contains(target) || !!genderRef.current?.contains(target) || !!planetRef.current?.contains(target);
     const onMouseDown = (event: MouseEvent) => {
-      if (!withinPopup(event.target as Node)) setFilterOpen(null);
+      if (!withinPopup(event.target as Node)) {
+        setFilterOpen(null);
+      }
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setFilterOpen(null);
+      if (event.key === 'Escape') {
+        setFilterOpen(null);
+      }
     };
     const onScroll = (event: Event) => {
-      if (!withinPopup(event.target as Node)) setFilterOpen(null);
+      if (!withinPopup(event.target as Node)) {
+        setFilterOpen(null);
+      }
     };
     document.addEventListener('mousedown', onMouseDown);
     document.addEventListener('keydown', onKeyDown);
@@ -89,30 +98,38 @@ export function AvatarItemsTable({
     setFilterOpen((current) => current === filter ? null : filter);
   };
   const cycle = (current: Set<string>, value: string, all: readonly string[]) => {
-    if (current.size === 0) return new Set(all.filter((entry) => entry !== value));
+    if (current.size === 0) {
+      return new Set(all.filter((entry) => entry !== value));
+    }
+
     const next = new Set(current);
-    if (next.has(value)) next.delete(value);
-    else next.add(value);
+    if (next.has(value)) {
+      next.delete(value);
+    }
+    else {
+      next.add(value);
+    }
+
     return next.size >= all.length ? new Set<string>() : next;
   };
 
   return (
     <>
       <div className="archive-pin">
-      <AvatarTableToolbar
-        sources={sources.map((source) => ({ ...source, onSelect: () => onSource(source.name) }))}
-        query={query}
-        addLabel="ADD ITEM"
-        onQuery={onQuery}
-        onAdd={onAdd}
-      />
-      <div className="reg-head" style={{ '--cols': COLS } as CSSProperties}>
-        <span>ID</span>
-        <FilterHeader label="Name" kind="planet" options={planetOptions} hidden={hiddenPlanets} open={filterOpen} position={filterPosition} anchor={planetRef} onOpen={openFilter} onCycle={(value) => setHiddenPlanets((current) => cycle(current, value, planetOptions))} />
-        <FilterHeader label="Type" kind="type" options={typeOptions} hidden={hiddenTypes} open={filterOpen} position={filterPosition} anchor={typeRef} onOpen={openFilter} onCycle={(value) => setHiddenTypes((current) => cycle(current, value, typeOptions))} />
-        <FilterHeader label="Gender" kind="gender" options={['male', 'female', 'any']} labels={{ male: 'Male', female: 'Female', any: 'Any' }} hidden={hiddenGenders} open={filterOpen} position={filterPosition} anchor={genderRef} onOpen={openFilter} onCycle={(value) => setHiddenGenders((current) => cycle(current, value, ['male', 'female', 'any']))} />
-        <span />
-      </div>
+        <AvatarTableToolbar
+          sources={sources.map((source) => ({ ...source, onSelect: () => onSource(source.name) }))}
+          query={query}
+          addLabel="ADD ITEM"
+          onQuery={onQuery}
+          onAdd={onAdd}
+        />
+        <div className="reg-head" style={{ '--cols': COLS } as CSSProperties}>
+          <span>ID</span>
+          <FilterHeader label="Name" kind="planet" options={planetOptions} hidden={hiddenPlanets} open={filterOpen} position={filterPosition} anchor={planetRef} onOpen={openFilter} onCycle={(value) => setHiddenPlanets((current) => cycle(current, value, planetOptions))} />
+          <FilterHeader label="Type" kind="type" options={typeOptions} hidden={hiddenTypes} open={filterOpen} position={filterPosition} anchor={typeRef} onOpen={openFilter} onCycle={(value) => setHiddenTypes((current) => cycle(current, value, typeOptions))} />
+          <FilterHeader label="Gender" kind="gender" options={['male', 'female', 'any']} labels={{ male: 'Male', female: 'Female', any: 'Any' }} hidden={hiddenGenders} open={filterOpen} position={filterPosition} anchor={genderRef} onOpen={openFilter} onCycle={(value) => setHiddenGenders((current) => cycle(current, value, ['male', 'female', 'any']))} />
+          <span />
+        </div>
       </div>
       <div className="archive-list" ref={listRef} onScroll={(event) => setView({ top: event.currentTarget.scrollTop, h: event.currentTarget.clientHeight })}>
         {visible.length === 0 ? (
@@ -138,7 +155,7 @@ function FilterHeader({ label, kind, options, labels, hidden, open, position, an
   labels?: Record<string, string>;
   hidden: ReadonlySet<string>;
   open: 'type' | 'gender' | 'planet' | null;
-  position: { x: number; y: number };
+  position: { x: number; y: number; };
   anchor: React.RefObject<HTMLSpanElement | null>;
   onOpen: (kind: 'type' | 'gender' | 'planet') => (event: React.MouseEvent<HTMLButtonElement>) => void;
   onCycle: (value: string) => void;

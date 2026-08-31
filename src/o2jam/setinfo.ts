@@ -54,8 +54,14 @@ export interface SetInfoResult {
 
 function genderOf(flag: number): SetGender {
   const code = (flag >> 6) & 0x03;
-  if (code === 0) return 'female';
-  if (code === 1) return 'male';
+  if (code === 0) {
+    return 'female';
+  }
+
+  if (code === 1) {
+    return 'male';
+  }
+
   return 'any';
 }
 
@@ -72,17 +78,25 @@ export function parseSetInfo(
   const sets: SetInfoEntry[] = [];
   const setCount = reader.u32();
 
-  const readString = (): { text: string; bytes: Uint8Array } | null => {
-    if (!reader.has(4)) return null;
+  const readString = (): { text: string; bytes: Uint8Array; } | null => {
+    if (!reader.has(4)) {
+      return null;
+    }
+
     const length = reader.i32();
-    if (length < 0 || !reader.has(length)) return null;
+    if (length < 0 || !reader.has(length)) {
+      return null;
+    }
+
     const at = reader.tell();
     return { text: reader.fixedString(length, encoding), bytes: raw.subarray(at, at + length) };
   };
 
   for (let index = 0; index < setCount; index++) {
     const offset = reader.tell();
-    if (!reader.has(SET_INFO_PREFIX_SIZE)) break;
+    if (!reader.has(SET_INFO_PREFIX_SIZE)) {
+      break;
+    }
 
     const id = reader.u32();
     const originFlag = reader.u8();
@@ -99,9 +113,14 @@ export function parseSetInfo(
     for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) salePrices.push(reader.u32());
 
     const name = readString();
-    if (name === null) break;
+    if (name === null) {
+      break;
+    }
+
     const description = readString();
-    if (description === null) break;
+    if (description === null) {
+      break;
+    }
 
     const planet = originFlag & 0x7f;
 

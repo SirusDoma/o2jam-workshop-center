@@ -213,7 +213,10 @@ export function writeOjnHeader(
 
 export function detectOjnHeaderEncoding(source: BinarySource): O2Encoding | null {
   const bytes = asBytes(source);
-  if (bytes.byteLength < OJN_HEADER_SIZE) return null;
+  if (bytes.byteLength < OJN_HEADER_SIZE) {
+    return null;
+  }
+
   const samples = OJN_HEADER_FIELDS.filter(
     (f) => f.key === 'title' || f.key === 'artist' || f.key === 'noteDesigner',
   ).map((f) => bytes.subarray(f.offset, f.offset + f.size));
@@ -222,7 +225,10 @@ export function detectOjnHeaderEncoding(source: BinarySource): O2Encoding | null
 
 export function isOjnHeader(source: BinarySource): boolean {
   const bytes = asBytes(source);
-  if (bytes.byteLength < OJN_HEADER_SIZE) return false;
+  if (bytes.byteLength < OJN_HEADER_SIZE) {
+    return false;
+  }
+
   return bytes[4] === 0x6f && bytes[5] === 0x6a && bytes[6] === 0x6e;
 }
 
@@ -236,14 +242,23 @@ export interface OjnEncryption {
 
 export function isEncryptedOjn(source: BinarySource): boolean {
   const bytes = asBytes(source);
-  if (bytes.byteLength < 8) return false;
-  if (bytes[0] !== 0x6e || bytes[1] !== 0x65 || bytes[2] !== 0x77) return false;
+  if (bytes.byteLength < 8) {
+    return false;
+  }
+
+  if (bytes[0] !== 0x6e || bytes[1] !== 0x65 || bytes[2] !== 0x77) {
+    return false;
+  }
+
   return (bytes[3] ?? 0) !== 0;
 }
 
 export function readOjnEncryption(source: BinarySource): OjnEncryption | null {
   const bytes = asBytes(source);
-  if (!isEncryptedOjn(bytes)) return null;
+  if (!isEncryptedOjn(bytes)) {
+    return null;
+  }
+
   return {
     xorBlockSize: bytes[3] ?? 0,
     primaryKey: bytes[4] ?? 0,
@@ -255,7 +270,9 @@ export function readOjnEncryption(source: BinarySource): OjnEncryption | null {
 export function decryptOjn(source: BinarySource): ArrayBuffer {
   const bytes = asBytes(source);
   const keying = readOjnEncryption(bytes);
-  if (!keying) return bytes.slice().buffer;
+  if (!keying) {
+    return bytes.slice().buffer;
+  }
 
   const { xorBlockSize, primaryKey, middleKey, initialKey } = keying;
   const key = new Uint8Array(xorBlockSize).fill(primaryKey);
@@ -289,16 +306,31 @@ export interface OjnFile {
 }
 
 function sniffMime(bytes: Uint8Array): string {
-  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'image/jpeg';
-  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e) return 'image/png';
-  if (bytes[0] === 0x42 && bytes[1] === 0x4d) return 'image/bmp';
-  if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46) return 'image/gif';
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return 'image/jpeg';
+  }
+
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e) {
+    return 'image/png';
+  }
+
+  if (bytes[0] === 0x42 && bytes[1] === 0x4d) {
+    return 'image/bmp';
+  }
+
+  if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46) {
+    return 'image/gif';
+  }
+
   return 'application/octet-stream';
 }
 
 export function sniffImageMime(source: BinarySource): string | null {
   const bytes = asBytes(source);
-  if (bytes.byteLength < 4) return null;
+  if (bytes.byteLength < 4) {
+    return null;
+  }
+
   const mime = sniffMime(bytes);
   return mime === 'application/octet-stream' ? null : mime;
 }
@@ -308,8 +340,13 @@ function sliceImage(
   offset: number,
   size: number,
 ): OjnImage | undefined {
-  if (size <= 0) return undefined;
-  if (offset <= 0 || offset >= data.byteLength) return undefined;
+  if (size <= 0) {
+    return undefined;
+  }
+
+  if (offset <= 0 || offset >= data.byteLength) {
+    return undefined;
+  }
 
   const end = Math.min(data.byteLength, offset + size);
   const bytes = data.slice(offset, end);
@@ -331,9 +368,18 @@ export function parseOjn(source: BinarySource, encoding: O2Encoding = DEFAULT_EN
   );
 
   const result: OjnFile = { header, encrypted, data };
-  if (encryption) result.encryption = encryption;
-  if (cover) result.cover = cover;
-  if (thumbnail) result.thumbnail = thumbnail;
+  if (encryption) {
+    result.encryption = encryption;
+  }
+
+  if (cover) {
+    result.cover = cover;
+  }
+
+  if (thumbnail) {
+    result.thumbnail = thumbnail;
+  }
+
   return result;
 }
 
@@ -382,7 +428,7 @@ export interface OjnChart {
   measureCount: number;
   blockCount: number;
   duration: number;
-  range: { start: number; end: number };
+  range: { start: number; end: number; };
 }
 
 function sectionRange(header: OjnHeader, difficulty: OjnDifficulty) {
@@ -432,7 +478,9 @@ export function parseOjnChart(source: BinarySource, difficulty: OjnDifficulty): 
 
   if (section.start > 0 && section.start < reader.size && end > section.start) {
     for (let block = 0; block < section.blocks; block++) {
-      if (pos + 8 > end) break;
+      if (pos + 8 > end) {
+        break;
+      }
 
       const measure = reader.view.getUint32(pos, true);
       const channel = reader.view.getUint16(pos + 4, true);
@@ -440,7 +488,9 @@ export function parseOjnChart(source: BinarySource, difficulty: OjnDifficulty): 
       const body = pos + 8;
       const bodyEnd = body + eventCount * 4;
 
-      if (bodyEnd > end) break;
+      if (bodyEnd > end) {
+        break;
+      }
 
       for (let i = 0; i < eventCount; i++) {
         const at = body + i * 4;
@@ -448,17 +498,23 @@ export function parseOjnChart(source: BinarySource, difficulty: OjnDifficulty): 
 
         if (channel === CHANNEL_MEASURE || channel === CHANNEL_BPM) {
           const value = reader.view.getFloat32(at, true);
-          if (value === 0) continue;
+          if (value === 0) {
+            continue;
+          }
+
           if (channel === CHANNEL_MEASURE) {
             measureFractions.push({ measure: measure + 1, fraction: value, offset: at });
           } else {
             bpmChanges.push({ measure, position, bpm: value, offset: at });
           }
+
           continue;
         }
 
         const id = reader.view.getUint16(at, true);
-        if (id === 0) continue;
+        if (id === 0) {
+          continue;
+        }
 
         const audio = reader.view.getInt8(at + 2);
         const type = reader.view.getInt8(at + 3);

@@ -26,8 +26,13 @@ function ToolStack() {
   const { pathname } = useLocation();
   const visited = useRef(new Set<string>());
   const known = TOOLS.some((t) => t.path === pathname);
-  if (known) visited.current.add(pathname);
-  if (!known && pathname !== '/') return <Navigate to="/" replace />;
+  if (known) {
+    visited.current.add(pathname);
+  }
+
+  if (!known && pathname !== '/') {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <>

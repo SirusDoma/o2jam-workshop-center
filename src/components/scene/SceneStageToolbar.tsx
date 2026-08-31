@@ -1,7 +1,7 @@
 import { Minus, Move, MousePointer2, Pause, Pencil, Play, Plus, ZoomIn } from 'lucide-react';
 
 export function SceneStageToolbar({ scenes, active, zoom, playing, fps, transparent, showBounds, moveMode, onScene, onAdd, onDelete, onRename, onZoom, onPlaying, onFps, onTransparent, onShowBounds, onMoveMode }: {
-  scenes: { name: string; label: string }[];
+  scenes: { name: string; label: string; }[];
   active: string;
   zoom: number;
   playing: boolean;

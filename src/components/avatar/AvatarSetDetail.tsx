@@ -44,10 +44,15 @@ function SetItemPicker({
   const planetRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (!filterOpen) return;
+    if (!filterOpen) {
+      return;
+    }
+
     const onDown = (e: MouseEvent) => {
       const t = e.target as Node;
-      if (!typeRef.current?.contains(t) && !planetRef.current?.contains(t)) setFilterOpen(null);
+      if (!typeRef.current?.contains(t) && !planetRef.current?.contains(t)) {
+        setFilterOpen(null);
+      }
     };
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
@@ -59,25 +64,40 @@ function SetItemPicker({
     [items, exclude, gender]
   );
   const typeOptions = useMemo(() => {
-    const byType = new Map<string, { id: number; disabled: boolean }>();
+    const byType = new Map<string, { id: number; disabled: boolean; }>();
     for (const it of items) {
-      if ((it.gender !== 'any' && it.gender !== gender) || it.itemType === 24) continue;
+      if ((it.gender !== 'any' && it.gender !== gender) || it.itemType === 24) {
+        continue;
+      }
+
       const cur = byType.get(it.itemTypeLabel);
-      if (!cur) byType.set(it.itemTypeLabel, { id: it.itemType, disabled: exclude.has(it.itemType) });
+      if (!cur) {
+        byType.set(it.itemTypeLabel, { id: it.itemType, disabled: exclude.has(it.itemType) });
+      }
     }
     return [...byType.entries()].sort((a, b) => a[1].id - b[1].id).map(([label, v]) => ({ label, disabled: v.disabled }));
   }, [items, exclude, gender]);
   const enabledTypeLabels = useMemo(() => typeOptions.filter((t) => !t.disabled).map((t) => t.label), [typeOptions]);
   const planetOptions = useMemo(() => {
     const byPlanet = new Map<string, number>();
-    for (const it of eligible) if (!byPlanet.has(it.planetLabel)) byPlanet.set(it.planetLabel, it.planetOrigin);
+    for (const it of eligible) if (!byPlanet.has(it.planetLabel)) {
+      byPlanet.set(it.planetLabel, it.planetOrigin);
+    }
     return [...byPlanet.entries()].sort((a, b) => a[1] - b[1]).map(([label]) => label);
   }, [eligible]);
   const cycle = (hidden: Set<string>, v: string, all: readonly string[]) => {
-    if (hidden.size === 0) return new Set(all.filter((x) => x !== v));
+    if (hidden.size === 0) {
+      return new Set(all.filter((x) => x !== v));
+    }
+
     const next = new Set(hidden);
-    if (next.has(v)) next.delete(v);
-    else next.add(v);
+    if (next.has(v)) {
+      next.delete(v);
+    }
+    else {
+      next.add(v);
+    }
+
     return next.size >= all.length ? new Set<string>() : next;
   };
   const shown = eligible.filter(
@@ -227,7 +247,9 @@ export function AvatarSetDetail({
     for (const entry of set.items) {
       const item = entry.active ? allItems.find((candidate) => candidate.itemId === entry.itemId) : undefined;
       const equipped = item ? instrumentOf(item) : 'none';
-      if (equipped !== 'none') return equipped;
+      if (equipped !== 'none') {
+        return equipped;
+      }
     }
     return 'none';
   });
@@ -242,7 +264,9 @@ export function AvatarSetDetail({
   }, [playing, fps]);
   const byId = useMemo(() => {
     const m = new Map<number, ItemEntry>();
-    for (const it of allItems) if (!m.has(it.itemId)) m.set(it.itemId, it);
+    for (const it of allItems) if (!m.has(it.itemId)) {
+      m.set(it.itemId, it);
+    }
     return m;
   }, [allItems]);
   const [picking, setPicking] = useState<number | 'add' | null>(null);
@@ -251,9 +275,14 @@ export function AvatarSetDetail({
   const typesInSet = (skipRow?: number) => {
     const taken = new Set<number>();
     active.forEach((i, j) => {
-      if (j === skipRow) return;
+      if (j === skipRow) {
+        return;
+      }
+
       const linked = byId.get(i.itemId);
-      if (linked) taken.add(linked.itemType);
+      if (linked) {
+        taken.add(linked.itemType);
+      }
     });
     return taken;
   };

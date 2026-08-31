@@ -1,7 +1,7 @@
 import type { ArchiveEntry, Sprite } from '../../o2jam';
 import { fmtBytes, fmtHex, fmtOffset } from '../../format';
 
-function MetadataRow({ label, value, at, unknown }: { label: string; value: string; at?: number; unknown?: boolean }) {
+function MetadataRow({ label, value, at, unknown }: { label: string; value: string; at?: number; unknown?: boolean; }) {
   return (
     <div className="metarow">
       <span className={`mr-k${unknown ? ' unknown' : ''}`}>{label}</span>
@@ -13,7 +13,7 @@ function MetadataRow({ label, value, at, unknown }: { label: string; value: stri
   );
 }
 
-function SpriteMetadata({ sprite }: { sprite: Sprite }) {
+function SpriteMetadata({ sprite }: { sprite: Sprite; }) {
   return (
     <>
       <MetadataRow label="Sprite format" value={sprite.formatLabel} />

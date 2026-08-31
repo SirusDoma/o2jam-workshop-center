@@ -50,7 +50,7 @@ export function SceneInspector({
   showBounds: boolean;
   source: PosSource;
   canSwitch: boolean;
-  spriteRows: { x: number; y: number; w: number; h: number }[] | null;
+  spriteRows: { x: number; y: number; w: number; h: number; }[] | null;
   spriteMissing: boolean;
   spriteOn: boolean;
   textOn: boolean;
@@ -60,7 +60,7 @@ export function SceneInspector({
   onField: (patch: FieldEdit) => void;
   onFrame: (frame: number) => void;
   onBound: (patch: Partial<Bound>) => void;
-  onSpriteRow: (index: number, patch: { x?: number; y?: number }) => void;
+  onSpriteRow: (index: number, patch: { x?: number; y?: number; }) => void;
   onBrowse: () => void;
   onRemove: () => void;
   onAddSprite: () => void;

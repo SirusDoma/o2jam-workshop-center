@@ -6,11 +6,14 @@ export function BoundsEditor({
   onEdit,
   onRemove,
 }: {
-  rows: { key: string; token: string; bound: Bound; control: ControlEntry | null }[];
-  onEdit: (row: { bound: Bound; control: ControlEntry | null }, patch: Partial<Bound>) => void;
-  onRemove: (row: { bound: Bound; control: ControlEntry | null }) => void;
+  rows: { key: string; token: string; bound: Bound; control: ControlEntry | null; }[];
+  onEdit: (row: { bound: Bound; control: ControlEntry | null; }, patch: Partial<Bound>) => void;
+  onRemove: (row: { bound: Bound; control: ControlEntry | null; }) => void;
 }) {
-  if (rows.length === 0) return <div className="archive-empty">NO BOUNDS</div>;
+  if (rows.length === 0) {
+    return <div className="archive-empty">NO BOUNDS</div>;
+  }
+
   return (
     <div className="boundlist">
       {rows.map((r, i) => (

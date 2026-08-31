@@ -33,8 +33,14 @@ export interface AlbumListResult {
 
 export function isAlbumListData(source: BinarySource): boolean {
   const bytes = asBytes(source);
-  if (bytes.byteLength < 4 + ALBUM_ENTRY_SIZE) return false;
-  if ((bytes.byteLength - 4) % ALBUM_ENTRY_SIZE !== 0) return false;
+  if (bytes.byteLength < 4 + ALBUM_ENTRY_SIZE) {
+    return false;
+  }
+
+  if ((bytes.byteLength - 4) % ALBUM_ENTRY_SIZE !== 0) {
+    return false;
+  }
+
   const count = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getInt32(0, true);
   const capacity = (bytes.byteLength - 4) / ALBUM_ENTRY_SIZE;
   return count > 0 && count <= capacity;
@@ -42,7 +48,10 @@ export function isAlbumListData(source: BinarySource): boolean {
 
 export function detectAlbumListEncoding(source: BinarySource): O2Encoding | null {
   const bytes = asBytes(source);
-  if (!isAlbumListData(bytes)) return null;
+  if (!isAlbumListData(bytes)) {
+    return null;
+  }
+
   const capacity = Math.floor((bytes.byteLength - 4) / ALBUM_ENTRY_SIZE);
   const samples: Uint8Array[] = [];
   for (let i = 0; i < capacity; i++) {
@@ -68,7 +77,10 @@ export function parseAlbumList(
     for (let j = 0; j < ALBUM_SONG_SLOTS; j++) {
       const slot = at + 80 + j * 8;
       const musicId = view.getInt32(slot, true);
-      if (musicId === 0) continue;
+      if (musicId === 0) {
+        continue;
+      }
+
       songs.push({ musicId, difficulty: view.getInt32(slot + 4, true) });
     }
     albums.push({

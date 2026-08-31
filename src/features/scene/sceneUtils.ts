@@ -41,12 +41,15 @@ import {
 
 export const CONTROL_LIST_NAMES = ['ControlList_Interface.txt', 'ControlList_Playing.txt'];
 
-export function readScene(file: WorkspaceFile): { list?: ControlList; encoding?: O2Encoding; error?: string } {
+export function readScene(file: WorkspaceFile): { list?: ControlList; encoding?: O2Encoding; error?: string; } {
   try {
     const archive = parseArchive(file.buffer, DEFAULT_ENCODING);
     for (const name of CONTROL_LIST_NAMES) {
       const entry = findEntry(archive.entries, name);
-      if (!entry) continue;
+      if (!entry) {
+        continue;
+      }
+
       const bytes = readEntry(file.buffer, entry);
       const encoding = detectEncoding([bytes]) ?? 'ascii';
       return { list: parseControlList(decodeText(bytes, encoding)), encoding };
@@ -71,7 +74,10 @@ export function decodeSpriteFrames(file: WorkspaceFile, name: string): EditFrame
   try {
     const archive = parseArchive(file.buffer, DEFAULT_ENCODING);
     const entry = findEntry(archive.entries, name);
-    if (!entry) return [];
+    if (!entry) {
+      return [];
+    }
+
     const data = readEntry(file.buffer, entry);
     const sprite = parseSprite(data, entry.name);
     const frames: EditFrame[] = [];
@@ -110,7 +116,7 @@ export function withinAnchor(member: Bound, anchor: Bound): boolean {
 
 export function toRows(controls: ControlEntry[]): Row[] {
   const rows: Row[] = [];
-  const groups = new Map<number, Row & { kind: 'set' }>();
+  const groups = new Map<number, Row & { kind: 'set'; }>();
   for (const c of controls) {
     if (c.setId === null) {
       rows.push({ kind: 'control', control: c });
@@ -121,6 +127,7 @@ export function toRows(controls: ControlEntry[]): Row[] {
         groups.set(c.setId, g);
         rows.push(g);
       }
+
       g.members.push(c);
     }
   }
@@ -129,14 +136,21 @@ export function toRows(controls: ControlEntry[]): Row[] {
 
 export function filterRows(rows: Row[], query: string): Row[] {
   const q = query.trim().toLowerCase();
-  if (!q) return rows;
+  if (!q) {
+    return rows;
+  }
+
   const hit = (c: ControlEntry) => `${c.token} ${c.idHex} ${c.sprite}`.toLowerCase().includes(q);
   const out: Row[] = [];
   for (const row of rows) {
     if (row.kind === 'control') {
-      if (hit(row.control)) out.push(row);
+      if (hit(row.control)) {
+        out.push(row);
+      }
     } else if (row.kind === 'deadset') {
-      if (`set 0x${row.setId.toString(16)}`.includes(q)) out.push(row);
+      if (`set 0x${row.setId.toString(16)}`.includes(q)) {
+        out.push(row);
+      }
     } else {
       const members = row.members.filter(hit);
       if (members.length || `set 0x${row.setId.toString(16)}`.includes(q)) {
@@ -159,13 +173,20 @@ export function effectiveControls(
   dissolvedSets: ReadonlySet<string>
 ): ControlEntry[] {
   const result: ControlEntry[] = [];
-  if (state.base && !removed.has(ckey(state.base))) result.push(applyEdits(state.base, fieldEdits[ckey(state.base)]));
+  if (state.base && !removed.has(ckey(state.base))) {
+    result.push(applyEdits(state.base, fieldEdits[ckey(state.base)]));
+  }
+
   const controls: ControlEntry[] = [];
   for (const control of state.controls) {
-    if (!removed.has(ckey(control))) controls.push(restoreDissolvedSet(state, applyEdits(control, fieldEdits[ckey(control)]), dissolvedSets));
+    if (!removed.has(ckey(control))) {
+      controls.push(restoreDissolvedSet(state, applyEdits(control, fieldEdits[ckey(control)]), dissolvedSets));
+    }
   }
   for (const control of added[state.name] ?? []) {
-    if (!removed.has(ckey(control))) controls.push(restoreDissolvedSet(state, applyEdits(control, fieldEdits[ckey(control)]), dissolvedSets));
+    if (!removed.has(ckey(control))) {
+      controls.push(restoreDissolvedSet(state, applyEdits(control, fieldEdits[ckey(control)]), dissolvedSets));
+    }
   }
   return [...result, ...sortByOrder(controls, orderKeys[state.name])];
 }
@@ -176,9 +197,12 @@ export function sceneRows(
   added: Record<string, ControlEntry[]>,
   orderKeys: Record<string, string[]>,
   dissolvedSets: ReadonlySet<string>
-): { rows: Row[]; ordered: ControlEntry[] } {
+): { rows: Row[]; ordered: ControlEntry[]; } {
   const ordered: ControlEntry[] = [];
-  if (state.base) ordered.push(applyEdits(state.base, fieldEdits[ckey(state.base)]));
+  if (state.base) {
+    ordered.push(applyEdits(state.base, fieldEdits[ckey(state.base)]));
+  }
+
   const controls = [
     ...state.controls.map((control) => restoreDissolvedSet(state, applyEdits(control, fieldEdits[ckey(control)]), dissolvedSets)),
     ...(added[state.name] ?? []).map((control) => restoreDissolvedSet(state, applyEdits(control, fieldEdits[ckey(control)]), dissolvedSets)),
@@ -188,10 +212,15 @@ export function sceneRows(
   const dead = [...dissolvedSets]
     .filter((key) => key.startsWith(`${state.name}:`))
     .map((key) => Number(key.slice(state.name.length + 1)));
-  if (!dead.length) return { rows, ordered };
+  if (!dead.length) {
+    return { rows, ordered };
+  }
+
   const originalSetIds = new Map<string, number>();
   for (const control of [...state.controls, ...(added[state.name] ?? [])]) {
-    if (control.setId !== null) originalSetIds.set(ckey(control), control.setId);
+    if (control.setId !== null) {
+      originalSetIds.set(ckey(control), control.setId);
+    }
   }
   for (const setId of dead) {
     const index = rows.findIndex((row) => row.kind === 'control' && originalSetIds.get(ckey(row.control)) === setId);
@@ -212,7 +241,9 @@ export function leftoverBounds(
 
 export function blockOrigin(controls: ControlEntry[], bounds: (Bound | undefined)[]): BlockOrigin {
   let index = -1;
-  for (const control of controls) if (control.boundIndex >= 0 && (index < 0 || control.boundIndex < index)) index = control.boundIndex;
+  for (const control of controls) if (control.boundIndex >= 0 && (index < 0 || control.boundIndex < index)) {
+    index = control.boundIndex;
+  }
   const bound = index >= 0 ? bounds[index] : undefined;
   return bound ? { idx: index, x: bound.left, y: bound.top } : null;
 }
@@ -237,14 +268,17 @@ export function placeControls({
   hidden: ReadonlySet<string>;
   origin: BlockOrigin;
   sources: Record<string, PosSource>;
-  spritePositions: Record<string, { x: number; y: number }>;
+  spritePositions: Record<string, { x: number; y: number; }>;
   setIdEdits: Record<string, number>;
 }): Placed[] {
   const result: Placed[] = [];
   const anchorsBySet = new Map<number, Bound[]>();
   for (const decodedControl of decoded) {
     const control = decodedControl.control;
-    if (hidden.has(ckey(control))) continue;
+    if (hidden.has(ckey(control))) {
+      continue;
+    }
+
     const firstFrame = decodedControl.frames[0]!;
     const base = { ...decodedControl, w: firstFrame.width, h: firstFrame.height };
     const bound = boundOfIn(control, bounds, addedBounds);
@@ -259,18 +293,24 @@ export function placeControls({
         anchors = anchorBounds(controls, mappedSetId, bounds);
         anchorsBySet.set(control.setId, anchors);
       }
+
       if (anchors.length && bound) {
         anchors.forEach((anchor, index) => {
-          if (!withinAnchor(bound, anchor)) return;
+          if (!withinAnchor(bound, anchor)) {
+            return;
+          }
+
           const position = shifted(anchor.left + bound.left, anchor.top + bound.top, control.boundIndex, origin);
           result.push({ ...base, key: `${ckey(control)}#${index}`, x: position.x, y: position.y });
         });
         continue;
       }
+
       if (spriteX || spriteY) {
         const position = shifted(spriteX, spriteY, control.boundIndex, origin);
         result.push({ ...base, key: ckey(control), x: position.x, y: position.y });
       }
+
       continue;
     }
 
@@ -303,7 +343,10 @@ export function createBoundRects({
   const anchorsBySet = new Map<number, Bound[]>();
   for (const control of controls) {
     const bound = boundOfIn(control, bounds, addedBounds);
-    if (!bound) continue;
+    if (!bound) {
+      continue;
+    }
+
     const key = ckey(control);
     if (control.setId !== null) {
       let anchors = anchorsBySet.get(control.setId);
@@ -311,15 +354,21 @@ export function createBoundRects({
         anchors = anchorBounds(controls, setIdEdits[`${state.name}:${control.setId}`] ?? control.setId, bounds);
         anchorsBySet.set(control.setId, anchors);
       }
+
       if (anchors.length) {
         for (const anchor of anchors) {
-          if (!withinAnchor(bound, anchor)) continue;
+          if (!withinAnchor(bound, anchor)) {
+            continue;
+          }
+
           const position = shifted(anchor.left + bound.left, anchor.top + bound.top, control.boundIndex, origin);
           result.push({ key, left: position.x, top: position.y, width: bound.width, height: bound.height });
         }
       }
+
       continue;
     }
+
     const position = shifted(bound.left, bound.top, control.boundIndex, origin);
     result.push({ key, left: position.x, top: position.y, width: bound.width, height: bound.height });
   }
@@ -335,17 +384,19 @@ export function createBoundRows(
   bounds: (Bound | undefined)[],
   addedBounds: Record<string, Bound>,
   leftovers: Bound[]
-): { key: string; token: string; bound: Bound; control: ControlEntry | null }[] {
-  const result: { key: string; token: string; bound: Bound; control: ControlEntry | null }[] = [];
+): { key: string; token: string; bound: Bound; control: ControlEntry | null; }[] {
+  const result: { key: string; token: string; bound: Bound; control: ControlEntry | null; }[] = [];
   for (const control of controls) {
     const bound = boundOfIn(control, bounds, addedBounds);
-    if (bound) result.push({ key: `c${ckey(control)}`, token: control.token, bound, control });
+    if (bound) {
+      result.push({ key: `c${ckey(control)}`, token: control.token, bound, control });
+    }
   }
   for (const bound of leftovers) result.push({ key: `l${bound.index}`, token: '—', bound, control: null });
   return result;
 }
 
-export function sceneExtent(placed: Placed[], bounds: BoundRect[]): { w: number; h: number } {
+export function sceneExtent(placed: Placed[], bounds: BoundRect[]): { w: number; h: number; } {
   let width = 640;
   let height = 480;
   for (const placedControl of placed) {
@@ -368,24 +419,34 @@ export function selectedRectangles(
   bounds: BoundRect[],
   frameSelection: Record<string, number>
 ): Rect[] {
-  if (!selected) return [];
+  if (!selected) {
+    return [];
+  }
+
   const sprites = placed.filter((entry) => ckey(entry.control) === selected);
   if (sprites.length) {
     return sprites.map((entry) => {
       let index = Math.min(frameSelection[selected] ?? 0, entry.frames.length - 1);
-      if (!entry.frames[index]) index = 0;
+      if (!entry.frames[index]) {
+        index = 0;
+      }
+
       const frame = entry.frames[index]!;
       const offset = frameOff(entry, index);
       return { left: entry.x + offset.x, top: entry.y + offset.y, width: frame.width, height: frame.height };
     });
   }
+
   return bounds.filter((bound) => bound.key === selected).map(({ left, top, width, height }) => ({ left, top, width, height }));
 }
 
 export function labelDraws(labels: Record<string, TextStyle>, bounds: BoundRect[], placed: Placed[]): LabelDraw[] {
   const result: LabelDraw[] = [];
   for (const [key, style] of Object.entries(labels)) {
-    if (!style.text.trim()) continue;
+    if (!style.text.trim()) {
+      continue;
+    }
+
     const boundRects = bounds.filter((bound) => bound.key === key);
     const sources = boundRects.length
       ? boundRects
@@ -395,10 +456,10 @@ export function labelDraws(labels: Record<string, TextStyle>, bounds: BoundRect[
   return result;
 }
 
-type DecodedEntry = { frames: DecodedFrame[]; fpos: { x: number; y: number }[]; fx: number; fy: number } | null;
+type DecodedEntry = { frames: DecodedFrame[]; fpos: { x: number; y: number; }[]; fx: number; fy: number; } | null;
 export interface DecodeCache {
   file: WorkspaceFile | null;
-  map: Map<string, { entry: DecodedEntry; override: EditFrame[] | undefined; keyOn: boolean }>;
+  map: Map<string, { entry: DecodedEntry; override: EditFrame[] | undefined; keyOn: boolean; }>;
 }
 
 export function decodeAll(file: WorkspaceFile, controls: ControlEntry[], keyOn: boolean, overrides: Record<string, EditFrame[]>, persist: DecodeCache): Decoded[] {
@@ -412,12 +473,18 @@ export function decodeAll(file: WorkspaceFile, controls: ControlEntry[], keyOn: 
     persist.file = file;
     persist.map.clear();
   }
+
   const cache = new Map<string, DecodedEntry>();
-  for (const [k, v] of persist.map) if (v.override === overrides[k] && v.keyOn === keyOn) cache.set(k, v.entry);
+  for (const [k, v] of persist.map) if (v.override === overrides[k] && v.keyOn === keyOn) {
+    cache.set(k, v.entry);
+  }
   const out: Decoded[] = [];
 
   for (const control of controls) {
-    if (!control.sprite) continue;
+    if (!control.sprite) {
+      continue;
+    }
+
     const k = control.sprite.toLowerCase();
     let entry = cache.get(k);
     if (entry === undefined) {
@@ -426,13 +493,20 @@ export function decodeAll(file: WorkspaceFile, controls: ControlEntry[], keyOn: 
       if (edited && edited.length) {
         const src = edited;
         const frames: DecodedFrame[] = src.map((f) => ({ width: f.width, height: f.height, rgba: f.rgba instanceof Uint8ClampedArray ? f.rgba : new Uint8ClampedArray(f.rgba) }) as DecodedFrame);
-        if (frames[0] && frames[0].width > 0) entry = { frames, fpos: src.map((f) => ({ x: f.x, y: f.y })), fx: src[0]!.x, fy: src[0]!.y };
+        if (frames[0] && frames[0].width > 0) {
+          entry = { frames, fpos: src.map((f) => ({ x: f.x, y: f.y })), fx: src[0]!.x, fy: src[0]!.y };
+        }
+
         cache.set(k, entry);
         persist.map.set(k, { entry, override: overrides[k], keyOn });
-        if (!entry) continue;
+        if (!entry) {
+          continue;
+        }
+
         out.push({ control, frames: entry.frames, fpos: entry.fpos, fx: entry.fx, fy: entry.fy });
         continue;
       }
+
       const found = findEntry(archive.entries, control.sprite);
       if (found) {
         try {
@@ -440,7 +514,7 @@ export function decodeAll(file: WorkspaceFile, controls: ControlEntry[], keyOn: 
           const sprite = parseSprite(data, found.name);
           if (sprite.frameCount > 0) {
             const frames: DecodedFrame[] = [];
-            const fpos: { x: number; y: number }[] = [];
+            const fpos: { x: number; y: number; }[] = [];
             for (let i = 0; i < sprite.frameCount; i++) {
               try {
                 frames.push(decodeFrame(data, sprite, i, { colorKey: keyOn ? undefined : null }));
@@ -449,16 +523,23 @@ export function decodeAll(file: WorkspaceFile, controls: ControlEntry[], keyOn: 
               }
             }
             const meta = sprite.frames[0]!;
-            if (frames[0] && frames[0].width > 0) entry = { frames, fpos, fx: meta.x, fy: meta.y };
+            if (frames[0] && frames[0].width > 0) {
+              entry = { frames, fpos, fx: meta.x, fy: meta.y };
+            }
           }
         } catch {
           entry = null;
         }
       }
+
       cache.set(k, entry);
       persist.map.set(k, { entry, override: overrides[k], keyOn });
     }
-    if (!entry) continue;
+
+    if (!entry) {
+      continue;
+    }
+
     out.push({ control, frames: entry.frames, fpos: entry.fpos, fx: entry.fx, fy: entry.fy });
   }
   return out;

@@ -19,6 +19,7 @@ export function utf16beText(bytes: Uint8Array): string {
   if (bytes.length % 2 !== 0) {
     throw new FormatError(`UTF-16BE payload is ${bytes.length} bytes; an odd length cannot hold whole code units`);
   }
+
   let out = '';
   for (let i = 0; i < bytes.length; i += 2) {
     out += String.fromCharCode(((bytes[i] ?? 0) << 8) | (bytes[i + 1] ?? 0));
@@ -55,7 +56,10 @@ export function decodeBase64(text: string): Uint8Array {
   for (let i = 0; i < trimmed.length; i++) {
     const char = trimmed[i];
     const value = char === undefined ? -1 : BASE64_ALPHABET.indexOf(char);
-    if (value < 0) throw new FormatError(`invalid Base64 character at position ${i}`, undefined, i);
+    if (value < 0) {
+      throw new FormatError(`invalid Base64 character at position ${i}`, undefined, i);
+    }
+
     accumulator = (accumulator << 6) | value;
     bits += 6;
     if (bits >= 8) {

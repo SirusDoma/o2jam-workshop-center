@@ -32,13 +32,13 @@ export function PackageEntryList({
   added: AddedEntry[];
   removed: ReadonlySet<number>;
   replaced: ReadonlyMap<number, Uint8Array>;
-  contentType: ReadonlyMap<number, { label: string; img: boolean }>;
+  contentType: ReadonlyMap<number, { label: string; img: boolean; }>;
   picked: string | null;
   onPick: (key: string) => void;
   onToggleRemoved: (index: number) => void;
   onRemoveAdded: (index: number) => void;
   onAddFiles: (files: FileList | File[] | null) => void;
-  onNewEntry: (entry: { kind: 'sprite' | 'bound'; name: string }) => void;
+  onNewEntry: (entry: { kind: 'sprite' | 'bound'; name: string; }) => void;
 }) {
   const [query, setQuery] = useState('');
   const [dropOver, setDropOver] = useState(false);
@@ -64,7 +64,10 @@ export function PackageEntryList({
 
   useEffect(() => {
     const element = listRef.current;
-    if (!element) return;
+    if (!element) {
+      return;
+    }
+
     const observer = new ResizeObserver(() => setViewHeight(element.clientHeight));
     observer.observe(element);
     setViewHeight(element.clientHeight);
@@ -73,13 +76,21 @@ export function PackageEntryList({
 
   useEffect(() => {
     const row = listRef.current?.querySelector('.rows > li');
-    if (!row) return;
+    if (!row) {
+      return;
+    }
+
     const height = row.getBoundingClientRect().height;
-    if (height > 0 && Math.abs(height - rowHeight) > 0.5) setRowHeight(height);
+    if (height > 0 && Math.abs(height - rowHeight) > 0.5) {
+      setRowHeight(height);
+    }
   });
 
   const onScroll = useCallback(() => {
-    if (scrollFrame.current) return;
+    if (scrollFrame.current) {
+      return;
+    }
+
     scrollFrame.current = requestAnimationFrame(() => {
       scrollFrame.current = 0;
       setScrollTop(listRef.current?.scrollTop ?? 0);
@@ -94,7 +105,9 @@ export function PackageEntryList({
         setDropOver(true);
       }}
       onDragLeave={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node)) setDropOver(false);
+        if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+          setDropOver(false);
+        }
       }}
       onDrop={(event) => {
         event.preventDefault();

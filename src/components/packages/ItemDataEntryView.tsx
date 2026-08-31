@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 import type { ItemDataResult } from '../../o2jam';
 import { GENDER_LABEL, ITEM_COLS } from '../../features/packages/constants';
 
-export function ItemDataEntryView({ itemData }: { itemData: ItemDataResult }) {
+export function ItemDataEntryView({ itemData }: { itemData: ItemDataResult; }) {
   return (
     <>
       <div className="reg-head" style={{ '--cols': ITEM_COLS } as CSSProperties}>

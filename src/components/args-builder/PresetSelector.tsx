@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 import type { ArgumentsPreset } from '../../o2jam';
 import { StackHead } from '../Shell';
 
-export function PresetSelector({ presets, selected, onSelect }: { presets: ArgumentsPreset[]; selected: string; onSelect: (id: string) => void }) {
+export function PresetSelector({ presets, selected, onSelect }: { presets: ArgumentsPreset[]; selected: string; onSelect: (id: string) => void; }) {
   return (
     <section className="card reveal" style={{ '--d': '0.08s' } as CSSProperties}>
       <StackHead title="preset" tally={`${presets.length} preset${presets.length > 1 ? 's' : ''}`} />

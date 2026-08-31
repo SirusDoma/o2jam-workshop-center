@@ -3,6 +3,7 @@ import {
   buildArchive,
   detectItemDataEncoding,
   detectItemDataVersion,
+  isItemDataFilename,
   itemDataVersion,
   parseArchive,
   parseItemData,
@@ -44,7 +45,10 @@ export function buildAvatarPackage(options: BuildAvatarArchiveOptions): Uint8Arr
 
   for (const name of touchedTables) {
     const entry = archive.entries.find((candidate) => candidate.name === name);
-    if (!entry) continue;
+    if (!entry) {
+      continue;
+    }
+
     const bytes = readEntry(options.buffer, entry);
     const active = name === options.activeTableName;
     const versionId = active ? options.versionId : detectItemDataVersion(bytes) ?? options.versionId;
@@ -85,9 +89,16 @@ export function buildAvatarPackage(options: BuildAvatarArchiveOptions): Uint8Arr
     name: entry.name,
     data: replaced.get(entry.name.toLowerCase()) ?? addedByName.get(entry.name.toLowerCase()) ?? readEntry(options.buffer, entry),
   }));
+  let insertAt = entries.findIndex((entry) => entry.name.toLowerCase() === 'setinfodata.ojs' || isItemDataFilename(entry.name));
+  if (insertAt < 0) {
+    insertAt = entries.length;
+  }
+
   for (const [name, bytes] of Object.entries(options.addedFiles)) {
     const exists = archive.entries.some((entry) => entry.name.toLowerCase() === name.toLowerCase());
-    if (!exists && options.usedAddedFiles.has(name)) entries.push({ name, data: bytes });
+    if (!exists && options.usedAddedFiles.has(name)) {
+      entries.splice(insertAt++, 0, { name, data: bytes });
+    }
   }
   return buildArchive(archive.kind, entries, DEFAULT_ENCODING);
 }

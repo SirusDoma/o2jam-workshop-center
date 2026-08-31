@@ -17,7 +17,7 @@ import {
 import { GENDER_CODE } from './constants';
 import type { ItemEdit, SetEdit } from './types';
 
-const labelOf = (list: readonly { id: number; label: string }[], id: number) =>
+const labelOf = (list: readonly { id: number; label: string; }[], id: number) =>
   list.find((entry) => entry.id === id)?.label ?? `Unknown (${id})`;
 
 const genderOf = (bitflag: number): ItemGender => {
@@ -31,10 +31,19 @@ export function applyItemEdit(
   version: ItemDataVersion,
   encoding: O2Encoding
 ): ItemEntry {
-  if (!edit || (!edit.fields && !edit.slots)) return item;
+  if (!edit || (!edit.fields && !edit.slots)) {
+    return item;
+  }
+
   const result: ItemEntry = { ...item, ...edit.fields };
-  if (edit.fields?.name !== undefined) result.nameBytes = encodeText(edit.fields.name, encoding).bytes;
-  if (edit.fields?.description !== undefined) result.descriptionBytes = encodeText(edit.fields.description, encoding).bytes;
+  if (edit.fields?.name !== undefined) {
+    result.nameBytes = encodeText(edit.fields.name, encoding).bytes;
+  }
+
+  if (edit.fields?.description !== undefined) {
+    result.descriptionBytes = encodeText(edit.fields.description, encoding).bytes;
+  }
+
   result.itemTypeLabel = labelOf(version.itemTypes, result.itemType);
   result.planetLabel = labelOf(PLANET_ORIGINS, result.planetOrigin);
   result.paymentMethodLabel = labelOf(version.paymentMethods, result.paymentMethod);
@@ -46,19 +55,35 @@ export function applyItemEdit(
   if (edit.slots) {
     result.sprites = item.sprites.map((sprite) => {
       const value = edit.slots![sprite.slot.index];
-      if (value === undefined) return sprite;
-      if (!value) return { ...sprite, status: 0, present: false, filename: '', filenameBytes: new Uint8Array(0) };
+      if (value === undefined) {
+        return sprite;
+      }
+
+      if (!value) {
+        return { ...sprite, status: 0, present: false, filename: '', filenameBytes: new Uint8Array(0) };
+      }
+
       return { ...sprite, status: 1, present: true, filename: value, filenameBytes: encodeText(value, encoding).bytes };
     });
   }
+
   return result;
 }
 
 export function applySetEdit(set: SetInfoEntry, edit: SetEdit | undefined, encoding: O2Encoding): SetInfoEntry {
-  if (!edit || (!edit.fields && !edit.items)) return set;
+  if (!edit || (!edit.fields && !edit.items)) {
+    return set;
+  }
+
   const result: SetInfoEntry = { ...set, ...edit.fields };
-  if (edit.fields?.name !== undefined) result.nameBytes = encodeText(edit.fields.name, encoding).bytes;
-  if (edit.fields?.description !== undefined) result.descriptionBytes = encodeText(edit.fields.description, encoding).bytes;
+  if (edit.fields?.name !== undefined) {
+    result.nameBytes = encodeText(edit.fields.name, encoding).bytes;
+  }
+
+  if (edit.fields?.description !== undefined) {
+    result.descriptionBytes = encodeText(edit.fields.description, encoding).bytes;
+  }
+
   result.planetLabel = labelOf(PLANET_ORIGINS, result.planet);
   result.currencyLabel = SET_CURRENCIES.find((currency) => currency.id === (result.currency === 0 ? 0 : 1))?.label ?? '';
   const active = edit.items ?? set.items.filter((item) => item.active).map(({ itemId, price, salePrice }) => ({ itemId, price, salePrice }));
@@ -66,6 +91,7 @@ export function applySetEdit(set: SetInfoEntry, edit: SetEdit | undefined, encod
     const anyDiscount = active.some((item) => item.salePrice < item.price);
     result.discountPercent = anyDiscount ? Math.min(255, active.reduce((sum, item) => sum + item.salePrice, 0)) : 0;
   }
+
   result.discounted = result.discountPercent !== 0;
   result.itemCount = active.length;
   result.items = Array.from({ length: SET_INFO_MAX_ITEMS }, (_, slot) => {
@@ -86,9 +112,15 @@ export function applySetEdit(set: SetInfoEntry, edit: SetEdit | undefined, encod
 
 export function setEditIsNoop(original: SetInfoEntry, edit: SetEdit, encoding: O2Encoding): boolean {
   const result = applySetEdit(original, edit, encoding);
-  if (result === original) return true;
+  if (result === original) {
+    return true;
+  }
+
   const fields = ['name', 'description', 'planet', 'gender', 'isNew', 'currency'] as const;
-  if (fields.some((field) => result[field] !== original[field])) return false;
+  if (fields.some((field) => result[field] !== original[field])) {
+    return false;
+  }
+
   return original.items.every((item, slot) => {
     const edited = result.items[slot]!;
     return item.itemId === edited.itemId && item.price === edited.price && item.salePrice === edited.salePrice && item.active === edited.active;

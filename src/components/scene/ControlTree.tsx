@@ -46,8 +46,8 @@ export function ControlTree({
   onRestoreSet: (sid: number) => void;
   onReorder: (dragKey: string, dragScope: 'unit' | 'member', targetKey: string, after: boolean) => void;
 }) {
-  const dragData = useRef<{ key: string; scope: 'unit' | 'member' } | null>(null);
-  const [dropHint, setDropHint] = useState<{ key: string; after: boolean } | null>(null);
+  const dragData = useRef<{ key: string; scope: 'unit' | 'member'; } | null>(null);
+  const [dropHint, setDropHint] = useState<{ key: string; after: boolean; } | null>(null);
   const latest = useRef({ onSelect, onToggleHidden, onToggleBound, onToggleSource, onRestore, onReorder });
   latest.current = { onSelect, onToggleHidden, onToggleBound, onToggleSource, onRestore, onReorder };
   const stable = useMemo(
@@ -61,7 +61,10 @@ export function ControlTree({
         dragData.current = { key, scope };
       },
       overRow: (hintKey: string, e: React.DragEvent) => {
-        if (!dragData.current) return;
+        if (!dragData.current) {
+          return;
+        }
+
         e.preventDefault();
         const r = e.currentTarget.getBoundingClientRect();
         const after = e.clientY > r.top + r.height / 2;
@@ -74,7 +77,9 @@ export function ControlTree({
         const after = e.clientY > r.top + r.height / 2;
         dragData.current = null;
         setDropHint(null);
-        if (d) latest.current.onReorder(d.key, d.scope, targetKey, after);
+        if (d) {
+          latest.current.onReorder(d.key, d.scope, targetKey, after);
+        }
       },
       endDrag: () => {
         dragData.current = null;
@@ -94,6 +99,7 @@ export function ControlTree({
           const k = ckey(row.control);
           return <ControlRow key={k} c={row.control} on={selected === k} hintCls={hintCls(k)} {...rowProps} />;
         }
+
         if (row.kind === 'deadset') {
           return (
             <div key={`dead${row.setId}`} className="ctrow setrow removedctl">
@@ -108,6 +114,7 @@ export function ControlTree({
             </div>
           );
         }
+
         const open = expanded[row.setId] ?? false;
         const dead = row.members.length > 0 && row.members.every((m) => removed.has(ckey(m)));
         if (dead) {
@@ -148,6 +155,7 @@ export function ControlTree({
             </div>
           );
         }
+
         return (
           <div key={`set${row.setId}`}>
             <div
@@ -163,14 +171,19 @@ export function ControlTree({
               }}
               draggable
               onDragStart={(e) => {
-                if (row.members[0]) startDrag(ckey(row.members[0]), 'unit');
+                if (row.members[0]) {
+                  startDrag(ckey(row.members[0]), 'unit');
+                }
+
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/plain', `set${row.setId}`);
               }}
               onDragEnd={endDrag}
               onDragOver={(e) => overRow(`set${row.setId}`, e)}
               onDrop={(e) => {
-                if (row.members[0]) dropRow(ckey(row.members[0]), e);
+                if (row.members[0]) {
+                  dropRow(ckey(row.members[0]), e);
+                }
               }}
             >
               <span className="ct-grip" title="Drag to reorder">
@@ -289,6 +302,7 @@ const ControlRow = memo(function ControlRow({
       </div>
     );
   }
+
   return (
     <div
       className={`ctrow${nested ? ' nested' : ''}${on ? ' on' : ''}${off ? ' hiddenctl' : ''}${hintCls}`}
@@ -296,7 +310,11 @@ const ControlRow = memo(function ControlRow({
       tabIndex={0}
       draggable
       onClick={() => onSelect(key)}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(key); } }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault(); onSelect(key);
+        }
+      }}
       onDragStart={(e) => {
         startDrag(key, nested ? 'member' : 'unit');
         e.dataTransfer.effectAllowed = 'move';

@@ -14,7 +14,9 @@ export function NewPackageDialog({
   onCreate: (name: string) => void;
 }) {
   const [name, setName] = useState('Interface.opi');
-  if (!open) return null;
+  if (!open) {
+    return null;
+  }
 
   return (
     <Overlay label="New package" width="narrow" onClose={onClose}>
@@ -34,7 +36,9 @@ export function NewPackageDialog({
           aria-label="Package filename"
           onChange={(event) => setName(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === 'Enter') onCreate(name);
+            if (event.key === 'Enter') {
+              onCreate(name);
+            }
           }}
         />
         <div className="confirm-actions">
@@ -59,7 +63,10 @@ export function NewPackageEntryDialog({
   onCreate: (kind: NewEntryKind, name: string) => void;
 }) {
   const [name, setName] = useState(kind === 'sprite' ? 'Sprite.ojs' : 'Bounds.bnd');
-  if (!kind) return null;
+  if (!kind) {
+    return null;
+  }
+
   const title = kind === 'sprite' ? 'New sprite' : 'New bounds';
 
   return (
@@ -79,7 +86,9 @@ export function NewPackageEntryDialog({
           aria-label="Entry filename"
           onChange={(event) => setName(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === 'Enter') onCreate(kind, name);
+            if (event.key === 'Enter') {
+              onCreate(kind, name);
+            }
           }}
         />
         <div className="confirm-actions">

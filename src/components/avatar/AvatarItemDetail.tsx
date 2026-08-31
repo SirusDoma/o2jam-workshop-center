@@ -57,7 +57,9 @@ export function AvatarItemDetail({
   }, [playing, fps]);
   const byId = useMemo(() => {
     const m = new Map<number, ItemEntry>();
-    for (const it of allItems) if (!m.has(it.itemId)) m.set(it.itemId, it);
+    for (const it of allItems) if (!m.has(it.itemId)) {
+      m.set(it.itemId, it);
+    }
     return m;
   }, [allItems]);
 
@@ -67,6 +69,7 @@ export function AvatarItemDetail({
       const frames = s?.present ? renderSprite(file, s.filename, keyOn) : null;
       return frames && frames.length && frames[0]!.width > 0 ? [{ frames, order: 0 }] : [];
     }
+
     return buildLayers(file, [item], byId, showBase, instrument, gender, keyOn);
   }, [file, item, byId, showBase, instrument, gender, keyOn]);
 
@@ -102,206 +105,206 @@ export function AvatarItemDetail({
       />
 
       <div className="view-body">
-      {tab === 'render' && (
-        <>
-          <div className="stagebar">
-            <select
-              className="selctl"
-              style={{ width: 160 }}
-              value={instrument}
-              aria-label="Instrument"
-              onChange={(e) => setInstrument(e.target.value as SpriteInstrument | 'thumb0' | 'thumb1')}
-            >
-              {INSTRUMENTS.map((i) => (
-                <option key={i.id} value={i.id}>
-                  {i.label}
-                </option>
-              ))}
-              <option value="thumb0">Thumbnail (Big)</option>
-              <option value="thumb1">Thumbnail (Small)</option>
-            </select>
-            <select className="selctl" style={{ width: 96 }} value={gender} aria-label="Gender" onChange={(e) => setGender(e.target.value as SpriteGender)}>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-            </select>
-            <label className="checkline">
-              <input type="checkbox" checked={showBase} onChange={(e) => setShowBase(e.target.checked)} />
-              <span>Base body</span>
-            </label>
-            <label className="checkline">
-              <input type="checkbox" checked={keyOn} onChange={(e) => setKeyOn(e.target.checked)} />
-              <span>Transparency</span>
-            </label>
-            <button className="icon-btn" type="button" onClick={() => setPlaying((p) => !p)} aria-label={playing ? 'Pause' : 'Play'}>
-              {playing ? <Pause size={14} /> : <Play size={14} />}
-            </button>
-            <label className="animctl">
-              <input type="range" min={1} max={24} value={fps} aria-label="Speed" onChange={(e) => setFps(Number(e.target.value))} />
-              <span className="mono">{fps} fps</span>
-            </label>
-          </div>
-
-          <div className="avatarstage">
-            {layers.length === 0 ? (
-              <span className="dz-hint">
-                Nothing for {instrument === 'thumb0' ? 'thumbnail (big)' : instrument === 'thumb1' ? 'thumbnail (small)' : `${instrument} / ${gender}`}.
-              </span>
-            ) : (
-              <AvatarFig layers={layers} playing={playing} fps={fps} />
-            )}
-          </div>
-        </>
-      )}
-
-      {tab === 'meta' && (
-        <div className="deflist editlist">
-          <div className="defrow">
-            <span className="dk">ID</span>
-            <span className="de">
-              <input className="secinput mono" inputMode="numeric" value={String(item.itemId)} onChange={(e) => onField({ itemId: Number(e.target.value) || 0 })} />
-            </span>
-          </div>
-          <div className="defrow">
-            <span className="dk">Name</span>
-            <span className="de">
-              <input className="secinput" value={item.name} spellCheck={false} onChange={(e) => onField({ name: e.target.value })} />
-            </span>
-          </div>
-          <div className="defrow">
-            <span className="dk">Description</span>
-            <span className="de">
-              <textarea className="secinput ctsel-text" rows={2} value={item.description} onChange={(e) => onField({ description: e.target.value })} />
-            </span>
-          </div>
-          <div className="defrow">
-            <span className="dk">Type</span>
-            <span className="de">
+        {tab === 'render' && (
+          <>
+            <div className="stagebar">
               <select
-                className="secinput"
-                value={item.itemType}
-                onChange={(e) => {
-                  const t = Number(e.target.value);
-                  onField(item.index >= 1_000_000 ? { itemType: t, itemPart: partForType(version, t) } : { itemType: t });
-                }}
+                className="selctl"
+                style={{ width: 160 }}
+                value={instrument}
+                aria-label="Instrument"
+                onChange={(e) => setInstrument(e.target.value as SpriteInstrument | 'thumb0' | 'thumb1')}
               >
-                {version.itemTypes.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.label}
+                {INSTRUMENTS.map((i) => (
+                  <option key={i.id} value={i.id}>
+                    {i.label}
                   </option>
                 ))}
+                <option value="thumb0">Thumbnail (Big)</option>
+                <option value="thumb1">Thumbnail (Small)</option>
               </select>
-            </span>
-          </div>
-          <div className="defrow">
-            <span className="dk">Part</span>
-            <span className="de">
-              <select className="secinput" value={item.itemPart} onChange={(e) => onField({ itemPart: Number(e.target.value) })}>
-                {ITEM_PARTS.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.label}
-                  </option>
-                ))}
-                <option value={255}>Auto (by type)</option>
-              </select>
-            </span>
-          </div>
-          <div className="defrow">
-            <span className="dk">Planet</span>
-            <span className="de">
-              <select className="secinput" value={item.planetOrigin} onChange={(e) => onField({ planetOrigin: Number(e.target.value) })}>
-                {PLANET_ORIGINS.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
-            </span>
-          </div>
-          <div className="defrow">
-            <span className="dk">Gender</span>
-            <span className="de">
-              <select
-                className="secinput"
-                value={item.gender}
-                onChange={(e) => onField({ bitflag: (item.bitflag & ~(0x0f << 7)) | (GENDER_CODE[e.target.value as ItemGender] << 7) })}
-              >
-                <option value="female">Female</option>
+              <select className="selctl" style={{ width: 96 }} value={gender} aria-label="Gender" onChange={(e) => setGender(e.target.value as SpriteGender)}>
                 <option value="male">Male</option>
-                <option value="any">Any</option>
+                <option value="female">Female</option>
               </select>
-            </span>
-          </div>
-          <div className="defrow">
-            <span className="dk">New</span>
-            <span className="de">
-              <label className="tcheck" style={{ marginTop: 0 }}>
-                <input
-                  type="checkbox"
-                  checked={item.isNew}
-                  onChange={(e) => onField({ bitflag: e.target.checked ? item.bitflag | (1 << 11) : item.bitflag & ~(1 << 11) })}
-                />
-                <span>Show the NEW badge</span>
+              <label className="checkline">
+                <input type="checkbox" checked={showBase} onChange={(e) => setShowBase(e.target.checked)} />
+                <span>Base body</span>
               </label>
-            </span>
-          </div>
-          <div className="defrow">
-            <span className="dk">Quantity</span>
-            <span className="de">
-              <input className="secinput mono" inputMode="numeric" value={String(item.quantity)} onChange={(e) => onField({ quantity: Number(e.target.value) || 0 })} />
-            </span>
-          </div>
-          <div className="defrow">
-            <span className="dk">Payment</span>
-            <span className="de">
-              <select className="secinput" value={item.paymentMethod} onChange={(e) => onField({ paymentMethod: Number(e.target.value) })}>
-                {version.paymentMethods.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
-            </span>
-          </div>
-          <div className="defrow">
-            <span className="dk">Price GEM</span>
-            <span className="de">
-              <input className="secinput mono" inputMode="numeric" value={String(item.priceGem)} onChange={(e) => onField({ priceGem: Number(e.target.value) || 0 })} />
-            </span>
-          </div>
-          <div className="defrow">
-            <span className="dk">Price ePoint</span>
-            <span className="de">
-              <input className="secinput mono" inputMode="numeric" value={String(item.priceEPoint)} onChange={(e) => onField({ priceEPoint: Number(e.target.value) || 0 })} />
-            </span>
-          </div>
-          <div className="defrow">
-            <span className="dk">Attributive Category</span>
-            <span className="de">
-              <select className="secinput" value={item.attributiveCategory} onChange={(e) => onField({ attributiveCategory: Number(e.target.value) })}>
-                {ATTRIBUTIVE_CATEGORIES.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </span>
-          </div>
-          <div className="defrow">
-            <span className="dk">Attributive Effect</span>
-            <span className="de">
-              <select className="secinput" value={item.attributiveEffect} onChange={(e) => onField({ attributiveEffect: Number(e.target.value) })}>
-                {ATTRIBUTIVE_EFFECTS.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </span>
-          </div>
-        </div>
-      )}
+              <label className="checkline">
+                <input type="checkbox" checked={keyOn} onChange={(e) => setKeyOn(e.target.checked)} />
+                <span>Transparency</span>
+              </label>
+              <button className="icon-btn" type="button" onClick={() => setPlaying((p) => !p)} aria-label={playing ? 'Pause' : 'Play'}>
+                {playing ? <Pause size={14} /> : <Play size={14} />}
+              </button>
+              <label className="animctl">
+                <input type="range" min={1} max={24} value={fps} aria-label="Speed" onChange={(e) => setFps(Number(e.target.value))} />
+                <span className="mono">{fps} fps</span>
+              </label>
+            </div>
 
-      {tab === 'sprites' && <AvatarSpriteEditor file={file} item={item} spriteNames={spriteNames} onSet={onSlot} onImport={onImport} />}
+            <div className="avatarstage">
+              {layers.length === 0 ? (
+                <span className="dz-hint">
+                  Nothing for {instrument === 'thumb0' ? 'thumbnail (big)' : instrument === 'thumb1' ? 'thumbnail (small)' : `${instrument} / ${gender}`}.
+                </span>
+              ) : (
+                <AvatarFig layers={layers} playing={playing} fps={fps} />
+              )}
+            </div>
+          </>
+        )}
+
+        {tab === 'meta' && (
+          <div className="deflist editlist">
+            <div className="defrow">
+              <span className="dk">ID</span>
+              <span className="de">
+                <input className="secinput mono" inputMode="numeric" value={String(item.itemId)} onChange={(e) => onField({ itemId: Number(e.target.value) || 0 })} />
+              </span>
+            </div>
+            <div className="defrow">
+              <span className="dk">Name</span>
+              <span className="de">
+                <input className="secinput" value={item.name} spellCheck={false} onChange={(e) => onField({ name: e.target.value })} />
+              </span>
+            </div>
+            <div className="defrow">
+              <span className="dk">Description</span>
+              <span className="de">
+                <textarea className="secinput ctsel-text" rows={2} value={item.description} onChange={(e) => onField({ description: e.target.value })} />
+              </span>
+            </div>
+            <div className="defrow">
+              <span className="dk">Type</span>
+              <span className="de">
+                <select
+                  className="secinput"
+                  value={item.itemType}
+                  onChange={(e) => {
+                    const t = Number(e.target.value);
+                    onField(item.index >= 1_000_000 ? { itemType: t, itemPart: partForType(version, t) } : { itemType: t });
+                  }}
+                >
+                  {version.itemTypes.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            </div>
+            <div className="defrow">
+              <span className="dk">Part</span>
+              <span className="de">
+                <select className="secinput" value={item.itemPart} onChange={(e) => onField({ itemPart: Number(e.target.value) })}>
+                  {ITEM_PARTS.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.label}
+                    </option>
+                  ))}
+                  <option value={255}>Auto (by type)</option>
+                </select>
+              </span>
+            </div>
+            <div className="defrow">
+              <span className="dk">Planet</span>
+              <span className="de">
+                <select className="secinput" value={item.planetOrigin} onChange={(e) => onField({ planetOrigin: Number(e.target.value) })}>
+                  {PLANET_ORIGINS.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            </div>
+            <div className="defrow">
+              <span className="dk">Gender</span>
+              <span className="de">
+                <select
+                  className="secinput"
+                  value={item.gender}
+                  onChange={(e) => onField({ bitflag: (item.bitflag & ~(0x0f << 7)) | (GENDER_CODE[e.target.value as ItemGender] << 7) })}
+                >
+                  <option value="female">Female</option>
+                  <option value="male">Male</option>
+                  <option value="any">Any</option>
+                </select>
+              </span>
+            </div>
+            <div className="defrow">
+              <span className="dk">New</span>
+              <span className="de">
+                <label className="tcheck" style={{ marginTop: 0 }}>
+                  <input
+                    type="checkbox"
+                    checked={item.isNew}
+                    onChange={(e) => onField({ bitflag: e.target.checked ? item.bitflag | (1 << 11) : item.bitflag & ~(1 << 11) })}
+                  />
+                  <span>Show the NEW badge</span>
+                </label>
+              </span>
+            </div>
+            <div className="defrow">
+              <span className="dk">Quantity</span>
+              <span className="de">
+                <input className="secinput mono" inputMode="numeric" value={String(item.quantity)} onChange={(e) => onField({ quantity: Number(e.target.value) || 0 })} />
+              </span>
+            </div>
+            <div className="defrow">
+              <span className="dk">Payment</span>
+              <span className="de">
+                <select className="secinput" value={item.paymentMethod} onChange={(e) => onField({ paymentMethod: Number(e.target.value) })}>
+                  {version.paymentMethods.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            </div>
+            <div className="defrow">
+              <span className="dk">Price GEM</span>
+              <span className="de">
+                <input className="secinput mono" inputMode="numeric" value={String(item.priceGem)} onChange={(e) => onField({ priceGem: Number(e.target.value) || 0 })} />
+              </span>
+            </div>
+            <div className="defrow">
+              <span className="dk">Price ePoint</span>
+              <span className="de">
+                <input className="secinput mono" inputMode="numeric" value={String(item.priceEPoint)} onChange={(e) => onField({ priceEPoint: Number(e.target.value) || 0 })} />
+              </span>
+            </div>
+            <div className="defrow">
+              <span className="dk">Attributive Category</span>
+              <span className="de">
+                <select className="secinput" value={item.attributiveCategory} onChange={(e) => onField({ attributiveCategory: Number(e.target.value) })}>
+                  {ATTRIBUTIVE_CATEGORIES.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            </div>
+            <div className="defrow">
+              <span className="dk">Attributive Effect</span>
+              <span className="de">
+                <select className="secinput" value={item.attributiveEffect} onChange={(e) => onField({ attributiveEffect: Number(e.target.value) })}>
+                  {ATTRIBUTIVE_EFFECTS.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            </div>
+          </div>
+        )}
+
+        {tab === 'sprites' && <AvatarSpriteEditor file={file} item={item} spriteNames={spriteNames} onSet={onSlot} onImport={onImport} />}
       </div>
     </>
   );

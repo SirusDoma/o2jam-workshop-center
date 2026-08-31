@@ -6,7 +6,7 @@ interface ToastContextValue {
   notify: (message: string, tone?: Tone) => void;
 }
 
-const ToastContext = createContext<ToastContextValue>({ notify: () => {} });
+const ToastContext = createContext<ToastContextValue>({ notify: () => { } });
 
 interface Toast {
   id: number;
@@ -14,7 +14,7 @@ interface Toast {
   tone: Tone;
 }
 
-export function ToastProvider({ children }: { children: ReactNode }) {
+export function ToastProvider({ children }: { children: ReactNode; }) {
   const [toast, setToast] = useState<Toast | null>(null);
   const [shown, setShown] = useState(false);
 
@@ -23,7 +23,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!toast) return;
+    if (!toast) {
+      return;
+    }
+
     const on = window.setTimeout(() => setShown(true), 20);
     const off = window.setTimeout(() => setShown(false), 3600);
     const gone = window.setTimeout(() => setToast(null), 3900);

@@ -62,9 +62,15 @@ export function parseArchive(
   const declaredCount = reader.view.getInt32(4, true);
 
   let kind: ArchiveKind;
-  if (signature === ARCHIVE_SIGNATURES.opa) kind = 'opa';
-  else if (signature === ARCHIVE_SIGNATURES.opi) kind = 'opi';
-  else kind = 'opi';
+  if (signature === ARCHIVE_SIGNATURES.opa) {
+    kind = 'opa';
+  }
+  else if (signature === ARCHIVE_SIGNATURES.opi) {
+    kind = 'opi';
+  }
+  else {
+    kind = 'opi';
+  }
 
   const capacity = Math.max(0, Math.floor((reader.size - ARCHIVE_HEADER_SIZE) / FILE_HEADER_SIZE));
   const slots = Math.max(0, Math.min(capacity, declaredCount));
@@ -85,9 +91,14 @@ export function parseArchive(
     const unknown1 = reader.view.getInt32(headerOffset + 144, true);
     const unknown2 = reader.view.getInt32(headerOffset + 148, true);
 
-    if (fileSignature !== FILE_SIGNATURE_VALID) continue;
+    if (fileSignature !== FILE_SIGNATURE_VALID) {
+      continue;
+    }
 
-    if (offset < ARCHIVE_HEADER_SIZE || offset > tableOffset) continue;
+    if (offset < ARCHIVE_HEADER_SIZE || offset > tableOffset) {
+      continue;
+    }
+
     if (size < 0 || offset + size > tableOffset) {
       size = Math.max(0, tableOffset - offset);
     }
@@ -161,7 +172,7 @@ export function buildArchive(
   writer.i32(0);
   writer.i32(0);
 
-  const placed: { file: ArchiveInput; offset: number; reserved: number }[] = [];
+  const placed: { file: ArchiveInput; offset: number; reserved: number; }[] = [];
   for (const file of files) {
     const reserved = Math.max(file.data.byteLength, file.reservedSize ?? file.data.byteLength);
     const offset = writer.tell();
@@ -227,10 +238,14 @@ const PATCH_PATTERN = /^(Interface|Playing|Avatar)(\d+)?(?:_(\d+))?\.(opi|opa)$/
 
 export function parsePatchName(filename: string): PatchName | null {
   const match = PATCH_PATTERN.exec(filename.trim());
-  if (!match) return null;
+  if (!match) {
+    return null;
+  }
 
   const target = PATCH_TARGETS.find((t) => t.toLowerCase() === (match[1] ?? '').toLowerCase());
-  if (!target) return null;
+  if (!target) {
+    return null;
+  }
 
   return {
     filename,
@@ -257,7 +272,10 @@ export function sortArchivePrecedence(filenames: readonly string[]): string[] {
     const pb = parsePatchName(b);
     const na = pa?.patchNumber ?? -1;
     const nb = pb?.patchNumber ?? -1;
-    if (na !== nb) return nb - na;
+    if (na !== nb) {
+      return nb - na;
+    }
+
     return a.localeCompare(b);
   });
 }

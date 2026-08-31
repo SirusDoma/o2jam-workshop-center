@@ -46,9 +46,17 @@ function snapshot(charts: readonly EditChart[], sections: SectionRows, versionId
 }
 
 function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
-  if (a === b) return true;
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  if (a === b) {
+    return true;
+  }
+
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) {
+    return false;
+  }
   return true;
 }
 
@@ -78,7 +86,7 @@ export default function MusicListPage() {
   const [sections, setSections] = useState<SectionRows>(session.sections);
   const [baseline, setBaseline] = useState<Baseline>(session.baseline);
   const [openError, setOpenError] = useState<string | null>(null);
-  const [confirm, setConfirm] = useState<{ kind: 'open'; files: File[] } | { kind: 'clear' } | null>(null);
+  const [confirm, setConfirm] = useState<{ kind: 'open'; files: File[]; } | { kind: 'clear'; } | null>(null);
   const [sectionsOpen, setSectionsOpen] = useState(session.sectionsOpen);
 
   useEffect(() => {
@@ -102,21 +110,34 @@ export default function MusicListPage() {
       const now = group(sections[sec.key]);
       const was = group(baseline.sections[sec.key]);
       for (const id of new Set([...now.keys(), ...was.keys()])) {
-        if (now.get(id) !== was.get(id)) out.add(id);
+        if (now.get(id) !== was.get(id)) {
+          out.add(id);
+        }
       }
     }
     for (const c of charts) {
       const id = chartId(c.block);
       const base = baseline.blocks.get(id);
-      if (!base || !bytesEqual(base, c.block)) out.add(id);
+      if (!base || !bytesEqual(base, c.block)) {
+        out.add(id);
+      }
     }
     return out;
   }, [charts, sections, baseline, version]);
 
   const dirty = useMemo(() => {
-    if (changedSongs.size > 0) return true;
-    if ([...baseline.blocks.keys()].some((id) => !charts.some((c) => chartId(c.block) === id))) return true;
-    if (charts.length === 0 && baseline.blocks.size === 0) return false;
+    if (changedSongs.size > 0) {
+      return true;
+    }
+
+    if ([...baseline.blocks.keys()].some((id) => !charts.some((c) => chartId(c.block) === id))) {
+      return true;
+    }
+
+    if (charts.length === 0 && baseline.blocks.size === 0) {
+      return false;
+    }
+
     return versionId !== baseline.versionId || encoding !== baseline.encoding;
   }, [changedSongs, charts, baseline, versionId, encoding]);
 
@@ -137,6 +158,7 @@ export default function MusicListPage() {
           if (bytes.length < 4 + OJN_HEADER_SIZE || !decodeText(bytes.subarray(8, 12), 'ascii').startsWith('ojn')) {
             throw new Error(`${dat.name} is not a music list — no readable song headers.`);
           }
+
           const best = detectMusicListVersion(buf, dat.name) ?? versionId;
           setVersionId(best);
           const result = parseMusicList(buf, best, encoding);
@@ -151,7 +173,9 @@ export default function MusicListPage() {
             };
           });
           const rows: SectionRows = {};
-          for (const s of result.sections) if (s.present && s.entries.length) rows[s.key] = s.entries.map((e) => ({ ...e.values }));
+          for (const s of result.sections) if (s.present && s.entries.length) {
+            rows[s.key] = s.entries.map((e) => ({ ...e.values }));
+          }
           setCharts(loaded);
           setSections(rows);
           setBaseline(snapshot(loaded, rows, best, encoding));
@@ -197,18 +221,27 @@ export default function MusicListPage() {
           return next;
         });
         window.setTimeout(() => {
-          if (updated > 0) notify(`Updated ${updated} existing song${updated === 1 ? '' : 's'} by music ID.`, 'info');
+          if (updated > 0) {
+            notify(`Updated ${updated} existing song${updated === 1 ? '' : 's'} by music ID.`, 'info');
+          }
         }, 0);
       }
-      if (errors.length) setOpenError(errors.join(' '));
+
+      if (errors.length) {
+        setOpenError(errors.join(' '));
+      }
     })();
   };
 
   const ingest = (files: File[]) => {
     setOpenError(null);
     const replaces = files.some((f) => f.name.toLowerCase().endsWith('.dat'));
-    if (replaces && dirty) setConfirm({ kind: 'open', files });
-    else load(files);
+    if (replaces && dirty) {
+      setConfirm({ kind: 'open', files });
+    }
+    else {
+      load(files);
+    }
   };
 
   const doClear = () => {
@@ -218,7 +251,10 @@ export default function MusicListPage() {
   };
 
   const output = useMemo(() => {
-    if (charts.length === 0) return null;
+    if (charts.length === 0) {
+      return null;
+    }
+
     try {
       const secInput = version.sections
         .map((s) => ({ key: s.key, entries: sections[s.key] ?? [] }))
@@ -234,7 +270,10 @@ export default function MusicListPage() {
   useEffect(() => {
     const el = stickyRef.current;
     const parent = el?.parentElement;
-    if (!el || !parent) return;
+    if (!el || !parent) {
+      return;
+    }
+
     const set = () => parent.style.setProperty('--pin', `${el.getBoundingClientRect().height}px`);
     set();
     const ro = new ResizeObserver(set);
@@ -248,24 +287,24 @@ export default function MusicListPage() {
   return (
     <>
       <div className="stickyhead" ref={stickyRef}>
-      <PageHead
-        title="Music List"
-        sub="Read or build OJNList.dat for any client version."
-        actions={
-          <>
-            <select className="selctl" value={versionId} aria-label="Client version" onChange={(e) => setVersionId(e.target.value as MusicListVersionId)}>
-              {MUSIC_LIST_VERSIONS.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.label} · {v.filename}
-                </option>
-              ))}
-            </select>
-            <EncodingSelect value={encoding} onChange={(value) => setEncoding(value as O2Encoding)} />
-          </>
-        }
-      />
+        <PageHead
+          title="Music List"
+          sub="Read or build OJNList.dat for any client version."
+          actions={
+            <>
+              <select className="selctl" value={versionId} aria-label="Client version" onChange={(e) => setVersionId(e.target.value as MusicListVersionId)}>
+                {MUSIC_LIST_VERSIONS.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.label} · {v.filename}
+                  </option>
+                ))}
+              </select>
+              <EncodingSelect value={encoding} onChange={(value) => setEncoding(value as O2Encoding)} />
+            </>
+          }
+        />
 
-      <FileInputCard padded>
+        <FileInputCard padded>
           <DropZone
             accept=".dat,.ojn"
             onlyExt={['dat', 'ojn']}
@@ -303,7 +342,7 @@ export default function MusicListPage() {
               </button>
             )}
           </DropZone>
-      </FileInputCard>
+        </FileInputCard>
       </div>
 
       {openError && <WarningCard onClose={() => setOpenError(null)}>{openError}</WarningCard>}
@@ -342,8 +381,12 @@ export default function MusicListPage() {
           onConfirm={() => {
             const pending = confirm;
             setConfirm(null);
-            if (pending.kind === 'open') load(pending.files);
-            else doClear();
+            if (pending.kind === 'open') {
+              load(pending.files);
+            }
+            else {
+              doClear();
+            }
           }}
           onClose={() => setConfirm(null)}
         />

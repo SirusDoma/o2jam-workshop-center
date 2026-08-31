@@ -31,13 +31,13 @@ export function ControlSpriteEditor({
   placed: Placed | null;
   frame: number;
   source: PosSource;
-  spriteRows: { x: number; y: number; w: number; h: number }[] | null;
+  spriteRows: { x: number; y: number; w: number; h: number; }[] | null;
   spriteMissing: boolean;
   spriteOn: boolean;
   textOn: boolean;
   onField: (patch: FieldEdit) => void;
   onFrame: (frame: number) => void;
-  onSpriteRow: (index: number, patch: { x?: number; y?: number }) => void;
+  onSpriteRow: (index: number, patch: { x?: number; y?: number; }) => void;
   onBrowse: () => void;
   onAddSprite: () => void;
   onAddText: () => void;

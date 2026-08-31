@@ -47,7 +47,9 @@ export function SpritePicker({
         downOnScrim.current = e.target === e.currentTarget;
       }}
       onMouseUp={(e) => {
-        if (downOnScrim.current && e.target === e.currentTarget) onClose();
+        if (downOnScrim.current && e.target === e.currentTarget) {
+          onClose();
+        }
       }}
     >
       <div className="overlay-panel mid card" onMouseDown={(e) => e.stopPropagation()}>
@@ -84,7 +86,11 @@ export function SpritePicker({
                 <button type="button" className="btn small pl-use" onClick={() => onPick(n)}>
                   Use
                 </button>
-                <button type="button" className="pl-del" title="Delete .ojs" onClick={() => { onRemoveOjs(n); if (sel === n) setSel(null); }}>
+                <button type="button" className="pl-del" title="Delete .ojs" onClick={() => {
+                  onRemoveOjs(n); if (sel === n) {
+                    setSel(null);
+                  }
+                }}>
                   <Trash2 size={13} />
                 </button>
               </div>

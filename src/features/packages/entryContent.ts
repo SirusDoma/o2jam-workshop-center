@@ -25,14 +25,14 @@ import {
 import { isSprite } from './packageUtils';
 
 export type EntryContent =
-  | { kind: 'sprite'; sprite: Sprite }
-  | { kind: 'image'; mime: string }
-  | { kind: 'album'; album: AlbumListResult }
-  | { kind: 'musicList'; versionId: MusicListVersionId; songs: OjnHeader[] }
-  | { kind: 'itemData'; itemData: ItemDataResult }
-  | { kind: 'bounds' }
-  | { kind: 'text'; value: string; encoding: O2Encoding }
-  | { kind: 'bytes' };
+  | { kind: 'sprite'; sprite: Sprite; }
+  | { kind: 'image'; mime: string; }
+  | { kind: 'album'; album: AlbumListResult; }
+  | { kind: 'musicList'; versionId: MusicListVersionId; songs: OjnHeader[]; }
+  | { kind: 'itemData'; itemData: ItemDataResult; }
+  | { kind: 'bounds'; }
+  | { kind: 'text'; value: string; encoding: O2Encoding; }
+  | { kind: 'bytes'; };
 
 export function classifyEntryContent(
   data: Uint8Array,
@@ -50,7 +50,9 @@ export function classifyEntryContent(
   }
 
   const mime = sniffImageMime(data);
-  if (mime) return { kind: 'image', mime };
+  if (mime) {
+    return { kind: 'image', mime };
+  }
 
   if (isAlbumListData(data)) {
     const albumEncoding = auto ? detectAlbumListEncoding(data) ?? encoding : encoding;
@@ -71,7 +73,9 @@ export function classifyEntryContent(
           } catch {
           }
         }
-        if (songs.length) return { kind: 'musicList', versionId: musicList.versionId, songs };
+        if (songs.length) {
+          return { kind: 'musicList', versionId: musicList.versionId, songs };
+        }
       }
     } catch {
     }
@@ -83,13 +87,18 @@ export function classifyEntryContent(
       if (best) {
         const itemEncoding = auto ? detectItemDataEncoding(data, best) ?? encoding : encoding;
         const itemData = parseItemData(data, best, itemEncoding);
-        if (itemData.items.length) return { kind: 'itemData', itemData };
+        if (itemData.items.length) {
+          return { kind: 'itemData', itemData };
+        }
       }
     } catch {
     }
   }
 
-  if (ext === 'bnd') return { kind: 'bounds' };
+  if (ext === 'bnd') {
+    return { kind: 'bounds' };
+  }
+
   if (data.length <= 2_000_000 && data.indexOf(0) === -1) {
     const resolvedEncoding = textEncoding ?? (auto ? detectEncoding([data]) ?? encoding : encoding);
     const value = decodeText(data, resolvedEncoding);
