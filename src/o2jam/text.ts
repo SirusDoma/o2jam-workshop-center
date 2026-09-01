@@ -1,5 +1,5 @@
 
-export type O2Encoding = 'ascii' | 'euc-kr' | 'gbk' | 'shift-jis' | 'utf-8';
+export type O2Encoding = 'ascii' | 'euc-kr' | 'gbk' | 'big5' | 'shift-jis' | 'utf-8';
 
 export interface EncodingInfo {
   id: O2Encoding;
@@ -16,6 +16,7 @@ export const ENCODINGS: readonly EncodingInfo[] = [
     label: 'ASCII / Latin-1',
   },
   { id: 'gbk', label: 'Simplified Chinese (GBK)' },
+  { id: 'big5', label: 'Traditional Chinese (Big5)' },
   { id: 'shift-jis', label: 'Japanese (Shift-JIS)' },
   {
     id: 'utf-8',
@@ -30,6 +31,7 @@ const LABELS: Record<O2Encoding, string> = {
   ascii: 'windows-1252',
   'euc-kr': 'euc-kr',
   gbk: 'gbk',
+  big5: 'big5',
   'shift-jis': 'shift-jis',
   'utf-8': 'utf-8',
 };
@@ -185,7 +187,7 @@ export function detectEncoding(samples: readonly Uint8Array[]): O2Encoding | nul
   }
 
   let best: { encoding: O2Encoding; score: number; } | null = null;
-  for (const encoding of ['euc-kr', 'shift-jis', 'gbk'] as const) {
+  for (const encoding of ['euc-kr', 'shift-jis', 'gbk', 'big5'] as const) {
     const decoder = decoderFor(encoding);
     if (!decoder) {
       continue;

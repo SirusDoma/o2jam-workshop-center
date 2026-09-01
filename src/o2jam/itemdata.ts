@@ -4,7 +4,7 @@ import type { BinarySource, LabelledId } from './binary';
 import { DEFAULT_ENCODING, detectEncoding, encodeText } from './text';
 import type { O2Encoding } from './text';
 
-export type ItemDataVersionId = '3.00' | '3.10' | '3.82' | '2.33' | '6.65' | '5.89' | '8.02';
+export type ItemDataVersionId = '2.93' | '3.00' | '3.10' | '3.82' | '2.33' | '6.65' | '5.89' | '8.02';
 
 export function isItemDataFilename(name: string): boolean {
   return /^itemdata.*\.dat$/i.test(name.trim());
@@ -205,6 +205,8 @@ export interface ItemPrefixLayout {
 }
 
 export interface ItemDataLayout extends ItemPrefixLayout {
+  spriteSlotCount: number;
+  spriteEncoding: 'status-bytes' | 'presence-mask';
   emptySpriteSlotEncoding: 'with-status' | 'with-empty-filename';
 }
 
@@ -223,6 +225,8 @@ const LAYOUT_310: ItemDataLayout = {
   specialItemFlagMale: null,
   specialItemFlagFemale: null,
   nameLength: 21,
+  spriteSlotCount: SPRITE_SLOT_COUNT,
+  spriteEncoding: 'status-bytes',
   emptySpriteSlotEncoding: 'with-status',
 };
 
@@ -241,12 +245,20 @@ const LAYOUT_382: ItemDataLayout = {
   specialItemFlagMale: null,
   specialItemFlagFemale: null,
   nameLength: 22,
+  spriteSlotCount: SPRITE_SLOT_COUNT,
+  spriteEncoding: 'status-bytes',
   emptySpriteSlotEncoding: 'with-status',
 };
 
 const LAYOUT_300: ItemDataLayout = {
   ...LAYOUT_382,
   emptySpriteSlotEncoding: 'with-empty-filename',
+};
+
+const LAYOUT_293: ItemDataLayout = {
+  ...LAYOUT_310,
+  spriteSlotCount: 32,
+  spriteEncoding: 'presence-mask',
 };
 
 const LAYOUT_802: ItemDataLayout = {
@@ -263,9 +275,19 @@ export interface ItemDataVersion {
   layout: ItemDataLayout;
   itemTypes: readonly LabelledId[];
   paymentMethods: readonly LabelledId[];
+  supportsSetInfo: boolean;
 }
 
 export const ITEM_DATA_VERSIONS: readonly ItemDataVersion[] = [
+  {
+    id: '2.93',
+    label: 'v2.93 — O2Jam GAMANIA Closed Beta',
+    clientVersion: '2.93',
+    layout: LAYOUT_293,
+    itemTypes: ITEM_TYPES_BASE.filter((item) => item.id < 20),
+    paymentMethods: PAYMENT_310,
+    supportsSetInfo: false,
+  },
   {
     id: '3.00',
     label: 'v3.00 — O2Jam GAMANIA Open Beta',
@@ -273,6 +295,7 @@ export const ITEM_DATA_VERSIONS: readonly ItemDataVersion[] = [
     layout: LAYOUT_300,
     itemTypes: ITEM_TYPES_BASE,
     paymentMethods: PAYMENT_382,
+    supportsSetInfo: true,
   },
   {
     id: '3.10',
@@ -281,6 +304,7 @@ export const ITEM_DATA_VERSIONS: readonly ItemDataVersion[] = [
     layout: LAYOUT_310,
     itemTypes: ITEM_TYPES_BASE,
     paymentMethods: PAYMENT_310,
+    supportsSetInfo: true,
   },
   {
     id: '3.82',
@@ -289,6 +313,7 @@ export const ITEM_DATA_VERSIONS: readonly ItemDataVersion[] = [
     layout: LAYOUT_382,
     itemTypes: ITEM_TYPES_BASE,
     paymentMethods: PAYMENT_382,
+    supportsSetInfo: true,
   },
   {
     id: '2.33',
@@ -297,6 +322,7 @@ export const ITEM_DATA_VERSIONS: readonly ItemDataVersion[] = [
     layout: LAYOUT_382,
     itemTypes: ITEM_TYPES_BASE,
     paymentMethods: PAYMENT_382,
+    supportsSetInfo: true,
   },
   {
     id: '5.89',
@@ -305,6 +331,7 @@ export const ITEM_DATA_VERSIONS: readonly ItemDataVersion[] = [
     layout: LAYOUT_382,
     itemTypes: ITEM_TYPES_BASE,
     paymentMethods: PAYMENT_382,
+    supportsSetInfo: true,
   },
   {
     id: '6.65',
@@ -313,6 +340,7 @@ export const ITEM_DATA_VERSIONS: readonly ItemDataVersion[] = [
     layout: LAYOUT_382,
     itemTypes: ITEM_TYPES_BASE,
     paymentMethods: PAYMENT_382,
+    supportsSetInfo: true,
   },
   {
     id: '8.02',
@@ -321,6 +349,7 @@ export const ITEM_DATA_VERSIONS: readonly ItemDataVersion[] = [
     layout: LAYOUT_802,
     itemTypes: ITEM_TYPES_802,
     paymentMethods: PAYMENT_802,
+    supportsSetInfo: true,
   },
 ];
 
@@ -481,15 +510,34 @@ export function parseItemData(
 
       const sprites: ItemSpriteRef[] = [];
       let desynced = false;
-      for (const slot of SPRITE_SLOTS) {
-        const at = reader.tell();
-        if (!reader.has(1)) {
+      const slots = SPRITE_SLOTS.slice(0, layout.spriteSlotCount);
+      const maskOffset = reader.tell();
+      let presenceMask: number | null = null;
+      if (layout.spriteEncoding === 'presence-mask') {
+        if (!reader.has(4)) {
           desynced = true;
-          break;
         }
 
-        const status = reader.u8();
-        // Status 0 has no length or filename bytes.
+        if (!desynced) {
+          presenceMask = reader.u32();
+        }
+      }
+
+      for (const slot of desynced ? [] : slots) {
+        const at = presenceMask === null ? reader.tell() : maskOffset;
+        let status: number;
+        if (presenceMask === null) {
+          if (!reader.has(1)) {
+            desynced = true;
+            break;
+          }
+
+          status = reader.u8();
+        }
+        else {
+          status = (presenceMask >>> (31 - slot.index)) & 1;
+        }
+
         if (status !== 1) {
           sprites.push({ slot, status, present: false, filename: '', filenameBytes: new Uint8Array(0), offset: at });
           continue;
@@ -610,15 +658,35 @@ export function writeItemData(
 
     chunks.push(prefix, lstr(item.name, item.nameBytes), lstr(item.description, item.descriptionBytes));
 
-    for (const s of item.sprites) {
-      if (s.present) {
-        chunks.push(Uint8Array.of(1), lstr(s.filename, s.filenameBytes));
+    const sprites = item.sprites.slice(0, layout.spriteSlotCount);
+    if (layout.spriteEncoding === 'presence-mask') {
+      let mask = 0;
+      for (const sprite of sprites) {
+        if (sprite.present) {
+          mask = (mask | (1 << (31 - sprite.slot.index))) >>> 0;
+        }
       }
-      else if (layout.emptySpriteSlotEncoding === 'with-empty-filename') {
-        chunks.push(Uint8Array.of(1, 0, 0, 0, 0));
+
+      const maskBytes = new Uint8Array(4);
+      new DataView(maskBytes.buffer).setUint32(0, mask, true);
+      chunks.push(maskBytes);
+      for (const sprite of sprites) {
+        if (sprite.present) {
+          chunks.push(lstr(sprite.filename, sprite.filenameBytes));
+        }
       }
-      else {
-        chunks.push(Uint8Array.of(s.status & 0xff));
+    }
+    else {
+      for (const sprite of sprites) {
+        if (sprite.present) {
+          chunks.push(Uint8Array.of(1), lstr(sprite.filename, sprite.filenameBytes));
+        }
+        else if (layout.emptySpriteSlotEncoding === 'with-empty-filename') {
+          chunks.push(Uint8Array.of(1, 0, 0, 0, 0));
+        }
+        else {
+          chunks.push(Uint8Array.of(sprite.status & 0xff));
+        }
       }
     }
   }

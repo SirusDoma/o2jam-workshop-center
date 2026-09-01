@@ -149,7 +149,7 @@ export default function AvatarPage() {
   const item = picked === null ? null : items.find((i) => i.index === picked) ?? null;
 
   const setInfo = useMemo(() => {
-    if (!file) {
+    if (!file || !version.supportsSetInfo) {
       return null;
     }
 
@@ -160,7 +160,7 @@ export default function AvatarPage() {
     } catch {
       return null;
     }
-  }, [file, resolved, versionId]);
+  }, [file, resolved, version, versionId]);
   const setsEff = useMemo(
     () => [...(setInfo?.data.sets ?? []), ...addedSets].map((s) => applySetEdit(s, setInfoEdits[s.index], resolved)),
     [setInfo, addedSets, setInfoEdits, resolved]

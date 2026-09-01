@@ -197,7 +197,7 @@ export function createItem(index: number, itemId: number, version: ItemDataVersi
     description: '',
     nameBytes: encodeText('New Item', encoding).bytes,
     descriptionBytes: new Uint8Array(0),
-    sprites: SPRITE_SLOTS.map((slot) => ({
+    sprites: SPRITE_SLOTS.slice(0, version.layout.spriteSlotCount).map((slot) => ({
       slot,
       status: 0,
       present: false,
