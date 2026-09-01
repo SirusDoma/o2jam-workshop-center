@@ -3,6 +3,7 @@ import {
   buildArchive,
   encodeText,
   findEntry,
+  insertArchiveEntries,
   parseArchive,
   readEntry,
   writeBounds,
@@ -188,6 +189,7 @@ export function buildScenePackage(options: SceneArchiveOptions): Uint8Array {
 
       return { name: entry.name, data: readEntry(options.file.buffer, entry) };
     });
+  const addedEntries: { name: string; data: Uint8Array; }[] = [];
   for (const [lower, name] of Object.entries(options.newSprites)) {
     const frames = options.spriteFrames[lower];
     if (!frames?.length) {
@@ -196,14 +198,14 @@ export function buildScenePackage(options: SceneArchiveOptions): Uint8Array {
 
     const bytes = encodeSprite(frames, options.spritePositions[lower], name);
     if (bytes) {
-      entries.push({ name, data: bytes });
+      addedEntries.push({ name, data: bytes });
     }
   }
   const existing = new Set(archive.entries.map((entry) => entry.name.toLowerCase()));
   for (const [lower, bounds] of boundsByName) {
     if (!existing.has(lower)) {
-      entries.push({ name: bounds.name, data: bounds.data });
+      addedEntries.push({ name: bounds.name, data: bounds.data });
     }
   }
-  return buildArchive(archive.kind, entries, DEFAULT_ENCODING);
+  return buildArchive(archive.kind, insertArchiveEntries(archive.kind, entries, addedEntries), DEFAULT_ENCODING);
 }

@@ -4,6 +4,7 @@ import {
   ENCODINGS,
   buildArchive,
   detectArchiveEncoding,
+  insertArchiveEntries,
   isAlbumListData,
   isSpriteData,
   parseArchive,
@@ -160,7 +161,11 @@ export default function PackagesPage() {
       const kept = entries
         .filter((e) => !edits.removed.has(e.index))
         .map((e) => ({ name: e.name, data: dataOf(e.index, e) }));
-      const out = buildArchive(archive.data.kind, [...kept, ...edits.added], resolved);
+      const out = buildArchive(
+        archive.data.kind,
+        insertArchiveEntries(archive.data.kind, kept, edits.added),
+        resolved,
+      );
       if (!(await saveFile(out, file.name))) {
         return;
       }

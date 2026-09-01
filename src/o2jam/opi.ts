@@ -160,6 +160,19 @@ export interface ArchiveInput {
   reservedSize?: number;
 }
 
+export function insertArchiveEntries(
+  kind: ArchiveKind,
+  existing: readonly ArchiveInput[],
+  added: readonly ArchiveInput[],
+): ArchiveInput[] {
+  const last = existing[existing.length - 1];
+  const protectedExtension = kind === 'opa' ? '.dat' : '.txt';
+  const insertAt = last?.name.toLowerCase().endsWith(protectedExtension)
+    ? existing.length - 1
+    : existing.length;
+  return [...existing.slice(0, insertAt), ...added, ...existing.slice(insertAt)];
+}
+
 export function buildArchive(
   kind: ArchiveKind,
   files: readonly ArchiveInput[],

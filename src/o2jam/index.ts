@@ -85,6 +85,7 @@ export {
   readEntry,
   findEntry,
   buildArchive,
+  insertArchiveEntries,
   parsePatchName,
   formatPatchName,
   sortArchivePrecedence,

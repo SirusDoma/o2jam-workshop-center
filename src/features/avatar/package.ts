@@ -3,7 +3,7 @@ import {
   buildArchive,
   detectItemDataEncoding,
   detectItemDataVersion,
-  isItemDataFilename,
+  insertArchiveEntries,
   itemDataVersion,
   parseArchive,
   parseItemData,
@@ -89,16 +89,12 @@ export function buildAvatarPackage(options: BuildAvatarArchiveOptions): Uint8Arr
     name: entry.name,
     data: replaced.get(entry.name.toLowerCase()) ?? addedByName.get(entry.name.toLowerCase()) ?? readEntry(options.buffer, entry),
   }));
-  let insertAt = entries.findIndex((entry) => entry.name.toLowerCase() === 'setinfodata.ojs' || isItemDataFilename(entry.name));
-  if (insertAt < 0) {
-    insertAt = entries.length;
-  }
-
+  const addedEntries: { name: string; data: Uint8Array; }[] = [];
   for (const [name, bytes] of Object.entries(options.addedFiles)) {
     const exists = archive.entries.some((entry) => entry.name.toLowerCase() === name.toLowerCase());
     if (!exists && options.usedAddedFiles.has(name)) {
-      entries.splice(insertAt++, 0, { name, data: bytes });
+      addedEntries.push({ name, data: bytes });
     }
   }
-  return buildArchive(archive.kind, entries, DEFAULT_ENCODING);
+  return buildArchive(archive.kind, insertArchiveEntries(archive.kind, entries, addedEntries), DEFAULT_ENCODING);
 }
