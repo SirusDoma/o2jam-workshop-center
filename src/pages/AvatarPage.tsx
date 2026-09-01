@@ -5,6 +5,7 @@ import {
   ITEM_DATA_VERSIONS,
   detectItemDataEncoding,
   detectItemDataVersion,
+  detectSetInfoVersion,
   itemDataVersion,
   parseArchive,
   parseItemData,
@@ -69,7 +70,15 @@ export default function AvatarPage() {
       return;
     }
 
-    const detected = detectItemDataVersion(readEntry(file.buffer, table));
+    let detected = detectItemDataVersion(readEntry(file.buffer, table));
+    if (detected === '3.82') {
+      const archive = parseArchive(file.buffer, 'ascii');
+      const setInfoEntry = archive.entries.find((entry) => entry.name.toLowerCase() === 'setinfodata.ojs');
+      if (setInfoEntry) {
+        detected = detectSetInfoVersion(readEntry(file.buffer, setInfoEntry)) ?? detected;
+      }
+    }
+
     if (detected) {
       setVersionId(detected);
     }

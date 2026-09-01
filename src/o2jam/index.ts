@@ -182,8 +182,8 @@ export type {
 } from './itemdata';
 
 
-export { SET_INFO_PREFIX_SIZE, SET_INFO_MAX_ITEMS, SET_CURRENCIES, parseSetInfo, writeSetInfo } from './setinfo';
-export type { SetGender, SetInfoItem, SetInfoEntry, SetInfoResult } from './setinfo';
+export { SET_INFO_PREFIX_SIZE, SET_INFO_MAX_ITEMS, SET_CURRENCIES, parseSetInfo, detectSetInfoVersion, writeSetInfo } from './setinfo';
+export type { SetGender, SetInfoItem, SetInfoEntry, SetInfoResult, SetInfoVersionId } from './setinfo';
 
 
 export { CLIENT_VERSIONS, clientVersion } from './versions';

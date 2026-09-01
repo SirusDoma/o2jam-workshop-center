@@ -55,6 +55,8 @@ export interface SetInfoResult {
   bytesConsumed: number;
 }
 
+export type SetInfoVersionId = '3.00' | '3.82';
+
 function genderOf(flag: number): SetGender {
   const code = (flag >> 6) & 0x03;
   if (code === 0) {
@@ -177,6 +179,37 @@ export function parseSetInfo(
   }
 
   return { setCount, sets, bytesConsumed: reader.tell() };
+}
+
+export function detectSetInfoVersion(source: BinarySource): SetInfoVersionId | null {
+  const bytes = asBytes(source);
+  const candidate = (versionId: SetInfoVersionId) => {
+    try {
+      const parsed = parseSetInfo(bytes, 'ascii', versionId);
+      const valid = parsed.setCount > 0
+        && parsed.sets.length === parsed.setCount
+        && parsed.sets.every((set) => set.id <= parsed.setCount && set.itemCount <= SET_INFO_MAX_ITEMS);
+      return valid ? { versionId, exact: parsed.bytesConsumed === bytes.length } : null;
+    } catch {
+      return null;
+    }
+  };
+  const gamania = candidate('3.00');
+  const egames = candidate('3.82');
+
+  if (!gamania) {
+    return egames?.versionId ?? null;
+  }
+
+  if (!egames) {
+    return gamania.versionId;
+  }
+
+  if (gamania.exact === egames.exact) {
+    return null;
+  }
+
+  return gamania.exact ? gamania.versionId : egames.versionId;
 }
 
 const GENDER_CODES: Record<SetGender, number> = { female: 0, male: 1, any: 2 };

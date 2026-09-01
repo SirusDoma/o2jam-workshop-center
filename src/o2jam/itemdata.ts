@@ -669,7 +669,10 @@ export function detectItemDataVersion(source: BinarySource): ItemDataVersionId |
       score = -1;
     }
     return { versionId: v.id, score };
-  }).sort((a, b) => b.score - a.score);
+  }).sort((a, b) =>
+    b.score - a.score
+    || Number(b.versionId === '3.82') - Number(a.versionId === '3.82')
+  );
 
   return scored[0] && scored[0].score > 0 ? scored[0].versionId : null;
 }
