@@ -114,9 +114,17 @@ export function parseSetInfo(
     const itemIds: number[] = [];
     const prices: number[] = [];
     const salePrices: number[] = [];
-    for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) itemIds.push(reader.u32());
-    for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) prices.push(reader.u32());
-    for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) salePrices.push(reader.u32());
+    for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) {
+      itemIds.push(reader.u32());
+    }
+
+    for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) {
+      prices.push(reader.u32());
+    }
+
+    for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) {
+      salePrices.push(reader.u32());
+    }
 
     const name = readString();
     if (name === null) {
@@ -191,9 +199,18 @@ export function writeSetInfo(
       w.u8(s.currency);
     }
 
-    for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) w.u32(s.items[i]?.itemId ?? 0);
-    for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) w.u32(s.items[i]?.price ?? 0);
-    for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) w.u32(s.items[i]?.salePrice ?? 0);
+    for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) {
+      w.u32(s.items[i]?.itemId ?? 0);
+    }
+
+    for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) {
+      w.u32(s.items[i]?.price ?? 0);
+    }
+
+    for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) {
+      w.u32(s.items[i]?.salePrice ?? 0);
+    }
+
     const name = s.nameBytes ?? encodeText(s.name, encoding).bytes;
     const description = s.descriptionBytes ?? encodeText(s.description, encoding).bytes;
     w.i32(name.length).bytes(name);
