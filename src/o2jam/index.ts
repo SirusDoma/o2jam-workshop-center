@@ -171,6 +171,7 @@ export type {
   ItemDataVersionId,
   ItemDataVersion,
   ItemPrefixLayout,
+  ItemDataLayout,
   SpriteSlot,
   SpriteRegion,
   SpriteInstrument,

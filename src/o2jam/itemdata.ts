@@ -204,7 +204,11 @@ export interface ItemPrefixLayout {
   nameLength: number;
 }
 
-const LAYOUT_310: ItemPrefixLayout = {
+export interface ItemDataLayout extends ItemPrefixLayout {
+  emptySpriteSlotEncoding: 'with-status' | 'with-empty-filename';
+}
+
+const LAYOUT_310: ItemDataLayout = {
   itemId: 0,
   itemType: 4,
   planetOrigin: 5,
@@ -219,9 +223,10 @@ const LAYOUT_310: ItemPrefixLayout = {
   specialItemFlagMale: null,
   specialItemFlagFemale: null,
   nameLength: 21,
+  emptySpriteSlotEncoding: 'with-status',
 };
 
-const LAYOUT_382: ItemPrefixLayout = {
+const LAYOUT_382: ItemDataLayout = {
   itemId: 0,
   itemType: 4,
   planetOrigin: 5,
@@ -236,9 +241,15 @@ const LAYOUT_382: ItemPrefixLayout = {
   specialItemFlagMale: null,
   specialItemFlagFemale: null,
   nameLength: 22,
+  emptySpriteSlotEncoding: 'with-status',
 };
 
-const LAYOUT_802: ItemPrefixLayout = {
+const LAYOUT_300: ItemDataLayout = {
+  ...LAYOUT_382,
+  emptySpriteSlotEncoding: 'with-empty-filename',
+};
+
+const LAYOUT_802: ItemDataLayout = {
   ...LAYOUT_382,
   specialItemFlagMale: 22,
   specialItemFlagFemale: 26,
@@ -249,7 +260,7 @@ export interface ItemDataVersion {
   id: ItemDataVersionId;
   label: string;
   clientVersion: string;
-  layout: ItemPrefixLayout;
+  layout: ItemDataLayout;
   itemTypes: readonly LabelledId[];
   paymentMethods: readonly LabelledId[];
 }
@@ -259,7 +270,7 @@ export const ITEM_DATA_VERSIONS: readonly ItemDataVersion[] = [
     id: '3.00',
     label: 'v3.00 — O2Jam GAMANIA Open Beta',
     clientVersion: '3.00',
-    layout: LAYOUT_382,
+    layout: LAYOUT_300,
     itemTypes: ITEM_TYPES_BASE,
     paymentMethods: PAYMENT_382,
   },
@@ -602,6 +613,9 @@ export function writeItemData(
     for (const s of item.sprites) {
       if (s.present) {
         chunks.push(Uint8Array.of(1), lstr(s.filename, s.filenameBytes));
+      }
+      else if (layout.emptySpriteSlotEncoding === 'with-empty-filename') {
+        chunks.push(Uint8Array.of(1, 0, 0, 0, 0));
       }
       else {
         chunks.push(Uint8Array.of(s.status & 0xff));
