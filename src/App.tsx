@@ -11,6 +11,7 @@ import PackagesPage from './pages/PackagesPage';
 import ScenePage from './pages/ScenePage';
 import AvatarPage from './pages/AvatarPage';
 import ArgsBuilderPage from './pages/ArgsBuilderPage';
+import NoteToolPage from './pages/NoteToolPage';
 import { TOOL_CATALOG, type ToolCatalogEntry } from './toolCatalog';
 
 const PAGES: Record<ToolCatalogEntry['id'], () => ReactNode> = {
@@ -18,6 +19,7 @@ const PAGES: Record<ToolCatalogEntry['id'], () => ReactNode> = {
   packages: () => <PackagesPage />,
   scene: () => <ScenePage />,
   avatar: () => <AvatarPage />,
+  'note-tool': () => <NoteToolPage />,
   'arguments-builder': () => <ArgsBuilderPage />,
 };
 const TOOLS = TOOL_CATALOG.map((tool) => ({ path: tool.path, page: PAGES[tool.id] }));

@@ -1091,6 +1091,7 @@ html.theming .stackhead {
   flex-direction: column;
   animation: reveal 0.25s ease both;
 }
+.overlay-panel.compact { width: min(380px, 100%); }
 .overlay-panel.narrow { width: min(560px, 100%); }
 .overlay-panel.mid { width: min(720px, 100%); }
 

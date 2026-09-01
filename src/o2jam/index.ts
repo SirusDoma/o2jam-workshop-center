@@ -11,6 +11,8 @@ export type { O2Encoding, EncodingInfo, EncodedText } from './text';
 export {
   OJN_HEADER_SIZE,
   OJN_SIGNATURE,
+  OJN_PAN_MIN,
+  OJN_PAN_MAX,
   OJN_HEADER_FIELDS,
   DIFFICULTIES,
   GENRES,
@@ -25,6 +27,8 @@ export {
   decryptOjn,
   parseOjn,
   parseOjnChart,
+  decodeOjnPan,
+  encodeOjnPan,
   CHANNEL_MEASURE,
   CHANNEL_BPM,
   CHANNEL_LANE_FIRST,

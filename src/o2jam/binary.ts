@@ -1,6 +1,6 @@
 
-import { decodeText, encodeText } from './text';
-import type { O2Encoding } from './text';
+import { decodeText, encodeText } from './text.ts';
+import type { O2Encoding } from './text.ts';
 
 export class FormatError extends Error {
   readonly offset?: number;

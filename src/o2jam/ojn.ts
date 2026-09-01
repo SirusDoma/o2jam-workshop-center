@@ -1,11 +1,22 @@
 
-import { asBytes, ByteReader, FormatError } from './binary';
-import type { BinarySource, LabelledId } from './binary';
-import { decodeText, detectEncoding, encodeText, DEFAULT_ENCODING } from './text';
-import type { O2Encoding } from './text';
+import { asBytes, ByteReader, FormatError } from './binary.ts';
+import type { BinarySource, LabelledId } from './binary.ts';
+import { decodeText, detectEncoding, encodeText, DEFAULT_ENCODING } from './text.ts';
+import type { O2Encoding } from './text.ts';
 
 export const OJN_HEADER_SIZE = 300;
 export const OJN_SIGNATURE = 'ojn';
+export const OJN_PAN_MIN = -7;
+export const OJN_PAN_MAX = 7;
+
+export function decodeOjnPan(raw: number): number {
+  const nibble = (Math.round(raw) & 0x0f) || 8;
+  return nibble - 8;
+}
+
+export function encodeOjnPan(pan: number): number {
+  return Math.max(1, Math.min(15, Math.round(pan) + 8));
+}
 
 export type OjnDifficulty = 'ex' | 'nx' | 'hx';
 
@@ -521,8 +532,7 @@ export function parseOjnChart(source: BinarySource, difficulty: OjnDifficulty): 
 
         const rawVolume = (audio >> 4) & 0x0f;
         const volume = rawVolume === 0 ? 100 : (rawVolume / 16) * 100;
-        const rawPan = (audio & 0x0f) || 8;
-        const pan = ((rawPan - 1) / 14) * 2 - 1;
+        const pan = decodeOjnPan(audio & 0x0f);
 
         const background = type % 8 > 3;
         const kindCode = type % 4;

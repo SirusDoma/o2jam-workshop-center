@@ -33,16 +33,18 @@ export function Shell({ children }: { children: ReactNode; }) {
 }
 
 export function PageHead({
+  className,
   title,
   sub,
   actions,
 }: {
+  className?: string;
   title: string;
   sub: string;
   actions?: ReactNode;
 }) {
   return (
-    <header className="card pagehead">
+    <header className={`card pagehead${className ? ` ${className}` : ''}`}>
       <div>
         <h1>{title}</h1>
         <div className="sub">{sub}</div>

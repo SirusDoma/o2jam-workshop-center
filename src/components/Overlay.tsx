@@ -10,7 +10,7 @@ export function Overlay({
   children: ReactNode;
   onClose: () => void;
   label: string;
-  width?: 'narrow' | 'mid' | 'wide';
+  width?: 'compact' | 'narrow' | 'mid' | 'wide';
 }) {
   // Close only if both pointer down and pointer up hit the scrim.
   const downOnScrim = useRef(false);

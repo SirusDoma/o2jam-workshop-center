@@ -1,7 +1,7 @@
-import { ListMusic, MonitorPlay, Package, Terminal, UserRound, type LucideIcon } from 'lucide-react';
+import { ListMusic, MonitorPlay, Music2, Package, Terminal, UserRound, type LucideIcon } from 'lucide-react';
 
 export interface ToolCatalogEntry {
-  id: 'music-list' | 'packages' | 'scene' | 'avatar' | 'arguments-builder';
+  id: 'music-list' | 'packages' | 'scene' | 'avatar' | 'arguments-builder' | 'note-tool';
   path: string;
   label: string;
   description: string;
@@ -9,6 +9,7 @@ export interface ToolCatalogEntry {
 }
 
 export const TOOL_CATALOG: ToolCatalogEntry[] = [
+  { id: 'note-tool', path: '/tools/note-tool', label: 'Note Tool', description: 'Design and edit OJN note charts.', icon: Music2 },
   { id: 'music-list', path: '/tools/music-list', label: 'Music List', description: 'Read or build OJNList.dat for any client version.', icon: ListMusic },
   { id: 'packages', path: '/tools/package', label: 'Packages', description: 'Inspect, edit and repack an OPI or OPA package.', icon: Package },
   { id: 'scene', path: '/tools/scene', label: 'Scene Composer', description: 'Customize the scene graph of the interface.', icon: MonitorPlay },
