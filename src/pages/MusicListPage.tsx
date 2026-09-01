@@ -27,6 +27,7 @@ import { useToast } from '../context/ToastContext';
 import { reportDirty } from '../dirty';
 import { SectionEditor } from '../components/music-list/SectionEditor';
 import { MusicListTable } from '../components/music-list/MusicListTable';
+import { readMusicListSource } from '../features/music-list/source';
 import type { EditChart, SectionRows } from '../features/music-list/types';
 
 interface Baseline {
@@ -148,18 +149,18 @@ export default function MusicListPage() {
   const load = (files: File[]) => {
     void (async () => {
       const errors: string[] = [];
-      const dat = files.find((f) => f.name.toLowerCase().endsWith('.dat'));
+      const listSource = await readMusicListSource(files);
       const ojns = files.filter((f) => f.name.toLowerCase().endsWith('.ojn'));
 
-      if (dat) {
+      if (listSource) {
         try {
-          const buf = await dat.arrayBuffer();
+          const buf = listSource.buffer;
           const bytes = new Uint8Array(buf);
           if (bytes.length < 4 + OJN_HEADER_SIZE || !decodeText(bytes.subarray(8, 12), 'ascii').startsWith('ojn')) {
-            throw new Error(`${dat.name} is not a music list — no readable song headers.`);
+            throw new Error(`${listSource.source} is not a music list — no readable song headers.`);
           }
 
-          const best = detectMusicListVersion(buf, dat.name) ?? versionId;
+          const best = detectMusicListVersion(buf, listSource.filename) ?? versionId;
           setVersionId(best);
           const result = parseMusicList(buf, best, encoding);
           const loaded = result.charts.map((c) => {
@@ -167,7 +168,7 @@ export default function MusicListPage() {
             return {
               key: counter++,
               block,
-              source: dat.name,
+              source: listSource.source,
               encrypted: false,
               detected: detectOjnHeaderEncoding(block) ?? undefined,
             };
@@ -182,6 +183,9 @@ export default function MusicListPage() {
         } catch (err) {
           errors.push(err instanceof Error ? err.message : 'Could not read that list.');
         }
+      }
+      else if (files.some((file) => file.name.toLowerCase().endsWith('.opi'))) {
+        errors.push('No OJNList.dat was found in that OPI archive.');
       }
 
       const added: EditChart[] = [];
@@ -235,7 +239,10 @@ export default function MusicListPage() {
 
   const ingest = (files: File[]) => {
     setOpenError(null);
-    const replaces = files.some((f) => f.name.toLowerCase().endsWith('.dat'));
+    const replaces = files.some((file) => {
+      const name = file.name.toLowerCase();
+      return name.endsWith('.dat') || name.endsWith('.opi');
+    });
     if (replaces && dirty) {
       setConfirm({ kind: 'open', files });
     }
@@ -306,19 +313,19 @@ export default function MusicListPage() {
 
         <FileInputCard padded>
           <DropZone
-            accept=".dat,.ojn"
-            onlyExt={['dat', 'ojn']}
+            accept=".dat,.ojn,.opi"
+            onlyExt={['dat', 'ojn', 'opi']}
             onFiles={ingest}
             onError={(error) => setOpenError(error instanceof Error ? error.message : 'Could not open that file.')}
             onRejected={(rejected) => {
               setOpenError(
                 rejected.length === 1
-                  ? `${rejected[0]!.name} is not a valid .dat / .ojn file.`
-                  : `${rejected.length} files are not valid .dat / .ojn files.`
+                  ? `${rejected[0]!.name} is not a valid .dat / .ojn / .opi file.`
+                  : `${rejected.length} files are not valid .dat / .ojn / .opi files.`
               );
             }}
-            label={charts.length > 0 ? 'Drop a Music folder or OJN files to add more songs' : 'Drop a Music folder, OJN files, or an OJNList.dat'}
-            hint={charts.length > 0 ? 'Dropping another OJNList.dat replaces this list.' : 'OJM and other files are ignored.'}
+            label={charts.length > 0 ? 'Drop a Music folder or OJN files to add more songs' : 'Drop a Music folder, Playing.opi, OJN files, or OJNList.dat'}
+            hint={charts.length > 0 ? 'Dropping another OJNList.dat or Playing.opi replaces this list.' : 'OJM and other files are ignored.'}
             after={
               charts.length > 0 && (
                 <DownloadButton
