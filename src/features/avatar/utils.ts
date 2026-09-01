@@ -21,6 +21,16 @@ export interface Layer {
   order: number;
 }
 
+export function spriteNameStem(name: string): string {
+  const dot = name.lastIndexOf('.');
+  return (dot < 0 ? name : name.slice(0, dot)).toLowerCase();
+}
+
+export function ojiReferenceName(name: string): string {
+  const dot = name.lastIndexOf('.');
+  return `${dot < 0 ? name : name.slice(0, dot)}.oji`;
+}
+
 
 export function buildLayers(
   file: WorkspaceFile,
@@ -174,6 +184,28 @@ function equipTypeOf(item: ItemEntry, instrument: SpriteInstrument): string {
 export const spriteCache = new Map<string, DecodedAt[] | null>();
 export const importedSprites = new Map<string, Uint8Array>();
 
+function resolveImportedSprite(fileId: string, name: string): { name: string; data: Uint8Array; } | null {
+  const prefix = `${fileId}:`;
+  const exact = importedSprites.get(`${prefix}${name.toLowerCase()}`);
+  if (exact) {
+    return { name, data: exact };
+  }
+
+  const stem = spriteNameStem(name);
+  for (const [key, data] of importedSprites) {
+    if (!key.startsWith(prefix)) {
+      continue;
+    }
+
+    const candidate = key.slice(prefix.length);
+    if (spriteNameStem(candidate) === stem) {
+      return { name: candidate, data };
+    }
+  }
+
+  return null;
+}
+
 export function renderSprite(file: WorkspaceFile, name: string, keyOn: boolean): DecodedAt[] | null {
   const cacheKey = `${file.id}:${name}:${keyOn}`;
   const hit = spriteCache.get(cacheKey);
@@ -183,8 +215,9 @@ export function renderSprite(file: WorkspaceFile, name: string, keyOn: boolean):
 
   let result: DecodedAt[] | null = null;
   try {
-    let sname = name;
-    let data = importedSprites.get(`${file.id}:${name.toLowerCase()}`) ?? null;
+    const imported = resolveImportedSprite(file.id, name);
+    let sname = imported?.name ?? name;
+    let data = imported?.data ?? null;
     if (!data) {
       const archive = parseArchive(file.buffer, 'ascii');
       const entry = resolveSprite(archive.entries, name);

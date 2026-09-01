@@ -13,7 +13,6 @@ import {
 } from '../../o2jam';
 import { Tabs } from '../Tabs';
 import type { WorkspaceFile } from '../../context/WorkspaceContext';
-import { fmtOffset } from '../../format';
 import { AvatarFig } from './AvatarPreview';
 import { AvatarSpriteEditor } from './AvatarSpriteEditor';
 import { GENDER_CODE, INSTRUMENTS, partForType, playback } from '../../features/avatar/constants';
@@ -84,7 +83,7 @@ export function AvatarItemDetail({
             {edited && <span className="chip warn">EDITED</span>}
           </div>
           <span className="overlay-path">
-            Item {item.itemId} · {fmtOffset(item.offset)}
+            Item {item.itemId}
           </span>
         </div>
         <div className="overlay-actions">
@@ -98,7 +97,7 @@ export function AvatarItemDetail({
         tabs={[
           { id: 'render', label: 'Render' },
           { id: 'meta', label: 'Metadata' },
-          { id: 'sprites', label: 'Sprites', count: item.sprites.filter((s) => s.present && s.filename).length },
+          { id: 'sprites', label: 'Sprites' },
         ]}
         active={tab}
         onChange={setTab}

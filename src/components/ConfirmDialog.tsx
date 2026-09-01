@@ -1,7 +1,18 @@
 import { useRef } from 'react';
 import { X } from 'lucide-react';
 
-export function ConfirmDialog({ title, body, confirmLabel, onConfirm, onClose }: { title: string; body: string; confirmLabel: string; onConfirm: () => void; onClose: () => void; }) {
+interface ConfirmDialogProps {
+  title: string;
+  body: string;
+  confirmLabel: string;
+  confirmTone?: 'danger' | 'primary';
+  secondaryLabel?: string;
+  onConfirm: () => void;
+  onSecondary?: () => void;
+  onClose: () => void;
+}
+
+export function ConfirmDialog({ title, body, confirmLabel, confirmTone = 'danger', secondaryLabel, onConfirm, onSecondary, onClose }: ConfirmDialogProps) {
   const downOnScrim = useRef(false);
   return (
     <div
@@ -15,7 +26,7 @@ export function ConfirmDialog({ title, body, confirmLabel, onConfirm, onClose }:
         }
       }}
     >
-      <div className="overlay-panel narrow card" onClick={(e) => e.stopPropagation()}>
+      <div className="overlay-panel narrow card" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
         <div className="overlay-head">
           <div className="oh-main">
             <div className="oh-row">
@@ -34,7 +45,12 @@ export function ConfirmDialog({ title, body, confirmLabel, onConfirm, onClose }:
             <button className="btn" type="button" onClick={onClose}>
               Cancel
             </button>
-            <button className="btn danger" type="button" onClick={onConfirm}>
+            {secondaryLabel && onSecondary && (
+              <button className="btn" type="button" onClick={onSecondary}>
+                {secondaryLabel}
+              </button>
+            )}
+            <button className={`btn ${confirmTone}`} type="button" onClick={onConfirm}>
               {confirmLabel}
             </button>
           </div>

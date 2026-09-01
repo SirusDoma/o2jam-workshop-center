@@ -31,8 +31,8 @@ import { AvatarItemsTable } from '../components/avatar/AvatarItemsTable';
 import { AvatarSetDetail } from '../components/avatar/AvatarSetDetail';
 import { AvatarSetsTable } from '../components/avatar/AvatarSetsTable';
 import { buildAvatarPackage } from '../features/avatar/package';
-import { applyItemEdit, applySetEdit, createItem, createSet, setEditIsNoop } from '../features/avatar/model';
-import { archiveSpriteNames, findTables, importedSprites, spriteCache } from '../features/avatar/utils';
+import { applyItemEdit, applySetEdit, createItem, createSet, firstEmptyItemSlot, setEditIsNoop } from '../features/avatar/model';
+import { archiveSpriteNames, findTables, importedSprites, spriteCache, spriteNameStem } from '../features/avatar/utils';
 import type { ItemEdit, SetEdit } from '../features/avatar/types';
 import { useToast } from '../context/ToastContext';
 import { useWorkspace } from '../context/WorkspaceContext';
@@ -59,6 +59,7 @@ export default function AvatarPage() {
   const [removedItems, setRemovedItems] = useState<Record<string, Set<number>>>({});
   const [addedFiles, setAddedFiles] = useState<Record<string, Uint8Array>>({});
   const [confirmFile, setConfirmFile] = useState<{ kind: 'close' | 'switch'; id: string; } | null>(null);
+  const [emptyItemWarning, setEmptyItemWarning] = useState<{ index: number; itemId: number; } | null>(null);
   const nextIndex = useRef(1_000_000);
 
   const file = files.find((f) => f.id === fileId) ?? null;
@@ -123,6 +124,7 @@ export default function AvatarPage() {
     setAddedItems({});
     setRemovedItems({});
     setAddedFiles({});
+    setEmptyItemWarning(null);
     return () => {
       spriteCache.clear();
       importedSprites.clear();
@@ -281,8 +283,9 @@ export default function AvatarPage() {
           if (sp.present) {
             refs.add(sp.filename.toLowerCase());
           }
+    const refStems = new Set([...refs].map(spriteNameStem));
     const existing = new Set((file ? archiveSpriteNames(file) : []).map((n) => n.toLowerCase()));
-    return new Set(names.filter((n) => refs.has(n.toLowerCase()) || existing.has(n.toLowerCase())));
+    return new Set(names.filter((n) => refs.has(n.toLowerCase()) || refStems.has(spriteNameStem(n)) || existing.has(n.toLowerCase())));
   }, [addedFiles, edits, addedItems, file]);
 
   const dirty =
@@ -311,7 +314,7 @@ export default function AvatarPage() {
     return base + (addedItems[name]?.length ?? 0) - (removedItems[name]?.size ?? 0);
   };
 
-  const addItem = () => {
+  const appendItem = () => {
     if (!table) {
       return;
     }
@@ -324,13 +327,22 @@ export default function AvatarPage() {
     setPicked(index);
   };
 
+  const addItem = () => {
+    const empty = firstEmptyItemSlot(items.filter((item) => !removedSet?.has(item.index)));
+    if (empty) {
+      setEmptyItemWarning({ index: empty.index, itemId: empty.itemId });
+      return;
+    }
+
+    appendItem();
+  };
+
   const importSprite = async (f: File): Promise<string> => {
     const bytes = new Uint8Array(await f.arrayBuffer());
     setAddedFiles((all) => ({ ...all, [f.name]: bytes }));
     if (file) {
       importedSprites.set(`${file.id}:${f.name.toLowerCase()}`, bytes);
-      spriteCache.delete(`${file.id}:${f.name}:true`);
-      spriteCache.delete(`${file.id}:${f.name}:false`);
+      spriteCache.clear();
     }
 
     return f.name;
@@ -543,6 +555,25 @@ export default function AvatarPage() {
             }
           }}
           onClose={() => setConfirmFile(null)}
+        />
+      )}
+
+      {emptyItemWarning && (
+        <ConfirmDialog
+          title="Empty item slot"
+          body={`Item ID ${emptyItemWarning.itemId} is empty. Fill this slot first so the game can show the item in the shop.`}
+          confirmLabel={`Use slot ${emptyItemWarning.itemId}`}
+          confirmTone="primary"
+          secondaryLabel="Add anyway"
+          onConfirm={() => {
+            setPicked(emptyItemWarning.index);
+            setEmptyItemWarning(null);
+          }}
+          onSecondary={() => {
+            setEmptyItemWarning(null);
+            appendItem();
+          }}
+          onClose={() => setEmptyItemWarning(null)}
         />
       )}
 

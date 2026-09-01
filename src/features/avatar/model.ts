@@ -151,6 +151,21 @@ export function createSet(index: number, id: number, encoding: O2Encoding): SetI
   };
 }
 
+export function firstEmptyItemSlot(items: readonly ItemEntry[]): ItemEntry | null {
+  let first: ItemEntry | null = null;
+  for (const item of items) {
+    const empty = item.itemId > 0
+      && item.name.trim() === ''
+      && item.description.trim() === ''
+      && item.sprites.every((sprite) => sprite.filename.trim() === '');
+    if (empty && (!first || item.itemId < first.itemId)) {
+      first = item;
+    }
+  }
+
+  return first;
+}
+
 export function createItem(index: number, itemId: number, version: ItemDataVersion, encoding: O2Encoding): ItemEntry {
   return {
     index,

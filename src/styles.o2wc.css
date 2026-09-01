@@ -963,6 +963,28 @@ select.secinput {
 .slot-thumb.hollow:hover { color: var(--accent); border-color: var(--accent); }
 .st-link { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; }
 .slotcell.dragover .slot-thumb { border-color: var(--accent); color: var(--accent); background-color: var(--accent-soft); }
+.slot-drop-options {
+  width: 100%;
+  aspect-ratio: 1;
+  display: grid;
+  grid-template-rows: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 5px;
+}
+.slot-drop-target {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 2px;
+  color: var(--ink-3);
+  background: var(--code-bg);
+  font-size: 10.5px;
+  text-align: center;
+}
+.slot-drop-target.primary { flex-direction: column; }
+.slot-drop-target.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 .slot-name::placeholder { color: var(--ink-3); }
 .slot-thumb canvas { max-width: 100%; max-height: 100%; image-rendering: pixelated; }
 
@@ -1064,6 +1086,7 @@ select.secinput {
 .filtermenu .checkline:hover { background: var(--accent-soft); }
 
 .picker-import { margin-left: auto; }
+.dialogfoot .picker-reference { margin-left: 0; }
 
 .archive-pin .toolbar .toolbar-right { margin-left: auto; }
 .toolbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
