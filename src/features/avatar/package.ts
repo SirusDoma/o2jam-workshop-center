@@ -71,11 +71,11 @@ export function buildAvatarPackage(options: BuildAvatarArchiveOptions): Uint8Arr
     const entry = archive.entries.find((candidate) => candidate.name.toLowerCase() === 'setinfodata.ojs');
     if (entry) {
       const bytes = readEntry(options.buffer, entry);
-      const parsed = parseSetInfo(bytes, options.activeEncoding);
+      const parsed = parseSetInfo(bytes, options.activeEncoding, options.versionId);
       const sets = [...parsed.sets, ...options.addedSets]
         .filter((set) => !options.removedSets.has(set.index))
         .map((set) => applySetEdit(set, options.setEdits[set.index], options.activeEncoding));
-      const body = writeSetInfo(sets, options.activeEncoding);
+      const body = writeSetInfo(sets, options.activeEncoding, options.versionId);
       const tail = bytes.subarray(parsed.bytesConsumed);
       const output = new Uint8Array(body.length + tail.length);
       output.set(body, 0);

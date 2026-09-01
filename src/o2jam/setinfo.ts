@@ -4,9 +4,12 @@ import type { BinarySource, LabelledId } from './binary';
 import { DEFAULT_ENCODING, encodeText } from './text';
 import type { O2Encoding } from './text';
 import { PLANET_ORIGINS } from './itemdata';
+import type { ItemDataVersionId } from './itemdata';
 
 export const SET_INFO_PREFIX_SIZE = 69;
 export const SET_INFO_MAX_ITEMS = 5;
+
+const SET_INFO_PREFIX_SIZE_300 = 68;
 
 export type SetGender = 'female' | 'male' | 'any';
 
@@ -68,6 +71,7 @@ function genderOf(flag: number): SetGender {
 export function parseSetInfo(
   source: BinarySource,
   encoding: O2Encoding = DEFAULT_ENCODING,
+  versionId: ItemDataVersionId = '3.82',
 ): SetInfoResult {
   const reader = new ByteReader(source);
   if (reader.size < 4) {
@@ -77,6 +81,8 @@ export function parseSetInfo(
   const raw = asBytes(source);
   const sets: SetInfoEntry[] = [];
   const setCount = reader.u32();
+  const hasCurrency = versionId !== '3.00';
+  const prefixSize = hasCurrency ? SET_INFO_PREFIX_SIZE : SET_INFO_PREFIX_SIZE_300;
 
   const readString = (): { text: string; bytes: Uint8Array; } | null => {
     if (!reader.has(4)) {
@@ -94,7 +100,7 @@ export function parseSetInfo(
 
   for (let index = 0; index < setCount; index++) {
     const offset = reader.tell();
-    if (!reader.has(SET_INFO_PREFIX_SIZE)) {
+    if (!reader.has(prefixSize)) {
       break;
     }
 
@@ -103,7 +109,7 @@ export function parseSetInfo(
     const genderFlag = reader.u8();
     const discountPercent = reader.u8();
     const declaredItems = reader.u8();
-    const currency = reader.u8();
+    const currency = hasCurrency ? reader.u8() : 0;
 
     const itemIds: number[] = [];
     const prices: number[] = [];
@@ -167,8 +173,13 @@ export function parseSetInfo(
 
 const GENDER_CODES: Record<SetGender, number> = { female: 0, male: 1, any: 2 };
 
-export function writeSetInfo(sets: readonly SetInfoEntry[], encoding: O2Encoding = DEFAULT_ENCODING): Uint8Array {
+export function writeSetInfo(
+  sets: readonly SetInfoEntry[],
+  encoding: O2Encoding = DEFAULT_ENCODING,
+  versionId: ItemDataVersionId = '3.82',
+): Uint8Array {
   const w = new ByteWriter();
+  const hasCurrency = versionId !== '3.00';
   w.u32(sets.length);
   for (const s of sets) {
     w.u32(s.id);
@@ -176,7 +187,10 @@ export function writeSetInfo(sets: readonly SetInfoEntry[], encoding: O2Encoding
     w.u8((s.genderFlagRaw & 0x3f) | (GENDER_CODES[s.gender] << 6));
     w.u8(s.discountPercent);
     w.u8(s.itemCount);
-    w.u8(s.currency);
+    if (hasCurrency) {
+      w.u8(s.currency);
+    }
+
     for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) w.u32(s.items[i]?.itemId ?? 0);
     for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) w.u32(s.items[i]?.price ?? 0);
     for (let i = 0; i < SET_INFO_MAX_ITEMS; i++) w.u32(s.items[i]?.salePrice ?? 0);

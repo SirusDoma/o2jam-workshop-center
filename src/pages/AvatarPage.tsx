@@ -145,11 +145,11 @@ export default function AvatarPage() {
     try {
       const arc = parseArchive(file.buffer, 'ascii');
       const entry = arc.entries.find((e) => e.name.toLowerCase() === 'setinfodata.ojs');
-      return entry ? { name: entry.name, data: parseSetInfo(readEntry(file.buffer, entry), resolved) } : null;
+      return entry ? { name: entry.name, data: parseSetInfo(readEntry(file.buffer, entry), resolved, versionId) } : null;
     } catch {
       return null;
     }
-  }, [file, resolved]);
+  }, [file, resolved, versionId]);
   const setsEff = useMemo(
     () => [...(setInfo?.data.sets ?? []), ...addedSets].map((s) => applySetEdit(s, setInfoEdits[s.index], resolved)),
     [setInfo, addedSets, setInfoEdits, resolved]
@@ -609,6 +609,7 @@ export default function AvatarPage() {
                         file={file}
                         set={setEntry}
                         allItems={items}
+                        hasCurrency={versionId !== '3.00'}
                         edited={!!setInfoEdits[setEntry.index]}
                         onField={(fields) => editSetEntry(setEntry.index, { fields })}
                         onItems={(list) => editSetEntry(setEntry.index, { items: list })}

@@ -229,6 +229,7 @@ export function AvatarSetDetail({
   file,
   set,
   allItems,
+  hasCurrency,
   edited,
   onField,
   onItems,
@@ -237,6 +238,7 @@ export function AvatarSetDetail({
   file: WorkspaceFile;
   set: SetInfoEntry;
   allItems: ItemEntry[];
+  hasCurrency: boolean;
   edited: boolean;
   onField: (fields: NonNullable<SetEdit['fields']>) => void;
   onItems: (items: NonNullable<SetEdit['items']>) => void;
@@ -413,18 +415,20 @@ export function AvatarSetDetail({
                 </label>
               </span>
             </div>
-            <div className="defrow">
-              <span className="dk">Currency</span>
-              <span className="de">
-                <select className="secinput" value={set.currency === 0 ? 0 : 1} onChange={(e) => onField({ currency: Number(e.target.value) })}>
-                  {SET_CURRENCIES.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
-              </span>
-            </div>
+            {hasCurrency && (
+              <div className="defrow">
+                <span className="dk">Currency</span>
+                <span className="de">
+                  <select className="secinput" value={set.currency === 0 ? 0 : 1} onChange={(e) => onField({ currency: Number(e.target.value) })}>
+                    {SET_CURRENCIES.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                </span>
+              </div>
+            )}
           </div>
         )}
 

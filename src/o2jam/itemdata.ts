@@ -4,7 +4,7 @@ import type { BinarySource, LabelledId } from './binary';
 import { DEFAULT_ENCODING, detectEncoding, encodeText } from './text';
 import type { O2Encoding } from './text';
 
-export type ItemDataVersionId = '3.10' | '3.82' | '2.33' | '6.65' | '5.89' | '8.02';
+export type ItemDataVersionId = '3.00' | '3.10' | '3.82' | '2.33' | '6.65' | '5.89' | '8.02';
 
 export function isItemDataFilename(name: string): boolean {
   return /^itemdata.*\.dat$/i.test(name.trim());
@@ -255,6 +255,14 @@ export interface ItemDataVersion {
 }
 
 export const ITEM_DATA_VERSIONS: readonly ItemDataVersion[] = [
+  {
+    id: '3.00',
+    label: 'v3.00 — O2Jam GAMANIA Open Beta',
+    clientVersion: '3.00',
+    layout: LAYOUT_382,
+    itemTypes: ITEM_TYPES_BASE,
+    paymentMethods: PAYMENT_382,
+  },
   {
     id: '3.10',
     label: 'v3.10 — O2Jam Original',
