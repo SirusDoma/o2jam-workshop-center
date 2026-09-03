@@ -17,7 +17,7 @@ export function Shell({ children }: { children: ReactNode; }) {
       <main className="appcol">
         {children}
         <footer className="card appfoot">
-          <span>These tools run in your browser and work offline.</span>
+          <span>No internet connection required.</span>
           <nav className="appfoot-links" aria-label="Links">
             <a href="https://github.com/SirusDoma/o2jam-workshop-center" target="_blank" rel="noopener noreferrer">
               <GitHubMark /> GitHub
