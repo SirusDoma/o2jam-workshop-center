@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { DecodedFrame } from '../../o2jam';
+import { pickSceneControl, type HitRect, type SpriteHitRect } from '../../features/scene/hitTest';
 import { ckey, frameOff, type BoundRect, type LabelDraw, type Placed, type Rect } from '../../features/scene/model';
 
 const frameCanvasCache = new WeakMap<DecodedFrame, HTMLCanvasElement>();
@@ -90,6 +91,7 @@ export function StageCanvas({
   placed,
   boundRects,
   hitRects,
+  textHitRects,
   labelDraws,
   selectedRects,
   extent,
@@ -97,6 +99,7 @@ export function StageCanvas({
   tick,
   playing,
   frameSel,
+  transparent,
   moveOn,
   onSelect,
   onGrab,
@@ -106,6 +109,7 @@ export function StageCanvas({
   placed: Placed[];
   boundRects: BoundRect[];
   hitRects: BoundRect[];
+  textHitRects: BoundRect[];
   labelDraws: LabelDraw[];
   selectedRects: Rect[];
   extent: { w: number; h: number; };
@@ -113,6 +117,7 @@ export function StageCanvas({
   tick: number;
   playing: boolean;
   frameSel: Record<string, number>;
+  transparent: boolean;
   moveOn: boolean;
   onSelect: (id: string) => void;
   onGrab: (key: string, wx: number, wy: number) => void;
@@ -182,9 +187,7 @@ export function StageCanvas({
   };
 
   const pick = (wx: number, wy: number): string | null => {
-    const inside = (x: number, y: number, w: number, h: number) => wx >= x && wx < x + w && wy >= y && wy < y + h;
-
-    let top: string | null = null;
+    const sprites: SpriteHitRect[] = [];
     for (const p of placed) {
       const n = p.frames.length;
       let idx = playing && n > 1 ? tick % n : Math.min(frameSel[ckey(p.control)] ?? 0, n - 1);
@@ -194,28 +197,10 @@ export function StageCanvas({
 
       const f = p.frames[idx]!;
       const o = frameOff(p, idx);
-      if (inside(p.x + o.x, p.y + o.y, f.width, f.height)) {
-        top = ckey(p.control);
-      }
+      sprites.push({ key: ckey(p.control), left: p.x + o.x, top: p.y + o.y, width: f.width, height: f.height, rgba: f.rgba });
     }
-    if (top) {
-      return top;
-    }
-
-    let best: string | null = null;
-    let bestArea = Infinity;
-    for (const r of hitRects) {
-      if (!r.key || !inside(r.left, r.top, r.width, r.height)) {
-        continue;
-      }
-
-      const area = Math.max(1, r.width) * Math.max(1, r.height);
-      if (area < bestArea) {
-        bestArea = area;
-        best = r.key;
-      }
-    }
-    return best;
+    const textRects: HitRect[] = [...textHitRects.filter((rect): rect is BoundRect & { key: string; } => !!rect.key), ...labelDraws];
+    return pickSceneControl(wx, wy, sprites, textRects, hitRects.filter((rect): rect is BoundRect & { key: string; } => !!rect.key), transparent);
   };
 
   const onClick = (e: React.MouseEvent<HTMLCanvasElement>) => {

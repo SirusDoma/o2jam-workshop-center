@@ -10,6 +10,7 @@ export function SceneStage({
   placed,
   boundRects,
   hitRects,
+  textHitRects,
   labelDraws,
   selectedRects,
   extent,
@@ -40,6 +41,7 @@ export function SceneStage({
   placed: Placed[];
   boundRects: BoundRect[];
   hitRects: BoundRect[];
+  textHitRects: BoundRect[];
   labelDraws: LabelDraw[];
   selectedRects: Rect[];
   extent: { w: number; h: number; };
@@ -107,6 +109,7 @@ export function SceneStage({
           placed={placed}
           boundRects={showBounds ? boundRects : []}
           hitRects={hitRects}
+          textHitRects={textHitRects}
           labelDraws={labelDraws}
           selectedRects={selectedRects}
           extent={extent}
@@ -114,6 +117,7 @@ export function SceneStage({
           tick={tick}
           playing={playing}
           frameSel={frameSelection}
+          transparent={transparent}
           moveOn={moveMode}
           onSelect={onSelect}
           onGrab={onGrab}

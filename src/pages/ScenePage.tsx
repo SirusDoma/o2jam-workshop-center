@@ -871,6 +871,10 @@ export default function ScenePage() {
     () => createLabelDraws(labels, boundRects, placed),
     [labels, boundRects, placed]
   );
+  const textHitRects = useMemo(() => {
+    const keys = new Set(effControls.filter((control) => /^IDC_(TEXT|EDIT)/.test(control.token)).map(ckey));
+    return boundRects.filter((rect): rect is typeof rect & { key: string; } => !!rect.key && keys.has(rect.key));
+  }, [effControls, boundRects]);
 
   const dirty =
     Object.keys(fieldEdits).length > 0 ||
@@ -1125,6 +1129,7 @@ export default function ScenePage() {
               placed={placed}
               boundRects={shownBoundRects}
               hitRects={boundRects}
+              textHitRects={textHitRects}
               labelDraws={labelDraws}
               selectedRects={selectedRects}
               extent={extent}

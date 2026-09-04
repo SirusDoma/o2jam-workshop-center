@@ -164,6 +164,7 @@ export interface TextStyle {
 }
 export const DEFAULT_TEXT: TextStyle = { text: '', color: '#ffffff', size: 12, halign: 'left', valign: 'middle', outline: true };
 export interface LabelDraw extends Rect {
+  key: string;
   style: TextStyle;
 }
 export type BlockOrigin = { idx: number; x: number; y: number; } | null;

@@ -451,7 +451,7 @@ export function labelDraws(labels: Record<string, TextStyle>, bounds: BoundRect[
     const sources = boundRects.length
       ? boundRects
       : placed.filter((entry) => ckey(entry.control) === key).map((entry) => ({ left: entry.x, top: entry.y, width: entry.w, height: entry.h }));
-    for (const source of sources) result.push({ style, left: source.left, top: source.top, width: source.width, height: source.height });
+    for (const source of sources) result.push({ key, style, left: source.left, top: source.top, width: source.width, height: source.height });
   }
   return result;
 }
