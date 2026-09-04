@@ -53,6 +53,7 @@ const PREVIEW_CHART: EditorChart = {
     { id: 'preview-sample-4', lane: 4, absolutePosition: 2 + 10 / 16, sampleType: 'ogg', sampleId: 4, volume: 16, pan: 0 },
   ],
 };
+
 const noop = () => {};
 
 export function SettingsDialog({
@@ -71,6 +72,7 @@ export function SettingsDialog({
     setColorPreview(null);
     commitSettings(next);
   };
+
   const [message, setMessage] = useState<string | null>(null);
   const [previewGrid, setPreviewGrid] = useState('1/16');
   const [previewSubGrid, setPreviewSubGrid] = useState(`1/${settings.playheadGrid}`);
@@ -81,6 +83,7 @@ export function SettingsDialog({
     playheadGrid: previewPlayheadGrid,
     playheadPosition: snapPlayheadPosition(settings.playheadPosition, previewPlayheadGrid),
   };
+
   const subscribePreviewPosition = useCallback<PlaybackPositionSubscription>((listener) => {
     listener(gridCellBottomRatio(playheadPositionStep(settings.playheadPosition, previewPlayheadGrid), previewPlayheadGrid));
     return noop;

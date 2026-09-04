@@ -7,7 +7,9 @@ export function SaveAsDialog({ initialName, onConfirm, onClose }: { initialName:
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (valid) onConfirm(name.trim());
+    if (valid) {
+      onConfirm(name.trim());
+    }
   };
 
   return (

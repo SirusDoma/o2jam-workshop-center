@@ -8,6 +8,7 @@ export function normalizeDecimalInput(input: Pick<HTMLInputElement, 'value' | 's
     input.value = input.value.replaceAll(',', '.');
     input.setSelectionRange(selectionStart, selectionEnd);
   }
+
   return input.value;
 }
 
@@ -63,6 +64,7 @@ export async function saveBytesAs(bytes: Uint8Array, suggestedName: string, pick
       accept: { 'application/octet-stream': extension ? [extension] : [] },
     }],
   });
+
   const writable = await handle.createWritable();
   await writable.write(bytes);
   await writable.close();

@@ -30,25 +30,30 @@ export function SampleBankPicker({
       setQuery('');
     }
   }, [open, sampleType]);
+
   useEffect(() => {
     if (open) {
       scrollNearest(selectedOption.current);
     }
   }, [open, query, sampleId, sampleType, type]);
+
   useEffect(() => {
     if (!open) {
       return;
     }
+
     const closeOutside = (event: globalThis.PointerEvent) => {
       if (!root.current?.contains(event.target as Node)) {
         setOpen(false);
       }
     };
+
     const closeWithEscape = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') {
         setOpen(false);
       }
     };
+
     document.addEventListener('pointerdown', closeOutside);
     window.addEventListener('keydown', closeWithEscape);
     return () => {
@@ -66,6 +71,7 @@ export function SampleBankPicker({
       || formatSampleSlot(type, id).toLowerCase().includes(normalizedQuery)
       || sample?.name.toLowerCase().includes(normalizedQuery);
   });
+
   const selectedSample = samples.find((sample) => sample.id === sampleId);
 
   return (

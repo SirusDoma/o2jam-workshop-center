@@ -20,5 +20,6 @@ export function formatTimingValue(kind: 'bpm' | 'fraction', value: number): stri
   if (kind === 'bpm') {
     return formatBpmValue(value);
   }
+
   return String(FRACTION_OPTIONS.some((option) => option.value === value) ? value : DEFAULT_FRACTION_VALUE);
 }

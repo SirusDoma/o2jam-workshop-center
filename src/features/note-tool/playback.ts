@@ -101,6 +101,7 @@ export function bpmAtPosition(
     if (change.position > position) {
       break;
     }
+
     bpm = change.bpm;
   }
 
@@ -135,6 +136,7 @@ export function buildPlaybackSchedule({
         delay: eventSeconds - startSeconds,
         offset: 0,
       });
+
       continue;
     }
 

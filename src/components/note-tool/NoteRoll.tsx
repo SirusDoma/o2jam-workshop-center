@@ -56,6 +56,7 @@ function LaneHeaderLabel({ children, width }: { children: string; width: number 
       const style = getComputedStyle(column);
       setRequiredWidth(element.getBoundingClientRect().width + parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth));
     };
+
     const observer = new ResizeObserver(update);
     observer.observe(column);
     observer.observe(element);
@@ -153,12 +154,14 @@ export function NoteRoll({
     endPosition: number;
     clientY: number;
   } | null>(null);
+
   const longNoteAnimation = useRef<number | null>(null);
   const [longNoteDraft, setLongNoteDraft] = useState<{
     key: NoteLaneKey;
     startPosition: number;
     endPosition: number;
   } | null>(null);
+
   const eventDrag = useRef<{
     pointerId: number;
     selection: InspectorEvent[];
@@ -173,6 +176,7 @@ export function NoteRoll({
     noteToAutoplayLane: number | null;
     autoplayToNoteLane: number | null;
   } | null>(null);
+
   const [dragPreview, setDragPreview] = useState<{
     selection: InspectorEvent[];
     positionDelta: number;
@@ -182,6 +186,7 @@ export function NoteRoll({
     noteToAutoplayLane: number | null;
     autoplayToNoteLane: number | null;
   } | null>(null);
+
   const [marquee, setMarquee] = useState<{
     pointerId: number;
     startX: number;
@@ -190,6 +195,7 @@ export function NoteRoll({
     currentY: number;
     additive: boolean;
   } | null>(null);
+
   const keys = KEYS_7;
   const rulerWidth = settings.lanes.measure.width;
   const measureWidth = settings.lanes.fraction.width;
@@ -234,6 +240,7 @@ export function NoteRoll({
       const missingHeight = Math.max(0, element.clientHeight - 34 - rollBodyHeight);
       setMeasureCount((count) => Math.max(count, chartMeasures, count + Math.ceil(missingHeight / measureHeight)));
     };
+
     const observer = new ResizeObserver(fillViewport);
     fillViewport();
     observer.observe(element);
@@ -248,8 +255,7 @@ export function NoteRoll({
 
     if (previousScrollHeight.current === 0) {
       element.scrollTop = Math.max(0, element.scrollHeight - element.clientHeight);
-    }
-    else if (element.scrollHeight > previousScrollHeight.current) {
+    } else if (element.scrollHeight > previousScrollHeight.current) {
       element.scrollTop += element.scrollHeight - previousScrollHeight.current;
     }
 
@@ -419,6 +425,7 @@ export function NoteRoll({
     if (drag?.pointerId !== event.pointerId) {
       return;
     }
+
     drag.clientY = event.clientY;
     seekFromRuler(drag.target, drag.clientY);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
@@ -429,6 +436,7 @@ export function NoteRoll({
       window.cancelAnimationFrame(rulerSeekAnimation.current);
       rulerSeekAnimation.current = null;
     }
+
     rulerSeek.current = null;
     window.setTimeout(() => { suppressPlayheadScroll.current = false; }, 0);
   };
@@ -472,6 +480,7 @@ export function NoteRoll({
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
+
     playheadDrag.current = null;
   };
 
@@ -530,6 +539,7 @@ export function NoteRoll({
       drag.startPosition,
       gridPositionAtY(drag.clientY - bounds.top, geometry.measureCount, geometry.measureHeight, geometry.gridDivision, geometry.measureFractions),
     );
+
     setLongNoteDraft({ key: drag.key, startPosition: drag.startPosition, endPosition: drag.endPosition });
   };
 
@@ -583,6 +593,7 @@ export function NoteRoll({
       endPosition: startPosition,
       clientY: event.clientY,
     };
+
     setLongNoteDraft({ key, startPosition, endPosition: startPosition });
     queueLongNoteAutoScroll();
   };
@@ -630,6 +641,7 @@ export function NoteRoll({
     if (rulerSeekAnimation.current !== null) {
       window.cancelAnimationFrame(rulerSeekAnimation.current);
     }
+
     if (longNoteAnimation.current !== null) {
       window.cancelAnimationFrame(longNoteAnimation.current);
     }
@@ -659,6 +671,7 @@ export function NoteRoll({
       if (startPosition === null) {
         return;
       }
+
       if (!isEventSelected(selectedEvents, selection)) {
         onSelectEvent(selection, false);
       }
@@ -678,6 +691,7 @@ export function NoteRoll({
         noteToAutoplayLane: null,
         autoplayToNoteLane: null,
       };
+
       setDragPreview({
         selection: dragSelection,
         positionDelta: 0,
@@ -698,6 +712,7 @@ export function NoteRoll({
       const targetPosition = drag.kind === 'fraction'
         ? Math.floor(chartPositionAtY(targetY, measureCount, measureHeight, measureCount, measureFractions))
         : gridPositionAtY(targetY, measureCount, measureHeight, gridDivision, measureFractions);
+
       let positionDelta = targetPosition - drag.startPosition;
       positionDelta = clampSelectionPositionDelta(drag.selection, positionDelta, chart);
       let laneDelta = 0;
@@ -709,15 +724,13 @@ export function NoteRoll({
         if (sampleBounds && event.clientX >= sampleBounds.left) {
           const requestedLane = laneIndexAt(event.clientX - sampleBounds.left, currentSampleWidths) + 1;
           noteToAutoplayLane = clampNoteToAutoplayLane(requestedLane, drag.startLane, drag.selection, chart, keys);
-        }
-        else {
+        } else {
           const bounds = event.currentTarget.closest('.nt-lanes')?.getBoundingClientRect();
           if (bounds) {
             laneDelta = laneIndexAt(event.clientX - bounds.left, currentKeyWidths) - drag.startLane;
           }
         }
-      }
-      else if (drag.kind === 'autoplay') {
+      } else if (drag.kind === 'autoplay') {
         const bounds = event.currentTarget.closest('.nt-sample-lanes')?.getBoundingClientRect();
         const mainBounds = event.currentTarget.closest('.nt-roll-body')?.querySelector('.nt-lanes')?.getBoundingClientRect();
         if (mainBounds && event.clientX < mainBounds.right) {
@@ -728,11 +741,11 @@ export function NoteRoll({
             chart.autoplayNotes.filter((note) => selectedIds.has(note.id)).map((note) => note.lane),
             keys.length,
           );
-        }
-        else if (bounds) {
+        } else if (bounds) {
           laneDelta = laneIndexAt(event.clientX - bounds.left, currentSampleWidths) - drag.startLane;
         }
       }
+
       laneDelta = clampSelectionLaneDelta(drag.kind, drag.selection, laneDelta, chart, keys);
 
       drag.positionDelta = positionDelta;
@@ -778,18 +791,21 @@ export function NoteRoll({
           ? { autoplayToNote: { sourceLane: drag.startLane + 1, targetLane: keys[drag.autoplayToNoteLane]! } }
           : {}),
       });
+
       suppressGridClick.current = true;
       window.setTimeout(() => { suppressGridClick.current = false; }, 0);
-    }
-    else if (commit && drag?.pointerId === event.pointerId) {
+    } else if (commit && drag?.pointerId === event.pointerId) {
       onSelectEvent(drag.target, false);
     }
+
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
+
     if (eventDrag.current?.pointerId === event.pointerId) {
       eventDrag.current = null;
     }
+
     setDragPreview(null);
   };
 
@@ -819,6 +835,7 @@ export function NoteRoll({
             dragPreview.sourceNoteLane + 1,
           )
         : 0;
+
     const originalPosition = eventPosition(chart, selection);
     const positionDelta = selection.kind === 'fraction' ? Math.round(dragPreview.positionDelta) : dragPreview.positionDelta;
     const translateY = originalPosition === null ? 0 : positionY(originalPosition + positionDelta) - positionY(originalPosition);
@@ -875,15 +892,16 @@ export function NoteRoll({
           id: element.dataset.eventId ?? '',
         }))
         .filter((item) => item.id);
+
       onSelectEvents(selection, marquee.additive);
       suppressGridClick.current = true;
       window.setTimeout(() => { suppressGridClick.current = false; }, 0);
-    }
-    else if (commit) {
+    } else if (commit) {
       onSelectEvents([], false);
       suppressGridClick.current = true;
       window.setTimeout(() => { suppressGridClick.current = false; }, 0);
     }
+
     setMarquee(null);
   };
 
@@ -1218,6 +1236,7 @@ function clampNoteToAutoplayLane(
     .filter((note) => selectedIds.has(note.id))
     .map((note) => keys.indexOf(note.key) - sourceLane)
     .filter((offset) => offset + sourceLane >= 0);
+
   if (offsets.length === 0) {
     return Math.max(1, Math.min(SAMPLE_LANES.length, requested));
   }
@@ -1238,6 +1257,7 @@ function clampSelectionLaneDelta(
     : kind === 'autoplay'
       ? chart.autoplayNotes.filter((note) => selectedIds.has(note.id)).map((note) => note.lane - 1)
       : [];
+
   if (indexes.length === 0) {
     return 0;
   }
@@ -1271,6 +1291,7 @@ function clampSelectionPositionDelta(
       }
     }
   });
+
   return positions.length === 0 ? 0 : Math.max(requested, -Math.min(...positions));
 }
 
@@ -1329,5 +1350,6 @@ function maxEventMeasure(notes: EditorChartNote[], autoplay: AutoplayChartNote[]
     ...notes.map((note) => note.absolutePosition + (note.duration ?? 0)),
     ...autoplay.map((note) => note.absolutePosition),
   ];
+
   return Math.max(0, ...positions.map((position) => Math.floor(position) + 1));
 }

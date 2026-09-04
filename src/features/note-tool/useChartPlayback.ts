@@ -136,6 +136,7 @@ export function useChartPlayback({
         setPlaying(false);
         setMessage('One or more samples could not be decoded by this browser.');
       }
+
       return;
     }
 
@@ -153,6 +154,7 @@ export function useChartPlayback({
       measureFractions,
       sampleDurations: durations,
     });
+
     const eventById = new Map(events.map((event) => [event.id, event]));
     const now = audioContext.currentTime;
 
@@ -192,6 +194,7 @@ export function useChartPlayback({
       emitPosition(next);
       animation.current = requestAnimationFrame(update);
     };
+
     animation.current = requestAnimationFrame(update);
   }, [baseBpm, bpmChanges, commitPosition, emitPosition, endPosition, events, measureFractions, samples, stopSources]);
 

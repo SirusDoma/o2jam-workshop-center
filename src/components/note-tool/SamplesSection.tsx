@@ -64,17 +64,21 @@ export function SamplesSection({
       audio.current.pause();
       audio.current.currentTime = 0;
     }
+
     audio.current = null;
     if (audioUrl.current) {
       URL.revokeObjectURL(audioUrl.current);
       audioUrl.current = null;
     }
+
     setPlaying(false);
     setMessage(null);
   };
 
   useEffect(() => {
-    if (disabled) stopPreview();
+    if (disabled) {
+      stopPreview();
+    }
   }, [disabled]);
 
   const playPreview = async (sample = selected) => {
@@ -141,6 +145,7 @@ export function SamplesSection({
           && !next.some((sample) => sample.id === selectedId)
           ? selectedId
           : null;
+
         const id = preferredId ?? allocateSampleId(sampleType, next.map((sample) => sample.id), file.name);
         const sample: OjmSample = {
           id,
@@ -151,6 +156,7 @@ export function SamplesSection({
           mime: file.type || (codec === 'wav' ? 'audio/wav' : 'audio/ogg'),
           data: await file.arrayBuffer(),
         };
+
         next.push(sample);
         added.push(sample);
       }
@@ -165,6 +171,7 @@ export function SamplesSection({
     if (first) {
       onSelectedSampleChange({ id: first.id, type: first.type });
     }
+
     setMessage(`${added.length} sample${added.length === 1 ? '' : 's'} added.`);
   };
 
@@ -200,7 +207,9 @@ export function SamplesSection({
                   onChange={(event) => {
                     const file = event.currentTarget.files?.[0];
                     event.currentTarget.value = '';
-                    if (file) onOpenFiles([file]);
+                    if (file) {
+                      onOpenFiles([file]);
+                    }
                   }}
                 />
               </div>
@@ -217,6 +226,7 @@ export function SamplesSection({
               if (format !== 'm30' && draggedType && draggedType !== type && settings.acceptedTypes.includes(draggedType)) {
                 onSelectedSampleChange({ id: sampleSlotIds(draggedType)[0] ?? 0, type: draggedType });
               }
+
               setDragging(true);
             }}
             onDragLeave={(event) => {
@@ -230,8 +240,11 @@ export function SamplesSection({
               setDragging(false);
               void collectDropped(event.dataTransfer).then((files) => {
                 const dropped = classifyNoteToolFiles(files);
-                if (dropped.ojn || dropped.ojm) onOpenFiles(files);
-                else void addFiles(files);
+                if (dropped.ojn || dropped.ojm) {
+                  onOpenFiles(files);
+                } else {
+                  void addFiles(files);
+                }
               }).catch(() => setMessage('Dropped files could not be read.'));
             }}
           >
@@ -264,7 +277,11 @@ export function SamplesSection({
                   key={id}
                   ref={selectedId === id ? selectedRow : undefined}
                   onClick={() => onSelectedSampleChange({ id, type })}
-                  onDoubleClick={() => { if (sample) void playPreview(sample); }}
+                  onDoubleClick={() => {
+                    if (sample) {
+                      void playPreview(sample);
+                    }
+                  }}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault();

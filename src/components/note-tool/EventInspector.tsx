@@ -41,12 +41,12 @@ export function EventInspector({
     const measure = Math.max(0, Math.floor(nextMeasure));
     if (event.kind === 'fraction') {
       onChange({ measure });
-    }
-    else {
+    } else {
       const step = Math.min(positionStep, measureGridPositionCount(measure, gridDivision, measureFractions) - 1);
       onChange({ absolutePosition: measure + step / gridDivision });
     }
   };
+
   const changePosition = (step: number) => onChange({ absolutePosition: measure + step / gridDivision });
 
   return (

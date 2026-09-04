@@ -65,6 +65,7 @@ export default function NoteToolPage() {
       playheadThickness: clampPlayheadThickness(toolSettings.playheadThickness),
     };
   }, [toolSettings]);
+
   const [metadata, setMetadata] = useState<ChartMetadata>(emptyMetadata);
   const [levels, setLevels] = useState<Record<Difficulty, number>>({ EX: 0, NX: 0, HX: 0 });
   const [editorDocument, setEditorDocument] = useState<EditorDocument>(emptyEditorDocument);
@@ -160,6 +161,7 @@ export default function NoteToolPage() {
       setFileMessage('Select an OJN file.');
       return false;
     }
+
     if (file.size > MAX_OJN_BYTES) {
       setFileMessage(`${file.name} is larger than 128 MB.`);
       return false;
@@ -190,7 +192,6 @@ export default function NoteToolPage() {
       setOjmFormat('omc');
       setOjmEncryption('none');
       setEncoding(detectedEncoding);
-      setFileMessage(`${file.name} loaded.`);
       hiSpeed.current = '1.0';
       setEditorRevision((revision) => revision + 1);
       return true;
@@ -230,22 +231,29 @@ export default function NoteToolPage() {
     const ojnLoaded = ojn ? await loadOjn(ojn) : false;
     const ojmLoaded = ojm ? await loadOjm(ojm) : false;
 
-    if (ojnLoaded && ojmLoaded) {
-      setFileMessage(`${ojn?.name} and ${ojm?.name} loaded.`);
+    if (ojnLoaded) {
+      markDocumentCleanAfterRender();
+    } else if (ojmLoaded) {
+      setDirty(true);
     }
-    if (ojnLoaded) markDocumentCleanAfterRender();
-    else if (ojmLoaded) setDirty(true);
   };
 
   const performFileAction = (action: PendingFileAction) => {
-    if (action.kind === 'open') void openFiles(action);
-    else if (action.kind === 'new') setNameRequest({ kind: 'new', initialName: musicFileName(0, 'ojn') });
-    else createNew();
+    if (action.kind === 'open') {
+      void openFiles(action);
+    } else if (action.kind === 'new') {
+      setNameRequest({ kind: 'new', initialName: musicFileName(0, 'ojn') });
+    } else {
+      createNew();
+    }
   };
 
   const requestFileAction = (action: PendingFileAction) => {
-    if (dirty) setPendingAction(action);
-    else performFileAction(action);
+    if (dirty) {
+      setPendingAction(action);
+    } else {
+      performFileAction(action);
+    }
   };
 
   const requestOpenFiles = (files: File[]) => {
@@ -254,10 +262,12 @@ export default function NoteToolPage() {
       setFileMessage('Select an OJN, OJM, OMC, or M30 file.');
       return;
     }
+
     if (dropped.duplicates.length > 0) {
-      setFileMessage('Open at most one OJN and one sample bank at a time.');
+      setFileMessage('Open at most one OJN and one OJM at a time.');
       return;
     }
+
     requestFileAction({ kind: 'open', ojn: dropped.ojn, ojm: dropped.ojm });
   };
 
@@ -281,6 +291,7 @@ export default function NoteToolPage() {
         releaseImage(current, imageUrls.current);
         return image;
       });
+
       setDirty(true);
     }).catch(() => setFileMessage(`${label} could not be loaded.`));
   };
@@ -307,8 +318,7 @@ export default function NoteToolPage() {
     if (event.key === 'ArrowLeft') {
       event.preventDefault();
       setPanelWidth((width) => Math.max(210, width - 10));
-    }
-    else if (event.key === 'ArrowRight') {
+    } else if (event.key === 'ArrowRight') {
       event.preventDefault();
       setPanelWidth((width) => Math.min(520, width + 10));
     }
@@ -320,6 +330,7 @@ export default function NoteToolPage() {
     NX: resolveChartLevel(levels.NX, editorDocument.NX, metadata.bpm),
     HX: resolveChartLevel(levels.HX, editorDocument.HX, metadata.bpm),
   }), [editorDocument, levels, metadata.bpm]);
+
   const documentState = useMemo(() => ({
     documentName,
     metadata,
@@ -340,6 +351,7 @@ export default function NoteToolPage() {
       setDirty(false);
       return;
     }
+
     setDirty(!noteToolStatesEqual(cleanDocumentState.current, documentState));
   }, [cleanRevision, documentState]);
 
@@ -355,6 +367,7 @@ export default function NoteToolPage() {
     if (next === 'm30') {
       setSelectedSample({ id: sampleSlotIds('ogg')[0] ?? 1000, type: 'ogg' });
     }
+
     setFileMessage(null);
   };
 
@@ -366,11 +379,13 @@ export default function NoteToolPage() {
       setDocumentName(name);
       setDocumentNameDraft(name);
     }
+
     setMetadata((current) => ({
       ...current,
       ...patch,
       ...(patch.musicId !== undefined && !ojmNameAccepted ? { ojmFileName: musicFileName(patch.musicId, 'ojm') } : {}),
     }));
+
     setDirty(true);
   };
 
@@ -381,6 +396,7 @@ export default function NoteToolPage() {
       setNameRequest({ kind: 'save', initialName: suggestedOjnName() });
       return;
     }
+
     void saveFiles(documentName, savePicker());
   };
 
@@ -390,6 +406,7 @@ export default function NoteToolPage() {
       setRenamingDocument(false);
       return;
     }
+
     const name = normalizeFileName(documentNameDraft.trim(), '.ojn');
     setDocumentName(name);
     setDocumentNameDraft(name);
@@ -410,11 +427,17 @@ export default function NoteToolPage() {
         baseHeader: loaded?.file.header,
         encoding,
       });
+
       const savedOjnName = picker
         ? await saveBytesAs(ojn, requestedName, picker)
         : (downloadBytes(ojn, requestedName), requestedName);
-      if (picker) await saveBytesAs(bank, bankFileName, picker);
-      else downloadBytes(bank, bankFileName);
+
+      if (picker) {
+        await saveBytesAs(bank, bankFileName, picker);
+      } else {
+        downloadBytes(bank, bankFileName);
+      }
+
       setDocumentName(savedOjnName);
       setDocumentNameDraft(savedOjnName);
       setDocumentNameAccepted(true);
@@ -423,7 +446,10 @@ export default function NoteToolPage() {
       markDocumentCleanAfterRender();
     }
     catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') return;
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return;
+      }
+
       setFileMessage(error instanceof Error ? `Save failed: ${error.message}` : 'Save failed.');
     }
   };
@@ -451,19 +477,26 @@ export default function NoteToolPage() {
         onChange={(event) => {
           const file = event.currentTarget.files?.[0];
           event.currentTarget.value = '';
-          if (file) requestOpenFiles([file]);
+          if (file) {
+            requestOpenFiles([file]);
+          }
         }}
       />
 
       <section
         className={`card nt-workspace${maximized ? ' nt-maximized' : ''}${workspaceDragging ? ' is-dragging' : ''}`}
         onDragOver={(event: DragEvent<HTMLElement>) => {
-          if (playbackActive || !event.dataTransfer.types.includes('Files')) return;
+          if (playbackActive || !event.dataTransfer.types.includes('Files')) {
+            return;
+          }
+
           event.preventDefault();
           setWorkspaceDragging(true);
         }}
         onDragLeave={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setWorkspaceDragging(false);
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+            setWorkspaceDragging(false);
+          }
         }}
         onDrop={(event) => {
           event.preventDefault();
@@ -493,8 +526,7 @@ export default function NoteToolPage() {
                   if (event.key === 'Enter') {
                     event.preventDefault();
                     commitDocumentName();
-                  }
-                  else if (event.key === 'Escape') {
+                  } else if (event.key === 'Escape') {
                     setDocumentNameDraft(documentName);
                     setRenamingDocument(false);
                   }
@@ -658,8 +690,11 @@ export default function NoteToolPage() {
             const request = nameRequest;
             const normalizedName = normalizeFileName(name, '.ojn');
             setNameRequest(null);
-            if (request.kind === 'new') createNew(normalizedName, true);
-            else void saveFiles(normalizedName, savePicker());
+            if (request.kind === 'new') {
+              createNew(normalizedName, true);
+            } else {
+              void saveFiles(normalizedName, savePicker());
+            }
           }}
         />
       ) : null}
@@ -682,8 +717,10 @@ function FpsCounter() {
         frames = 0;
         started = now;
       }
+
       animation = requestAnimationFrame(sample);
     };
+
     animation = requestAnimationFrame(sample);
     return () => cancelAnimationFrame(animation);
   }, []);
@@ -696,6 +733,7 @@ function releaseImage(image: PreviewImage | null, urls: Set<string>): null {
     URL.revokeObjectURL(image.url);
     urls.delete(image.url);
   }
+
   return null;
 }
 

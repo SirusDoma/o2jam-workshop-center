@@ -22,7 +22,9 @@ export function BpmInput({ value, onChange }: { value: number; onChange: (value:
       onChange={(event) => setDraft(normalizeDecimalInput(event.currentTarget))}
       onBlur={commit}
       onKeyDown={(event) => {
-        if (event.key === 'Enter') event.currentTarget.blur();
+        if (event.key === 'Enter') {
+          event.currentTarget.blur();
+        }
       }}
     />
   );

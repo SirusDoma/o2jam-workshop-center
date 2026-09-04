@@ -32,6 +32,7 @@ export const SAMPLE_LANE_KEYS = [
   'sample-29',
   'sample-30',
 ] as const;
+
 export const SAMPLE_LANE_COUNT = SAMPLE_LANE_KEYS.length;
 export const NOTE_AREA_LANE_KEYS = [
   'measure',
@@ -40,6 +41,7 @@ export const NOTE_AREA_LANE_KEYS = [
   ...NOTE_LANE_KEYS,
   ...SAMPLE_LANE_KEYS,
 ] as const;
+
 export const NOTE_AREA_LANE_GROUPS = [
   {
     label: 'Timing',
@@ -58,6 +60,7 @@ export const NOTE_AREA_LANE_GROUPS = [
     lanes: SAMPLE_LANE_KEYS.map((key, index) => ({ key, label: `Sample ${index + 1}` })),
   },
 ] as const;
+
 export const MAX_LANE_WIDTH = 1000;
 export const DEFAULT_NOTE_HEIGHT = 16;
 export const MAX_NOTE_HEIGHT = 64;
@@ -261,6 +264,7 @@ export function parseNoteToolSettings(value: unknown): NoteToolSettings | null {
     longNoteStyle: value.longNoteStyle,
     noteTemplate: value.noteTemplate,
   };
+
   return uniformAutoplayStyle ? updateNoteLaneSettings(settings, 'sample-1', lanes['sample-1']) : settings;
 }
 
@@ -287,9 +291,11 @@ export function formatNoteLabel(
     if (modifiers.includes('upper')) {
       return value.toUpperCase();
     }
+
     if (modifiers.includes('lower')) {
       return value.toLowerCase();
     }
+
     if (modifiers.some((modifier) => modifier !== 'upper' && modifier !== 'lower' && !/^\d+$/.test(modifier))) {
       return token;
     }

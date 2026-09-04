@@ -46,10 +46,16 @@ export type EventMovement = {
 };
 
 export function clampAutoplayToNoteLane(requested: number, sourceLane: number, lanes: readonly number[], laneCount: number): number | null {
-  if (lanes.length === 0) return null;
+  if (lanes.length === 0) {
+    return null;
+  }
+
   const minOffset = Math.min(...lanes) - sourceLane;
   const maxOffset = Math.max(...lanes) - sourceLane;
-  if (maxOffset - minOffset >= laneCount) return null;
+  if (maxOffset - minOffset >= laneCount) {
+    return null;
+  }
+
   return clamp(requested, -minOffset, laneCount - 1 - maxOffset);
 }
 
@@ -70,6 +76,7 @@ export function placeBpmChange(chart: EditorChart, event: EditorBpmChange): Edit
     .filter((item) => Math.abs(item.absolutePosition - event.absolutePosition) > EPSILON)
     .concat({ ...event, absolutePosition: nonNegative(event.absolutePosition), bpm: positive(event.bpm, 120) })
     .sort(byPosition);
+
   return withMeasureCount({ ...chart, bpmChanges });
 }
 
@@ -79,6 +86,7 @@ export function placeMeasureFraction(chart: EditorChart, event: EditorMeasureFra
     .filter((item) => item.measure !== normalized.measure)
     .concat(normalized)
     .sort((left, right) => left.measure - right.measure);
+
   return withMeasureCount({ ...chart, measureFractions });
 }
 
@@ -88,6 +96,7 @@ export function placeAutoplayNote(chart: EditorChart, event: AutoplayChartNote):
     .filter((item) => item.lane !== normalized.lane || Math.abs(item.absolutePosition - normalized.absolutePosition) > EPSILON)
     .concat(normalized)
     .sort(byPosition);
+
   return withMeasureCount({ ...chart, autoplayNotes });
 }
 
@@ -119,6 +128,7 @@ export function updateChartEvent(chart: EditorChart, selection: InspectorEvent, 
       if (!current) {
         return chart;
       }
+
       const next: EditorChartNote = normalizeAudioEvent({
         ...current,
         key: patch.key ?? current.key,
@@ -129,12 +139,15 @@ export function updateChartEvent(chart: EditorChart, selection: InspectorEvent, 
         pan: patch.pan ?? current.pan,
         ...(typeof patch.duration === 'number' ? { duration: patch.duration } : {}),
       });
+
       if (patch.duration === null) {
         delete next.duration;
       }
+
       const notes = chart.notes
         .filter((item) => item.id === selection.id || item.key !== next.key || Math.abs(item.absolutePosition - next.absolutePosition) > EPSILON)
         .map((item) => item.id === selection.id ? next : item);
+
       return withMeasureCount({ ...chart, notes });
     }
     case 'autoplay': {
@@ -142,10 +155,12 @@ export function updateChartEvent(chart: EditorChart, selection: InspectorEvent, 
       if (!current) {
         return chart;
       }
+
       const next = normalizeAudioEvent({ ...current, ...patch, lane: clamp(Math.round(patch.lane ?? current.lane), 1, SAMPLE_LANE_COUNT) });
       const autoplayNotes = chart.autoplayNotes
         .filter((item) => item.id === selection.id || item.lane !== next.lane || Math.abs(item.absolutePosition - next.absolutePosition) > EPSILON)
         .map((item) => item.id === selection.id ? next : item);
+
       return withMeasureCount({ ...chart, autoplayNotes });
     }
     case 'bpm': {
@@ -153,15 +168,18 @@ export function updateChartEvent(chart: EditorChart, selection: InspectorEvent, 
       if (!current) {
         return chart;
       }
+
       const next = {
         ...current,
         absolutePosition: nonNegative(patch.absolutePosition ?? current.absolutePosition),
         bpm: positive(patch.bpm ?? current.bpm, current.bpm),
       };
+
       const bpmChanges = chart.bpmChanges
         .filter((item) => item.id === selection.id || Math.abs(item.absolutePosition - next.absolutePosition) > EPSILON)
         .map((item) => item.id === selection.id ? next : item)
         .sort(byPosition);
+
       return withMeasureCount({ ...chart, bpmChanges });
     }
     case 'fraction': {
@@ -169,15 +187,18 @@ export function updateChartEvent(chart: EditorChart, selection: InspectorEvent, 
       if (!current) {
         return chart;
       }
+
       const next = {
         ...current,
         measure: Math.floor(nonNegative(patch.measure ?? current.measure)),
         fraction: positive(patch.fraction ?? current.fraction, current.fraction),
       };
+
       const measureFractions = chart.measureFractions
         .filter((item) => item.id === selection.id || item.measure !== next.measure)
         .map((item) => item.id === selection.id ? next : item)
         .sort((left, right) => left.measure - right.measure);
+
       return withMeasureCount({ ...chart, measureFractions });
     }
   }
@@ -206,6 +227,7 @@ export function moveChartEvents(
     const found = findChartEvent(chart, item);
     return found ? [found.kind === 'fraction' ? found.event.measure : found.event.absolutePosition] : [];
   });
+
   const requestedPositionDelta = Number.isFinite(movement.positionDelta) ? movement.positionDelta : 0;
   const minimumPosition = positions.length > 0 ? Math.min(...positions) : 0;
   const positionDelta = Math.max(requestedPositionDelta, -minimumPosition);
@@ -217,11 +239,13 @@ export function moveChartEvents(
     selectedNotes.map((note) => noteLanes.indexOf(note.key)),
     noteLanes.length,
   );
+
   const autoplayLaneDelta = clampLaneDelta(
     movement.autoplayLaneDelta ?? 0,
     selectedAutoplay.map((note) => note.lane - 1),
     SAMPLE_LANE_COUNT,
   );
+
   const convertedNotes = movement.noteToAutoplay
     ? selectedNotes.map((note): AutoplayChartNote => {
       const sourceLane = noteLanes.indexOf(movement.noteToAutoplay?.sourceLane ?? note.key);
@@ -234,10 +258,12 @@ export function moveChartEvents(
       };
     })
     : [];
+
   const convertedCells = new Set(convertedNotes.map((note) => `${note.lane}:${note.absolutePosition}`));
   const mainLane = movement.autoplayToNote
     ? clampAutoplayToNoteLane(noteLanes.indexOf(movement.autoplayToNote.targetLane), movement.autoplayToNote.sourceLane, selectedAutoplay.map((note) => note.lane), noteLanes.length)
     : null;
+
   const convertedAutoplay = mainLane !== null && movement.autoplayToNote
     ? selectedAutoplay.map((note): EditorChartNote => {
       const { lane, ...audioEvent } = note;
@@ -248,6 +274,7 @@ export function moveChartEvents(
       };
     })
     : [];
+
   const convertedMainCells = new Set(convertedAutoplay.map((note) => `${note.key}:${note.absolutePosition}`));
 
   return withMeasureCount({
@@ -256,9 +283,11 @@ export function moveChartEvents(
       if (!selected.has(eventKey({ kind: 'note', id: note.id }))) {
         return [note];
       }
+
       if (movement.noteToAutoplay) {
         return [];
       }
+
       const laneIndex = noteLanes.indexOf(note.key);
       return [{
         ...note,

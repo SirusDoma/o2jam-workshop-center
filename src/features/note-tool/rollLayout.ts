@@ -95,9 +95,11 @@ export function edgeScrollDelta(
   if (pointerY < viewportTop + edgeSize) {
     return -maxDelta * Math.min(1, (viewportTop + edgeSize - pointerY) / edgeSize);
   }
+
   if (pointerY > viewportBottom - edgeSize) {
     return maxDelta * Math.min(1, (pointerY - viewportBottom + edgeSize) / edgeSize);
   }
+
   return 0;
 }
 

@@ -44,6 +44,7 @@ export function chartNotes(chart: OjnChart): EditorChartNote[] {
     const release = note.kind === 'hold'
       ? releases.find((candidate) => candidate.lane === note.lane && candidate.position > note.position && !usedReleases.has(candidate.offset))
       : undefined;
+
     const duration = release ? release.position - note.position : undefined;
     if (release) {
       usedReleases.add(release.offset);
@@ -129,7 +130,10 @@ export function computeLegacyChartLevel(chart: EditorChart, baseBpm: number): nu
 
   for (const note of chart.notes) {
     const lane = LANE_KEYS.indexOf(note.key);
-    if (lane < 0) continue;
+    if (lane < 0) {
+      continue;
+    }
+
     const start = legacyPosition(note.absolutePosition);
     lanes[start.measure]?.[lane]?.set(start.tick, note.duration ? 2 : 0);
     if (note.duration) {
@@ -150,7 +154,10 @@ export function computeLegacyChartLevel(chart: EditorChart, baseBpm: number): nu
     for (let lane = 0; lane < LANE_KEYS.length; lane += 1) {
       for (let tick = 0; tick < 192; tick += 1) {
         const kind = lanes[measure]![lane]!.get(tick);
-        if (kind === undefined) continue;
+        if (kind === undefined) {
+          continue;
+        }
+
         const weight = kind === 0 ? 1 : 2;
         noteWeight += weight;
         if (!seenTicks.has(tick)) {
@@ -179,7 +186,9 @@ export function computeLegacyChartLevel(chart: EditorChart, baseBpm: number): nu
 
       const cells = lanes[measure]!.map((lane) => lane.get(tick));
       for (const kind of cells) {
-        if (kind === 3) activeLongNotes -= 1;
+        if (kind === 3) {
+          activeLongNotes -= 1;
+        }
       }
 
       let hasPrimary = false;
@@ -189,33 +198,45 @@ export function computeLegacyChartLevel(chart: EditorChart, baseBpm: number): nu
 
       for (let lane = 0; lane < cells.length; lane += 1) {
         const kind = cells[lane];
-        if (kind === undefined) continue;
+        if (kind === undefined) {
+          continue;
+        }
 
         if (!previousLanes[lane] || activeLongNotes !== 0) {
           primaryWeight += (hasPrimary ? 0.5 : 1) * (activeLongNotes !== 0 ? 2 : 1) * bpm / 150;
           hasPrimary = true;
-        }
-        else if (kind !== 0) {
+        } else if (kind !== 0) {
           primaryWeight += (hasPrimary ? 1 : 2) * bpm / 150;
           hasPrimary = true;
         }
 
         if (hasFirstNote || activeLongNotes !== 0) {
           let weight = hasChordWeight ? 0.5 : 1;
-          if (activeLongNotes !== 0) weight *= 2;
-          if (kind !== 0 && activeLongNotes !== 0) weight *= 2;
+          if (activeLongNotes !== 0) {
+            weight *= 2;
+          }
+
+          if (kind !== 0 && activeLongNotes !== 0) {
+            weight *= 2;
+          }
+
           chordWeight += weight * bpm / 150;
           hasChordWeight = true;
-        }
-        else {
+        } else {
           hasFirstNote = true;
         }
+
         currentLanes[lane] = true;
       }
 
-      if (hasFirstNote) previousLanes = currentLanes;
+      if (hasFirstNote) {
+        previousLanes = currentLanes;
+      }
+
       for (const kind of cells) {
-        if (kind === 2) activeLongNotes += 1;
+        if (kind === 2) {
+          activeLongNotes += 1;
+        }
       }
     }
     scores[measure] = (scores[measure] ?? 0) + (primaryWeight + chordWeight) / sampleCount;
@@ -285,13 +306,17 @@ function legacyPosition(value: number): { measure: number; tick: number } {
     measure += 1;
     tick = 0;
   }
+
   return { measure, tick };
 }
 
 function tempoBefore(changes: EditorChart['bpmChanges'], position: number, baseBpm: number): number {
   let bpm = baseBpm;
   for (const change of changes) {
-    if (change.absolutePosition >= position) break;
+    if (change.absolutePosition >= position) {
+      break;
+    }
+
     bpm = change.bpm;
   }
   return bpm;

@@ -31,6 +31,7 @@ export function chartPositionAtScaledPosition(position: number, fractions: reado
       .filter((item) => Number.isFinite(item.measure) && item.measure >= 0)
       .map((item) => [Math.floor(item.measure), measureFractionAt(Math.floor(item.measure), fractions)]),
   )].sort(([left], [right]) => left - right);
+
   let chartCursor = 0;
   let scaledCursor = 0;
 

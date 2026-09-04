@@ -21,14 +21,18 @@ export function classifyNoteToolFiles<T extends { name: string; }>(files: readon
   for (const file of files) {
     const extension = file.name.slice(file.name.lastIndexOf('.') + 1).toLowerCase();
     if (extension === 'ojn') {
-      if (ojn) duplicates.push(file);
-      else ojn = file;
-    }
-    else if (extension === 'ojm' || extension === 'omc' || extension === 'm30') {
-      if (ojm) duplicates.push(file);
-      else ojm = file;
-    }
-    else {
+      if (ojn) {
+        duplicates.push(file);
+      } else {
+        ojn = file;
+      }
+    } else if (extension === 'ojm' || extension === 'omc' || extension === 'm30') {
+      if (ojm) {
+        duplicates.push(file);
+      } else {
+        ojm = file;
+      }
+    } else {
       unsupported.push(file);
     }
   }
@@ -92,17 +96,25 @@ export function musicFileName(musicId: number, extension: 'ojn' | 'ojm'): string
 }
 
 export function noteToolStatesEqual(left: unknown, right: unknown): boolean {
-  if (Object.is(left, right)) return true;
+  if (Object.is(left, right)) {
+    return true;
+  }
+
   if (left instanceof ArrayBuffer && right instanceof ArrayBuffer) {
     return equalBytes(new Uint8Array(left), new Uint8Array(right));
   }
+
   if (ArrayBuffer.isView(left) && ArrayBuffer.isView(right)) {
     return equalBytes(
       new Uint8Array(left.buffer, left.byteOffset, left.byteLength),
       new Uint8Array(right.buffer, right.byteOffset, right.byteLength),
     );
   }
-  if (left === null || right === null || typeof left !== 'object' || typeof right !== 'object') return false;
+
+  if (left === null || right === null || typeof left !== 'object' || typeof right !== 'object') {
+    return false;
+  }
+
   if (Array.isArray(left) || Array.isArray(right)) {
     return Array.isArray(left) && Array.isArray(right)
       && left.length === right.length

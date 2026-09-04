@@ -94,6 +94,7 @@ export function NoteEditor({
     samples,
     endPosition,
   });
+
   const playbackLocked = playback.playing || seekingDuringPlayback;
   const keys: NoteLaneKey[] = keyMode === 3 ? [...NOTE_LANE_KEYS_3] : [...NOTE_LANE_KEYS];
   const selectedSampleId = selectedSample.id;
@@ -105,6 +106,7 @@ export function NoteEditor({
     setHiSpeed(value);
     onHiSpeedChange(value);
   }, [onHiSpeedChange]);
+
   useEffect(() => {
     onPlaybackChange(playbackLocked);
     if (playbackLocked) {
@@ -112,28 +114,34 @@ export function NoteEditor({
       setShiftLongNote(false);
     }
   }, [onPlaybackChange, playbackLocked]);
+
   useEffect(() => {
     setSelectedEvents([]);
     setPendingTimingEvent(null);
   }, [difficulty]);
+
   useEffect(() => {
     const press = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') {
         setSelectedEvents([]);
         return;
       }
+
       if (event.key === 'Shift' && tool === 'note' && !isEditableTarget(event.target)) {
         setShiftLongNote(true);
       }
     };
+
     const release = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Shift') {
         setShiftLongNote(false);
       }
     };
+
     const blur = () => {
       setShiftLongNote(false);
     };
+
     window.addEventListener('keydown', press);
     window.addEventListener('keyup', release);
     window.addEventListener('blur', blur);
@@ -155,6 +163,7 @@ export function NoteEditor({
     if (kind === 'note' && !key) {
       return;
     }
+
     const target = kind === 'note'
       ? findNote(editorNotes, key!, absolutePosition, tolerance)
       : kind === 'autoplay'
@@ -162,6 +171,7 @@ export function NoteEditor({
         : kind === 'bpm'
           ? chart.bpmChanges.find((item) => Math.abs(item.absolutePosition - absolutePosition) <= tolerance)
           : chart.measureFractions.find((item) => item.measure === event.measure);
+
     const targetSelection = target ? { kind, id: target.id } as InspectorEvent : null;
 
     if (tool === 'select') {
@@ -173,6 +183,7 @@ export function NoteEditor({
       if (!targetSelection) {
         return;
       }
+
       onChartChange(removeChartEvent(chart, targetSelection));
       setSelectedEvents((current) => current.filter((item) => item.kind !== targetSelection.kind || item.id !== targetSelection.id));
       return;
@@ -187,8 +198,10 @@ export function NoteEditor({
         position: event.position,
         defaultValue: defaultBpmAtPosition(chart, absolutePosition, baseBpm),
       });
+
       return;
     }
+
     if (kind === 'fraction') {
       setPendingTimingEvent({
         kind,
@@ -198,8 +211,10 @@ export function NoteEditor({
         position: event.position,
         defaultValue: target && 'fraction' in target ? target.fraction : DEFAULT_FRACTION_VALUE,
       });
+
       return;
     }
+
     const id = `placed-${Date.now()}-${noteSequence.current += 1}`;
     if (kind === 'autoplay') {
       onChartChange(placeAutoplayNote(chart, {
@@ -211,6 +226,7 @@ export function NoteEditor({
         volume: volumeLevelToPercent(Number(noteVolume)),
         pan: Number(notePan),
       }));
+
       setSelectedEvents([{ kind, id }]);
       return;
     }
@@ -245,6 +261,7 @@ export function NoteEditor({
       volume: volumeLevelToPercent(Number(noteVolume)),
       pan: Number(notePan),
     };
+
     onChartChange({ ...chart, notes: placeLongNote(editorNotes, note, event.endPosition) });
     setSelectedEvents([{ kind: 'note', id }]);
   };
@@ -265,14 +282,14 @@ export function NoteEditor({
         absolutePosition: pendingTimingEvent.absolutePosition,
         bpm: value,
       }));
-    }
-    else {
+    } else {
       onChartChange(placeMeasureFraction(chart, {
         id: pendingTimingEvent.id,
         measure: pendingTimingEvent.measure,
         fraction: value,
       }));
     }
+
     setSelectedEvents([{ kind: pendingTimingEvent.kind, id: pendingTimingEvent.id }]);
     setPendingTimingEvent(null);
   };
@@ -411,8 +428,7 @@ export function NoteEditor({
               setSelectedEvents((current) => current.map((event) => event.kind === 'note' && converted.has(event.id)
                 ? { kind: 'autoplay', id: event.id }
                 : event));
-            }
-            else if (movement.autoplayToNote) {
+            } else if (movement.autoplayToNote) {
               const converted = new Set(selection.filter((event) => event.kind === 'autoplay').map((event) => event.id));
               setSelectedEvents((current) => current.map((event) => event.kind === 'autoplay' && converted.has(event.id)
                 ? { kind: 'note', id: event.id }
@@ -596,5 +612,6 @@ function formatTimingLocation(event: PendingTimingEvent, gridDivision: number): 
   if (event.kind === 'fraction') {
     return `Measure ${measure}`;
   }
+
   return `Measure ${measure} · ${Math.round(event.position * gridDivision)}/${gridDivision}`;
 }

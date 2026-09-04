@@ -86,6 +86,7 @@ export function writeOjnFile(input: WriteOjnInput): Uint8Array {
     blockOffsetHx,
     coverOffset,
   };
+
   const writer = new ByteWriter(coverOffset + cover.byteLength + thumbnail.byteLength);
   writer.bytes(writeOjnHeader(header, input.encoding));
   writer.bytes(ex.bytes).bytes(nx.bytes).bytes(hx.bytes).bytes(cover).bytes(thumbnail);
@@ -114,8 +115,10 @@ export function writeOjmBank(samples: readonly OjmSample[], format: OjmFormat, e
     if (samples.some((sample) => sample.codec !== 'ogg')) {
       throw new FormatError('M30 accepts OGG samples only.');
     }
+
     return writeM30(samples, encryption);
   }
+
   return writeOjm(samples, format === 'omc');
 }
 
@@ -124,13 +127,16 @@ export function parseOjmBank(source: BinarySource): ParsedOjmBank {
   if (bytes.byteLength < 4) {
     throw new FormatError('OJM file is too small.', 0);
   }
+
   const signature = String.fromCharCode(bytes[0] ?? 0, bytes[1] ?? 0, bytes[2] ?? 0);
   if (signature === 'M30') {
     return parseM30(bytes);
   }
+
   if (signature === 'OJM' || signature === 'OMC') {
     return parseLegacyOjm(bytes, signature === 'OMC');
   }
+
   throw new FormatError('Unknown OJM signature.', 0);
 }
 
@@ -138,6 +144,7 @@ function writeOjm(samples: readonly OjmSample[], encrypted: boolean): Uint8Array
   if (samples.some((sample) => sample.codec !== sample.type)) {
     throw new FormatError('OMC/OJM WAV and OGG banks require matching audio codecs.');
   }
+
   const wav = samples.filter((sample) => sample.type === 'wav').sort((left, right) => left.id - right.id);
   const ogg = samples.filter((sample) => sample.type === 'ogg').sort((left, right) => left.id - right.id);
   const wavCount = wav.length === 0 ? 0 : Math.max(...wav.map((sample) => sample.id)) + 1;
@@ -152,6 +159,7 @@ function writeOjm(samples: readonly OjmSample[], encrypted: boolean): Uint8Array
       wavWriter.zeros(56);
       continue;
     }
+
     const wavData = parseWav(sample.data);
     let pcm = wavData.data;
     if (encrypted) {
@@ -159,6 +167,7 @@ function writeOjm(samples: readonly OjmSample[], encrypted: boolean): Uint8Array
       pcm = rearrangeOmc(encoded.bytes, true);
       omcState = encoded.state;
     }
+
     wavWriter.fixedString(sample.name, 32, 'euc-kr');
     wavWriter.u16(wavData.audioFormat).u16(wavData.channels).u32(wavData.sampleRate).u32(wavData.byteRate);
     wavWriter.u16(wavData.blockAlign).u16(wavData.bitsPerSample).u32(0x61746164).u32(pcm.byteLength).bytes(pcm);
@@ -170,6 +179,7 @@ function writeOjm(samples: readonly OjmSample[], encrypted: boolean): Uint8Array
       oggWriter.zeros(36);
       continue;
     }
+
     const data = asBytes(sample.data);
     oggWriter.fixedString(sample.name, 32, 'euc-kr').u32(data.byteLength).bytes(data);
   }
@@ -202,6 +212,7 @@ function parseLegacyOjm(bytes: Uint8Array, encrypted: boolean): ParsedOjmBank {
   if (bytes.byteLength < 20) {
     throw new FormatError('OJM header is truncated.', 0);
   }
+
   const reader = new ByteReader(bytes).seek(4);
   reader.i16();
   reader.i16();
@@ -211,6 +222,7 @@ function parseLegacyOjm(bytes: Uint8Array, encrypted: boolean): ParsedOjmBank {
   if (wavStart < 20 || oggStart < wavStart || fileSize < oggStart) {
     throw new FormatError('OJM section offsets are invalid.', 8);
   }
+
   const samples: OjmSample[] = [];
   let offset = wavStart;
   let id = 0;
@@ -219,6 +231,7 @@ function parseLegacyOjm(bytes: Uint8Array, encrypted: boolean): ParsedOjmBank {
     if (offset + 56 > oggStart) {
       throw new FormatError('OJM WAV header is truncated.', offset);
     }
+
     const entry = new ByteReader(bytes).seek(offset);
     const name = sampleName(entry.bytes(32), 'wav', id);
     const audioFormat = entry.u16();
@@ -233,6 +246,7 @@ function parseLegacyOjm(bytes: Uint8Array, encrypted: boolean): ParsedOjmBank {
     if (offset + size > oggStart) {
       throw new FormatError('OJM WAV sample is truncated.', offset);
     }
+
     if (size > 0) {
       let pcm: Uint8Array = bytes.slice(offset, offset + size);
       if (encrypted) {
@@ -241,9 +255,11 @@ function parseLegacyOjm(bytes: Uint8Array, encrypted: boolean): ParsedOjmBank {
         pcm = decoded.bytes;
         omcState = decoded.state;
       }
+
       const data = buildWav({ audioFormat, channels, sampleRate, byteRate, blockAlign, bitsPerSample, data: pcm });
       samples.push({ id, name, type: 'wav', codec: 'wav', size: data.byteLength, mime: 'audio/wav', data: ownedBuffer(data) });
     }
+
     offset += size;
     id += 1;
   }
@@ -253,6 +269,7 @@ function parseLegacyOjm(bytes: Uint8Array, encrypted: boolean): ParsedOjmBank {
     if (offset + 36 > fileSize) {
       throw new FormatError('OJM OGG header is truncated.', offset);
     }
+
     const entry = new ByteReader(bytes).seek(offset);
     const name = sampleName(entry.bytes(32), 'ogg', id);
     const size = entry.u32();
@@ -260,10 +277,12 @@ function parseLegacyOjm(bytes: Uint8Array, encrypted: boolean): ParsedOjmBank {
     if (offset + size > fileSize) {
       throw new FormatError('OJM OGG sample is truncated.', offset);
     }
+
     if (size > 0) {
       const data = bytes.slice(offset, offset + size);
       samples.push({ id, name, type: 'ogg', codec: 'ogg', size, mime: 'audio/ogg', data: ownedBuffer(data) });
     }
+
     offset += size;
     id += 1;
   }
@@ -274,6 +293,7 @@ function parseM30(bytes: Uint8Array): ParsedOjmBank {
   if (bytes.byteLength < 28) {
     throw new FormatError('M30 header is truncated.', 0);
   }
+
   const reader = new ByteReader(bytes).seek(4);
   reader.i32();
   const flag = reader.i32();
@@ -285,15 +305,18 @@ function parseM30(bytes: Uint8Array): ParsedOjmBank {
   if (!encryption) {
     throw new FormatError(`Unsupported M30 encryption flag ${flag}.`, 8);
   }
+
   if (count < 0 || sampleOffset < 28 || sampleOffset > bytes.byteLength) {
     throw new FormatError('M30 header values are invalid.', 12);
   }
+
   const samples: OjmSample[] = [];
   let offset = sampleOffset;
   for (let index = 0; index < count; index += 1) {
     if (offset + 52 > bytes.byteLength) {
       throw new FormatError('M30 sample header is truncated.', offset);
     }
+
     const entry = new ByteReader(bytes).seek(offset);
     const nameBytes = entry.bytes(32);
     const size = entry.i32();
@@ -307,6 +330,7 @@ function parseM30(bytes: Uint8Array): ParsedOjmBank {
     if (size < 0 || offset + size > bytes.byteLength) {
       throw new FormatError('M30 sample is truncated.', offset);
     }
+
     const id = codec === 0 ? 1000 + ref : ref;
     const type = id >= 1000 ? 'ogg' as const : 'wav' as const;
     const encryptedData = bytes.slice(offset, offset + size);
@@ -332,6 +356,7 @@ function parseWav(source: BinarySource): WavData {
   if (bytes.byteLength < 44 || textAt(bytes, 0, 4) !== 'RIFF' || textAt(bytes, 8, 4) !== 'WAVE') {
     throw new FormatError('WAV sample has an invalid RIFF header.', 0);
   }
+
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   let format: Omit<WavData, 'data'> | null = null;
   let data: Uint8Array | null = null;
@@ -342,6 +367,7 @@ function parseWav(source: BinarySource): WavData {
     if (body + size > bytes.byteLength) {
       throw new FormatError('WAV chunk is truncated.', offset);
     }
+
     if (id === 'fmt ' && size >= 16) {
       format = {
         audioFormat: view.getUint16(body, true),
@@ -351,15 +377,16 @@ function parseWav(source: BinarySource): WavData {
         blockAlign: view.getUint16(body + 12, true),
         bitsPerSample: view.getUint16(body + 14, true),
       };
-    }
-    else if (id === 'data') {
+    } else if (id === 'data') {
       data = bytes.slice(body, body + size);
     }
+
     offset = body + size + (size & 1);
   }
   if (!format || !data) {
     throw new FormatError('WAV sample needs fmt and data chunks.', 12);
   }
+
   return { ...format, data };
 }
 
@@ -401,6 +428,7 @@ const M30_SCRAMBLE_16 = [
   [10, 6, 9, 12, 11, 7, 8, 0, 15, 3, 1, 2, 5, 13, 14, 4],
   [13, 0, 1, 14, 2, 3, 8, 11, 7, 12, 9, 5, 10, 15, 4, 6],
 ] as const;
+
 const M30_SCRAMBLE_17_INSERT = [0, 14, 10, 7, 11, 3, 1, 2, 4, 9, 12, 13, 8, 6, 5, 16] as const;
 const M30_SCRAMBLE_17_LAST = [1, 14, 2, 3, 13, 11, 7, 0, 8, 12, 9, 6, 15, 16, 5, 10, 4] as const;
 
@@ -451,6 +479,7 @@ function scrambleM30(source: Uint8Array, divisor: 16 | 17, encode: boolean): Uin
   const key = divisor === 16
     ? M30_SCRAMBLE_16[remainder]!
     : m30Scramble17Key(remainder);
+
   const result = new Uint8Array(source.byteLength);
   for (let index = 0; index < divisor; index += 1) {
     const shuffledIndex = key[index]!;
@@ -466,6 +495,7 @@ function m30Scramble17Key(remainder: number): readonly number[] {
   if (remainder === 16) {
     return M30_SCRAMBLE_17_LAST;
   }
+
   const key: number[] = [...M30_SCRAMBLE_16[remainder]!];
   key.splice(M30_SCRAMBLE_17_INSERT[remainder]!, 0, 16);
   return key;
@@ -506,6 +536,7 @@ function rearrangeOmc(source: Uint8Array, encode = false): Uint8Array {
   if (blockSize === 0) {
     return source.slice();
   }
+
   const result = source.slice();
   let key = ((source.byteLength % 17) << 4) + source.byteLength % 17;
   for (let block = 0; block < 17; block += 1) {
@@ -524,6 +555,7 @@ function sampleName(bytes: Uint8Array, extension: 'wav' | 'ogg', id: number): st
   if (!decoded) {
     return fallback;
   }
+
   return decoded.includes('.') ? decoded : `${decoded}.${extension}`;
 }
 
@@ -566,6 +598,7 @@ function encodeChart(chart: EditorChart, baseBpm: number): EncodedChart {
     block.cells.set(slot, cell);
     blocks.set(key, block);
   };
+
   let eventCount = 0;
 
   for (const event of chart.measureFractions) {
@@ -582,6 +615,7 @@ function encodeChart(chart: EditorChart, baseBpm: number): EncodedChart {
     if (lane < 0) {
       continue;
     }
+
     const background = note.sampleType === 'ogg';
     const start = splitPosition(note.absolutePosition);
     addCell(start.measure, lane + 2, EVENT_SLOTS, start.slot, noteCell(note.sampleId, note.volume, note.pan, background, note.duration ? 2 : 0));
@@ -606,8 +640,7 @@ function encodeChart(chart: EditorChart, baseBpm: number): EncodedChart {
       const cell = block.cells.get(slot);
       if (block.channel <= 1) {
         writer.f32(cell?.value ?? 0);
-      }
-      else {
+      } else {
         writer.u16(cell?.sampleId ?? 0).i8(cell?.audio ?? 0).i8(cell?.type ?? 0);
       }
     }
@@ -619,6 +652,7 @@ function encodeChart(chart: EditorChart, baseBpm: number): EncodedChart {
     chart.bpmChanges.map((event) => ({ position: event.absolutePosition, bpm: event.bpm })),
     chart.measureFractions,
   )));
+
   return {
     bytes: writer.toUint8Array(),
     blockCount: ordered.length,
@@ -637,6 +671,7 @@ function splitPosition(value: number): { measure: number; slot: number } {
     measure += 1;
     slot = 0;
   }
+
   return { measure, slot };
 }
 
