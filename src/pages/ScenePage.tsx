@@ -55,6 +55,7 @@ import {
   selectedRectangles,
   type DecodeCache,
 } from '../features/scene/sceneUtils';
+import { revertSpriteFrameBounds, spriteFrameBoundsChanged } from '../features/scene/spriteBounds';
 
 export default function ScenePage() {
   const { files, add, remove } = useWorkspace();
@@ -895,12 +896,22 @@ export default function ScenePage() {
     dissolvedSets.size > 0 ||
     Object.keys(boundFiles).length > 0;
 
+  const activeSpriteNames = new Set(effControls.map((control) => control.sprite.toLowerCase()).filter(Boolean));
+  const spriteBoundsEdited = [...activeSpriteNames].some((name) => {
+    if (spriteEdits[name]) {
+      return true;
+    }
+
+    const frames = spriteFrames[name];
+    return !!frames && spriteFrameBoundsChanged(frames, readSpriteFrames(name));
+  });
   const boundsEdited =
     !!active &&
     (Object.keys(boundEdits).some((k) => k.startsWith(`${active.name}:`)) ||
       (extraRects[active.name]?.length ?? 0) > 0 ||
       [...removedRects].some((k) => k.startsWith(`${active.name}:`)) ||
-      boundFiles[active.name] !== undefined);
+      boundFiles[active.name] !== undefined ||
+      spriteBoundsEdited);
 
   const revertBounds = () => {
     if (!active) {
@@ -918,6 +929,29 @@ export default function ScenePage() {
       return n;
     });
     setRemovedRects((s) => new Set([...s].filter((k) => !k.startsWith(`${active.name}:`))));
+    setSpriteEdits((edits) => Object.fromEntries(Object.entries(edits).filter(([name]) => !activeSpriteNames.has(name))));
+    setSpriteFrames((overrides) => {
+      const next = { ...overrides };
+      for (const name of activeSpriteNames) {
+        const frames = next[name];
+        if (!frames) {
+          continue;
+        }
+
+        const original = readSpriteFrames(name);
+        if (!spriteFrameBoundsChanged(frames, original)) {
+          continue;
+        }
+
+        const reverted = revertSpriteFrameBounds(frames, original);
+        if (reverted) {
+          next[name] = reverted;
+        } else {
+          delete next[name];
+        }
+      }
+      return next;
+    });
     setBoundFiles((m) => {
       if (!(active.name in m)) {
         return m;
