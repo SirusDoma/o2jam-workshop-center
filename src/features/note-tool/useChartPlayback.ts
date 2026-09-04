@@ -225,7 +225,13 @@ export function useChartPlayback({
     setPlaying(true);
 
     const update = () => {
-      const elapsed = Math.max(0, audioContext.currentTime - startedAt.current);
+      const outputTimestamp = audioContext.getOutputTimestamp();
+      const renderedTime = outputTimestamp.contextTime ?? 0;
+      const outputTime = renderedTime > 0
+        ? renderedTime
+        : audioContext.currentTime - audioContext.baseLatency - audioContext.outputLatency;
+
+      const elapsed = Math.max(0, outputTime - startedAt.current);
       const next = secondsToPosition(startedFromSeconds.current + elapsed, baseBpm, bpmChanges, measureFractions);
 
       if (next >= endPosition) {
