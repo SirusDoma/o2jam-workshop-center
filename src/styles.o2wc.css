@@ -1294,7 +1294,6 @@ select.secinput {
 .nt-dialogs .overlay { z-index: 130; }
 .nt-companion-file-button { flex-shrink: 0; width: 26px; height: 26px; }
 .nt-companion-file-button svg { width: 13px; height: 13px; }
-.nt-file-message { overflow: hidden; max-width: 42ch; font-size: 10px; color: var(--ink-3); text-overflow: ellipsis; white-space: nowrap; }
 .nt-filebar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .nt-fps { display: inline-flex; align-items: center; justify-content: center; min-width: 52px; min-height: 30px; padding: 0 7px; font-size: 9px; color: var(--ink-2); background: var(--code-bg); border: 1px solid var(--border); border-radius: 2px; }
 .nt-maximize-toggle svg { width: 15px; height: 15px; }

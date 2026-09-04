@@ -6,13 +6,14 @@ interface ConfirmDialogProps {
   body: string;
   confirmLabel: string;
   confirmTone?: 'danger' | 'primary';
+  cancelLabel?: string | null;
   secondaryLabel?: string;
   onConfirm: () => void;
   onSecondary?: () => void;
   onClose: () => void;
 }
 
-export function ConfirmDialog({ title, body, confirmLabel, confirmTone = 'danger', secondaryLabel, onConfirm, onSecondary, onClose }: ConfirmDialogProps) {
+export function ConfirmDialog({ title, body, confirmLabel, confirmTone = 'danger', cancelLabel = 'Cancel', secondaryLabel, onConfirm, onSecondary, onClose }: ConfirmDialogProps) {
   const downOnScrim = useRef(false);
   return (
     <div
@@ -42,9 +43,11 @@ export function ConfirmDialog({ title, body, confirmLabel, confirmTone = 'danger
         <div className="confirm-body">
           <p>{body}</p>
           <div className="confirm-actions">
-            <button className="btn" type="button" onClick={onClose}>
-              Cancel
-            </button>
+            {cancelLabel ? (
+              <button className="btn" type="button" onClick={onClose}>
+                {cancelLabel}
+              </button>
+            ) : null}
             {secondaryLabel && onSecondary && (
               <button className="btn" type="button" onClick={onSecondary}>
                 {secondaryLabel}

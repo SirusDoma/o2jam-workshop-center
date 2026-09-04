@@ -67,7 +67,7 @@ export function NoteEditor({
   onPlaybackChange: (playing: boolean) => void;
   onChartChange: (chart: EditorChart) => void;
 }) {
-  const [tool, setTool] = useState<EditTool>('note');
+  const [tool, setTool] = useState<EditTool>('select');
   const [longNote, setLongNote] = useState(false);
   const [noteVolume, setNoteVolume] = useState('16');
   const [notePan, setNotePan] = useState('0');

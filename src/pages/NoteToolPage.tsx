@@ -96,7 +96,7 @@ export default function NoteToolPage() {
   const [ojmFormat, setOjmFormat] = useState<OjmFormat>('omc');
   const [ojmEncryption, setOjmEncryption] = useState<OjmEncryption>('none');
   const [encoding, setEncoding] = useState<O2Encoding>('ascii');
-  const [fileMessage, setFileMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [editorRevision, setEditorRevision] = useState(0);
   const [dirty, setDirty] = useState(false);
   const [cleanRevision, setCleanRevision] = useState(0);
@@ -134,10 +134,6 @@ export default function NoteToolPage() {
       setSettingsStorageMessage('Settings could not be saved in this browser.');
     }
   }, [effectiveSettings]);
-
-  useEffect(() => {
-    setFileMessage(null);
-  }, [ojmFormat, ojmEncryption]);
 
   const clearImages = () => {
     setCoverImage((current) => releaseImage(current, imageUrls.current));
@@ -189,7 +185,7 @@ export default function NoteToolPage() {
     setOjmEncryption('none');
     setEncoding('ascii');
     setPreviewImage(null);
-    setFileMessage(null);
+    setErrorMessage(null);
     markDocumentCleanAfterRender();
     hiSpeed.current = '1.0';
     setEditorRevision((revision) => revision + 1);
@@ -197,12 +193,12 @@ export default function NoteToolPage() {
 
   const loadOjn = async (file: File, preserveSampleBank = false): Promise<boolean> => {
     if (!file.name.toLowerCase().endsWith('.ojn')) {
-      setFileMessage('Select an OJN file.');
+      setErrorMessage('Select an OJN file.');
       return false;
     }
 
     if (file.size > MAX_OJN_BYTES) {
-      setFileMessage(`${file.name} is larger than 128 MB.`);
+      setErrorMessage(`${file.name} is larger than 128 MB.`);
       return false;
     }
 
@@ -250,14 +246,14 @@ export default function NoteToolPage() {
       return true;
     }
     catch (error) {
-      setFileMessage(error instanceof Error ? `OJN could not be loaded: ${error.message}` : 'OJN could not be loaded.');
+      setErrorMessage(error instanceof Error ? `OJN could not be loaded: ${error.message}` : 'OJN could not be loaded.');
       return false;
     }
   };
 
   const loadOjm = async (file: File): Promise<boolean> => {
     if (file.size > MAX_SAMPLE_BANK_BYTES) {
-      setFileMessage(`${file.name} is larger than 512 MB.`);
+      setErrorMessage(`${file.name} is larger than 512 MB.`);
       return false;
     }
 
@@ -275,7 +271,7 @@ export default function NoteToolPage() {
       return true;
     }
     catch (error) {
-      setFileMessage(error instanceof Error ? `OJM could not be loaded: ${error.message}` : 'OJM could not be loaded.');
+      setErrorMessage(error instanceof Error ? `OJM could not be loaded: ${error.message}` : 'OJM could not be loaded.');
       return false;
     }
   };
@@ -336,12 +332,12 @@ export default function NoteToolPage() {
     const selected = classifyNoteToolFiles(files);
     const selectedCount = Number(Boolean(selected.ojn)) + Number(Boolean(selected.ojm));
     if (files.length > 2 || selected.unsupported.length > 0 || selected.duplicates.length > 0 || selectedCount !== files.length) {
-      setFileMessage('Open at most one OJN and one OJM file.');
+      setErrorMessage('Open at most one OJN and one OJM file.');
       return;
     }
 
     if (!selected.ojn && !selected.ojm) {
-      setFileMessage('Select an OJN or OJM file.');
+      setErrorMessage('Select an OJN or OJM file.');
       return;
     }
 
@@ -370,7 +366,7 @@ export default function NoteToolPage() {
         return;
       }
 
-      setFileMessage(error instanceof Error ? `Files could not be opened: ${error.message}` : 'Files could not be opened.');
+      setErrorMessage(error instanceof Error ? `Files could not be opened: ${error.message}` : 'Files could not be opened.');
     }
   };
 
@@ -397,7 +393,7 @@ export default function NoteToolPage() {
         if (error instanceof DOMException && error.name === 'AbortError') {
           finishCompanionBrowse(null);
         } else {
-          setFileMessage(error instanceof Error ? `Companion file could not be opened: ${error.message}` : 'Companion file could not be opened.');
+          setErrorMessage(error instanceof Error ? `Companion file could not be opened: ${error.message}` : 'Companion file could not be opened.');
         }
       }
 
@@ -422,7 +418,7 @@ export default function NoteToolPage() {
     catch (error) {
       input.removeEventListener('cancel', handleCancel);
       companionCancelHandler.current = null;
-      setFileMessage(error instanceof Error ? `Companion file could not be opened: ${error.message}` : 'Companion file could not be opened.');
+      setErrorMessage(error instanceof Error ? `Companion file could not be opened: ${error.message}` : 'Companion file could not be opened.');
     }
   };
 
@@ -439,7 +435,6 @@ export default function NoteToolPage() {
   const finishCompanionBrowse = (file: File | null) => {
     const request = companionRequest.current;
     clearCompanionBrowse();
-    setFileMessage(null);
 
     if (!request) {
       return;
@@ -448,7 +443,7 @@ export default function NoteToolPage() {
     if (!request.first) {
       if (file) {
         if (!file.name.toLowerCase().endsWith('.ojn')) {
-          setFileMessage('Select an OJN file.');
+          setErrorMessage('Select an OJN file.');
           return;
         }
 
@@ -461,7 +456,7 @@ export default function NoteToolPage() {
     const files = file ? [request.first, file] : [request.first];
     const selected = classifyNoteToolFiles(files);
     if (selected.unsupported.length > 0 || selected.duplicates.length > 0) {
-      setFileMessage(`Select an ${request.expected.toUpperCase()} file.`);
+      setErrorMessage(`Select an ${request.expected.toUpperCase()} file.`);
       return;
     }
 
@@ -490,7 +485,7 @@ export default function NoteToolPage() {
       });
 
       setDirty(true);
-    }).catch(() => setFileMessage(`${label} could not be loaded.`));
+    }).catch(() => setErrorMessage(`${label} could not be loaded.`));
   };
 
   const removeImage = (label: PreviewImage['label']) => {
@@ -554,7 +549,7 @@ export default function NoteToolPage() {
 
   const chooseOjmFormat = (next: OjmFormat, encryption: OjmEncryption = next === 'm30' ? 'nami' : 'none') => {
     if (next === 'm30' && samples.some((sample) => sample.type === 'wav')) {
-      setFileMessage('Remove WAV samples before switching to M30.');
+      setErrorMessage('Remove WAV samples before switching to M30.');
       return;
     }
 
@@ -565,7 +560,6 @@ export default function NoteToolPage() {
       setSelectedSample({ id: sampleSlotIds('ogg')[0] ?? 1000, type: 'ogg' });
     }
 
-    setFileMessage(null);
   };
 
   const suggestedOjnName = () => musicFileName(metadata.musicId, 'ojn');
@@ -641,7 +635,6 @@ export default function NoteToolPage() {
       setOjnFileLoaded(true);
       setOjmFileLoaded(true);
       setRenamingDocument(false);
-      setFileMessage(null);
       markDocumentCleanAfterRender();
     }
     catch (error) {
@@ -649,7 +642,7 @@ export default function NoteToolPage() {
         return;
       }
 
-      setFileMessage(error instanceof Error ? `Save failed: ${error.message}` : 'Save failed.');
+      setErrorMessage(error instanceof Error ? `Save failed: ${error.message}` : 'Save failed.');
     }
   };
 
@@ -720,7 +713,7 @@ export default function NoteToolPage() {
         onDrop={(event) => {
           event.preventDefault();
           setWorkspaceDragging(false);
-          void collectDropped(event.dataTransfer).then((files) => requestOpenFiles(files, true)).catch(() => setFileMessage('Dropped files could not be read.'));
+          void collectDropped(event.dataTransfer).then((files) => requestOpenFiles(files, true)).catch(() => setErrorMessage('Dropped files could not be read.'));
         }}
       >
         {workspaceDragging ? (
@@ -782,7 +775,6 @@ export default function NoteToolPage() {
                 <FolderOpen aria-hidden="true" />
               </button>
             ) : null}
-            {fileMessage ? <span className="nt-file-message" role="status">{fileMessage}</span> : null}
           </div>
           <div className="nt-filebar-actions">
             <FpsCounter />
@@ -905,6 +897,18 @@ export default function NoteToolPage() {
       ) : null}
 
       <div className="nt-dialogs">
+        {errorMessage ? (
+          <ConfirmDialog
+            title="Error"
+            body={errorMessage}
+            confirmLabel="OK"
+            confirmTone="primary"
+            cancelLabel={null}
+            onClose={() => setErrorMessage(null)}
+            onConfirm={() => setErrorMessage(null)}
+          />
+        ) : null}
+
         {pendingAction ? (
           <ConfirmDialog
             title="Unsaved changes"
