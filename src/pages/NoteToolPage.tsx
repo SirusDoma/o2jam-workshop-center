@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type CSSProperties, type DragEvent, type KeyboardEvent, type PointerEvent } from 'react';
-import { FilePlus2, FolderOpen, Maximize2, Minimize2, Save, Settings2, Upload, X } from 'lucide-react';
+import { FilePlus2, FolderOpen, Maximize2, Minimize2, Save, Settings2, TriangleAlert, Upload, X } from 'lucide-react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { collectDropped } from '../components/DropZone';
 import { ChartSidebar } from '../components/note-tool/ChartSidebar';
@@ -23,9 +23,22 @@ const MAX_OJN_BYTES = 128 * 1024 * 1024;
 
 type PendingFileAction =
   | { kind: 'new' | 'close'; }
-  | { kind: 'open'; ojn: File | null; ojm: File | null; };
+  | { kind: 'open'; ojn: File | null; ojm: File | null; replaceDocument: boolean; findCompanion?: boolean; };
+
+type CompanionRequest = {
+  first: File | null;
+  expected: 'ojn' | 'ojm';
+  suggestedName: string;
+};
 
 type SavePickerWindow = Window & { showSaveFilePicker?: SaveFilePicker; };
+
+type OpenPickerWindow = Window & {
+  showOpenFilePicker?: (options: {
+    multiple: boolean;
+    types: Array<{ description: string; accept: Record<string, string[]>; }>;
+  }) => Promise<Array<{ getFile: () => Promise<File>; }>>;
+};
 
 type NameRequest = {
   kind: 'new' | 'save';
@@ -70,6 +83,9 @@ export default function NoteToolPage() {
   const [levels, setLevels] = useState<Record<Difficulty, number>>({ EX: 0, NX: 0, HX: 0 });
   const [editorDocument, setEditorDocument] = useState<EditorDocument>(emptyEditorDocument);
   const [loaded, setLoaded] = useState<LoadedChart | null>(null);
+  const [ojnFileLoaded, setOjnFileLoaded] = useState(true);
+  const [ojmFileLoaded, setOjmFileLoaded] = useState(true);
+  const [filesLoading, setFilesLoading] = useState(false);
   const [documentName, setDocumentName] = useState('Untitled.ojn');
   const [documentNameDraft, setDocumentNameDraft] = useState('Untitled.ojn');
   const [documentNameAccepted, setDocumentNameAccepted] = useState(false);
@@ -86,11 +102,15 @@ export default function NoteToolPage() {
   const [cleanRevision, setCleanRevision] = useState(0);
   const [workspaceDragging, setWorkspaceDragging] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingFileAction | null>(null);
+  const [companionPending, setCompanionPending] = useState<CompanionRequest | null>(null);
   const [nameRequest, setNameRequest] = useState<NameRequest | null>(null);
   const [playbackActive, setPlaybackActive] = useState(false);
   const hiSpeed = useRef('1.0');
   const panelDrag = useRef({ x: 0, width: 250 });
   const ojnInput = useRef<HTMLInputElement>(null);
+  const companionInput = useRef<HTMLInputElement>(null);
+  const companionRequest = useRef<CompanionRequest | null>(null);
+  const companionCancelHandler = useRef<(() => void) | null>(null);
   const imageUrls = useRef(new Set<string>());
   const cleanDocumentState = useRef<unknown>(null);
   const captureCleanDocumentState = useRef(true);
@@ -130,7 +150,24 @@ export default function NoteToolPage() {
     setCleanRevision((revision) => revision + 1);
   };
 
+  const clearCompanionBrowse = () => {
+    const input = companionInput.current;
+    const cancelHandler = companionCancelHandler.current;
+    if (input && cancelHandler) {
+      input.removeEventListener('cancel', cancelHandler);
+    }
+
+    if (input) {
+      input.value = '';
+    }
+
+    companionCancelHandler.current = null;
+    companionRequest.current = null;
+    setCompanionPending(null);
+  };
+
   const createNew = (name = 'Untitled.ojn', nameAccepted = false) => {
+    clearCompanionBrowse();
     clearImages();
     setDifficulty('EX');
     setKeyMode(7);
@@ -139,6 +176,8 @@ export default function NoteToolPage() {
     setLevels({ EX: 0, NX: 0, HX: 0 });
     setEditorDocument(emptyEditorDocument());
     setLoaded(null);
+    setOjnFileLoaded(true);
+    setOjmFileLoaded(true);
     setDocumentName(name);
     setDocumentNameDraft(name);
     setDocumentNameAccepted(nameAccepted);
@@ -156,7 +195,7 @@ export default function NoteToolPage() {
     setEditorRevision((revision) => revision + 1);
   };
 
-  const loadOjn = async (file: File): Promise<boolean> => {
+  const loadOjn = async (file: File, preserveSampleBank = false): Promise<boolean> => {
     if (!file.name.toLowerCase().endsWith('.ojn')) {
       setFileMessage('Select an OJN file.');
       return false;
@@ -176,21 +215,35 @@ export default function NoteToolPage() {
       clearImages();
       const nextCover = parsed.cover ? imageFromOjn('Cover Image', parsed.cover.bytes, parsed.cover.mime, imageUrls.current) : null;
       const nextThumbnail = parsed.thumbnail ? imageFromOjn('Thumbnail Image', parsed.thumbnail.bytes, parsed.thumbnail.mime, imageUrls.current) : null;
+      const nextMetadata = metadataFromOjn(parsed);
+      if (!parsed.header.ojm.trim()) {
+        nextMetadata.ojmFileName = replaceFileExtension(file.name, '.ojm');
+      }
+
+      if (preserveSampleBank) {
+        nextMetadata.ojmFileName = metadata.ojmFileName;
+      }
+
       setCoverImage(nextCover);
       setThumbnailImage(nextThumbnail);
-      setMetadata(metadataFromOjn(parsed));
+      setMetadata(nextMetadata);
       setLevels({ EX: parsed.header.levelEx, NX: parsed.header.levelNx, HX: parsed.header.levelHx });
       setEditorDocument(document);
       setLoaded({ name: file.name, file: parsed });
+      setOjnFileLoaded(true);
       setDocumentName(file.name);
       setDocumentNameDraft(file.name);
       setDocumentNameAccepted(true);
       setOjmNameAccepted(true);
       setRenamingDocument(false);
-      setSamples([]);
-      setSelectedSample({ id: 0, type: 'wav' });
-      setOjmFormat('omc');
-      setOjmEncryption('none');
+      if (!preserveSampleBank) {
+        setOjmFileLoaded(false);
+        setSamples([]);
+        setSelectedSample({ id: 0, type: 'wav' });
+        setOjmFormat('omc');
+        setOjmEncryption('none');
+      }
+
       setEncoding(detectedEncoding);
       hiSpeed.current = '1.0';
       setEditorRevision((revision) => revision + 1);
@@ -211,6 +264,7 @@ export default function NoteToolPage() {
     try {
       const parsed = parseOjmBank(await file.arrayBuffer());
       setSamples(parsed.samples);
+      setOjmFileLoaded(true);
       setMetadata((current) => ({ ...current, ojmFileName: file.name }));
       setOjmNameAccepted(true);
       setOjmFormat(parsed.format);
@@ -218,7 +272,6 @@ export default function NoteToolPage() {
       const first = parsed.samples[0];
       const firstType = first?.type ?? 'wav';
       setSelectedSample({ id: first?.id ?? sampleSlotIds(firstType)[0] ?? 0, type: firstType });
-      setFileMessage(`${file.name} loaded with ${parsed.samples.length} sample${parsed.samples.length === 1 ? '' : 's'}.`);
       return true;
     }
     catch (error) {
@@ -227,20 +280,43 @@ export default function NoteToolPage() {
     }
   };
 
-  const openFiles = async ({ ojn, ojm }: Extract<PendingFileAction, { kind: 'open'; }>) => {
-    const ojnLoaded = ojn ? await loadOjn(ojn) : false;
-    const ojmLoaded = ojm ? await loadOjm(ojm) : false;
+  const openFiles = async ({ ojn, ojm, replaceDocument }: Extract<PendingFileAction, { kind: 'open'; }>) => {
+    setFilesLoading(true);
+    try {
+      if (replaceDocument) {
+        let nextOjnName = 'Untitled.ojn';
+        if (ojn) {
+          nextOjnName = ojn.name;
+        } else if (ojm) {
+          nextOjnName = replaceFileExtension(ojm.name, '.ojn');
+        }
 
-    if (ojnLoaded) {
-      markDocumentCleanAfterRender();
-    } else if (ojmLoaded) {
-      setDirty(true);
+        createNew(nextOjnName, true);
+        setOjnFileLoaded(false);
+        setOjmFileLoaded(false);
+      }
+
+      const ojnLoaded = ojn ? await loadOjn(ojn, !replaceDocument && ojmFileLoaded) : false;
+      const ojmLoaded = ojm ? await loadOjm(ojm) : false;
+
+      if (ojnLoaded || (replaceDocument && ojmLoaded)) {
+        markDocumentCleanAfterRender();
+      } else if (ojmLoaded) {
+        setDirty(true);
+      }
+    }
+    finally {
+      setFilesLoading(false);
     }
   };
 
   const performFileAction = (action: PendingFileAction) => {
     if (action.kind === 'open') {
-      void openFiles(action);
+      if (action.findCompanion && (!action.ojn || !action.ojm)) {
+        beginCompanionBrowse(action.ojn ?? action.ojm!);
+      } else {
+        void openFiles(action);
+      }
     } else if (action.kind === 'new') {
       setNameRequest({ kind: 'new', initialName: musicFileName(0, 'ojn') });
     } else {
@@ -256,19 +332,140 @@ export default function NoteToolPage() {
     }
   };
 
-  const requestOpenFiles = (files: File[]) => {
-    const dropped = classifyNoteToolFiles(files);
-    if (!dropped.ojn && !dropped.ojm) {
-      setFileMessage('Select an OJN, OJM, OMC, or M30 file.');
+  const requestOpenFiles = (files: File[], replaceDocument = false, findCompanion = false) => {
+    const selected = classifyNoteToolFiles(files);
+    const selectedCount = Number(Boolean(selected.ojn)) + Number(Boolean(selected.ojm));
+    if (files.length > 2 || selected.unsupported.length > 0 || selected.duplicates.length > 0 || selectedCount !== files.length) {
+      setFileMessage('Open at most one OJN and one OJM file.');
       return;
     }
 
-    if (dropped.duplicates.length > 0) {
-      setFileMessage('Open at most one OJN and one OJM at a time.');
+    if (!selected.ojn && !selected.ojm) {
+      setFileMessage('Select an OJN or OJM file.');
       return;
     }
 
-    requestFileAction({ kind: 'open', ojn: dropped.ojn, ojm: dropped.ojm });
+    requestFileAction({ kind: 'open', ojn: selected.ojn, ojm: selected.ojm, replaceDocument, findCompanion });
+  };
+
+  const browseFiles = async () => {
+    clearCompanionBrowse();
+    const picker = (window as OpenPickerWindow).showOpenFilePicker;
+    if (!picker) {
+      ojnInput.current?.click();
+      return;
+    }
+
+    try {
+      const handles = await picker.call(window, {
+        multiple: true,
+        types: [{ description: 'OJN and OJM files', accept: { 'application/octet-stream': ['.ojn', '.ojm'] } }],
+      });
+
+      const files = await Promise.all(handles.map((handle) => handle.getFile()));
+      requestOpenFiles(files, true, true);
+    }
+    catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return;
+      }
+
+      setFileMessage(error instanceof Error ? `Files could not be opened: ${error.message}` : 'Files could not be opened.');
+    }
+  };
+
+  const openCompanionPicker = async () => {
+    const request = companionRequest.current ?? (!ojnFileLoaded ? { first: null, expected: 'ojn' as const, suggestedName: documentName } : null);
+    const input = companionInput.current;
+    if (!request || !input) {
+      return;
+    }
+
+    companionRequest.current = request;
+    const picker = (window as OpenPickerWindow).showOpenFilePicker;
+    if (picker) {
+      try {
+        const handles = await picker.call(window, {
+          multiple: false,
+          types: [{ description: `${request.expected.toUpperCase()} file`, accept: { 'application/octet-stream': [`.${request.expected}`] } }],
+        });
+
+        const file = await handles[0]?.getFile() ?? null;
+        finishCompanionBrowse(file);
+      }
+      catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          finishCompanionBrowse(null);
+        } else {
+          setFileMessage(error instanceof Error ? `Companion file could not be opened: ${error.message}` : 'Companion file could not be opened.');
+        }
+      }
+
+      return;
+    }
+
+    if (companionCancelHandler.current) {
+      input.removeEventListener('cancel', companionCancelHandler.current);
+    }
+
+    input.accept = request.expected === 'ojn' ? '.ojn' : '.ojm';
+    const handleCancel = () => {
+      companionCancelHandler.current = null;
+      finishCompanionBrowse(null);
+    };
+
+    companionCancelHandler.current = handleCancel;
+    input.addEventListener('cancel', handleCancel, { once: true });
+    try {
+      input.showPicker();
+    }
+    catch (error) {
+      input.removeEventListener('cancel', handleCancel);
+      companionCancelHandler.current = null;
+      setFileMessage(error instanceof Error ? `Companion file could not be opened: ${error.message}` : 'Companion file could not be opened.');
+    }
+  };
+
+  const beginCompanionBrowse = (first: File) => {
+    clearCompanionBrowse();
+    const expected = first.name.toLowerCase().endsWith('.ojn') ? 'ojm' : 'ojn';
+    const suggestedName = replaceFileExtension(first.name, `.${expected}`);
+
+    companionRequest.current = { first, expected, suggestedName };
+    setCompanionPending(companionRequest.current);
+    void openCompanionPicker();
+  };
+
+  const finishCompanionBrowse = (file: File | null) => {
+    const request = companionRequest.current;
+    clearCompanionBrowse();
+    setFileMessage(null);
+
+    if (!request) {
+      return;
+    }
+
+    if (!request.first) {
+      if (file) {
+        if (!file.name.toLowerCase().endsWith('.ojn')) {
+          setFileMessage('Select an OJN file.');
+          return;
+        }
+
+        requestOpenFiles([file]);
+      }
+
+      return;
+    }
+
+    const files = file ? [request.first, file] : [request.first];
+    const selected = classifyNoteToolFiles(files);
+    if (selected.unsupported.length > 0 || selected.duplicates.length > 0) {
+      setFileMessage(`Select an ${request.expected.toUpperCase()} file.`);
+      return;
+    }
+
+    void openFiles({ kind: 'open', ojn: selected.ojn, ojm: selected.ojm, replaceDocument: true });
   };
 
   const changeDifficulty = (next: Difficulty) => {
@@ -441,6 +638,8 @@ export default function NoteToolPage() {
       setDocumentName(savedOjnName);
       setDocumentNameDraft(savedOjnName);
       setDocumentNameAccepted(true);
+      setOjnFileLoaded(true);
+      setOjmFileLoaded(true);
       setRenamingDocument(false);
       setFileMessage(null);
       markDocumentCleanAfterRender();
@@ -462,9 +661,9 @@ export default function NoteToolPage() {
         sub="Create and edit OJN note charts."
         actions={
           <>
-            <button className="btn nt-page-action" type="button" disabled={playbackActive} onClick={() => requestFileAction({ kind: 'new' })}><FilePlus2 size={14} />New</button>
-            <button className="btn nt-page-action" type="button" disabled={playbackActive} onClick={() => ojnInput.current?.click()}><FolderOpen size={14} />Browse</button>
-            <button className="btn primary nt-page-action" type="button" disabled={playbackActive || !dirty} onClick={requestSave}><Save size={14} />Save</button>
+            <button className="btn nt-page-action" type="button" disabled={playbackActive || filesLoading} onClick={() => requestFileAction({ kind: 'new' })}><FilePlus2 size={14} />New</button>
+            <button className="btn nt-page-action" type="button" disabled={playbackActive || filesLoading} onClick={() => void browseFiles()}><FolderOpen size={14} />Browse</button>
+            <button className="btn primary nt-page-action" type="button" disabled={playbackActive || filesLoading || !dirty} onClick={requestSave}><Save size={14} />Save</button>
           </>
         }
       />
@@ -472,19 +671,39 @@ export default function NoteToolPage() {
         className="sr-only"
         ref={ojnInput}
         type="file"
+        multiple
         disabled={playbackActive}
-        accept=".ojn,application/octet-stream"
+        accept=".ojn,.ojm"
         onChange={(event) => {
-          const file = event.currentTarget.files?.[0];
+          const files = Array.from(event.currentTarget.files ?? []);
           event.currentTarget.value = '';
-          if (file) {
-            requestOpenFiles([file]);
+          if (files.length > 0) {
+            requestOpenFiles(files, true, true);
           }
+        }}
+      />
+      <input
+        className="sr-only"
+        ref={companionInput}
+        type="file"
+        disabled={playbackActive}
+        accept=".ojm"
+        onChange={(event) => {
+          if (companionCancelHandler.current) {
+            event.currentTarget.removeEventListener('cancel', companionCancelHandler.current);
+            companionCancelHandler.current = null;
+          }
+
+          const file = event.currentTarget.files?.[0] ?? null;
+          event.currentTarget.value = '';
+          finishCompanionBrowse(file);
         }}
       />
 
       <section
         className={`card nt-workspace${maximized ? ' nt-maximized' : ''}${workspaceDragging ? ' is-dragging' : ''}`}
+        aria-busy={filesLoading}
+        inert={filesLoading}
         onDragOver={(event: DragEvent<HTMLElement>) => {
           if (playbackActive || !event.dataTransfer.types.includes('Files')) {
             return;
@@ -501,7 +720,7 @@ export default function NoteToolPage() {
         onDrop={(event) => {
           event.preventDefault();
           setWorkspaceDragging(false);
-          void collectDropped(event.dataTransfer).then(requestOpenFiles).catch(() => setFileMessage('Dropped files could not be read.'));
+          void collectDropped(event.dataTransfer).then((files) => requestOpenFiles(files, true)).catch(() => setFileMessage('Dropped files could not be read.'));
         }}
       >
         {workspaceDragging ? (
@@ -546,6 +765,23 @@ export default function NoteToolPage() {
                 {documentName}
               </button>
             )}
+            {!ojnFileLoaded ? (
+              <span className="nt-missing-file-chip" title={`OJN is not loaded.`}>
+                <TriangleAlert aria-hidden="true" />
+                OJN is not loaded
+              </span>
+            ) : null}
+            {!ojnFileLoaded ? (
+              <button
+                className="icon-btn nt-companion-file-button"
+                type="button"
+                aria-label={`Browse for ${companionPending?.expected.toUpperCase() ?? 'OJN'} file`}
+                title={`Browse for ${companionPending?.expected.toUpperCase() ?? 'OJN'} file`}
+                onClick={openCompanionPicker}
+              >
+                <FolderOpen aria-hidden="true" />
+              </button>
+            ) : null}
             {fileMessage ? <span className="nt-file-message" role="status">{fileMessage}</span> : null}
           </div>
           <div className="nt-filebar-actions">
@@ -593,6 +829,7 @@ export default function NoteToolPage() {
               samples={samples}
               selectedSample={selectedSample}
               ojmFileName={metadata.ojmFileName}
+              ojmLoaded={ojmFileLoaded}
               format={ojmFormat}
               encryption={ojmEncryption}
               onSamplesChange={(nextSamples) => {
@@ -605,7 +842,10 @@ export default function NoteToolPage() {
                 setOjmNameAccepted(true);
                 setDirty(true);
               }}
-              onOpenFiles={requestOpenFiles}
+              onOpenFiles={(files) => {
+                const selected = classifyNoteToolFiles(files);
+                requestOpenFiles(files, Boolean(selected.ojn));
+              }}
             />
           </aside>
 
@@ -664,40 +904,42 @@ export default function NoteToolPage() {
         </div>
       ) : null}
 
-      {pendingAction ? (
-        <ConfirmDialog
-          title="Unsaved changes"
-          body={pendingAction.kind === 'close'
-            ? 'This file has unsaved changes. Closing it discards them.'
-            : pendingAction.kind === 'new'
-              ? 'This file has unsaved changes. Creating a new file discards them.'
-              : 'This file has unsaved changes. Opening another file discards them.'}
-          confirmLabel="Discard"
-          onClose={() => setPendingAction(null)}
-          onConfirm={() => {
-            const action = pendingAction;
-            setPendingAction(null);
-            performFileAction(action);
-          }}
-        />
-      ) : null}
+      <div className="nt-dialogs">
+        {pendingAction ? (
+          <ConfirmDialog
+            title="Unsaved changes"
+            body={pendingAction.kind === 'close'
+              ? 'This file has unsaved changes. Closing it discards them.'
+              : pendingAction.kind === 'new'
+                ? 'This file has unsaved changes. Creating a new file discards them.'
+                : 'This file has unsaved changes. Opening another file discards them.'}
+            confirmLabel="Discard"
+            onClose={() => setPendingAction(null)}
+            onConfirm={() => {
+              const action = pendingAction;
+              setPendingAction(null);
+              performFileAction(action);
+            }}
+          />
+        ) : null}
 
-      {nameRequest ? (
-        <SaveAsDialog
-          initialName={nameRequest.initialName}
-          onClose={() => setNameRequest(null)}
-          onConfirm={(name) => {
-            const request = nameRequest;
-            const normalizedName = normalizeFileName(name, '.ojn');
-            setNameRequest(null);
-            if (request.kind === 'new') {
-              createNew(normalizedName, true);
-            } else {
-              void saveFiles(normalizedName, savePicker());
-            }
-          }}
-        />
-      ) : null}
+        {nameRequest ? (
+          <SaveAsDialog
+            initialName={nameRequest.initialName}
+            onClose={() => setNameRequest(null)}
+            onConfirm={(name) => {
+              const request = nameRequest;
+              const normalizedName = normalizeFileName(name, '.ojn');
+              setNameRequest(null);
+              if (request.kind === 'new') {
+                createNew(normalizedName, true);
+              } else {
+                void saveFiles(normalizedName, savePicker());
+              }
+            }}
+          />
+        ) : null}
+      </div>
     </>
   );
 }
@@ -763,5 +1005,11 @@ function fileNameForTitle(title: string, extension: string): string {
 
 function normalizeFileName(name: string, extension: string): string {
   const base = name.toLowerCase().endsWith(extension) ? name.slice(0, -extension.length) : name;
+  return fileNameForTitle(base, extension);
+}
+
+function replaceFileExtension(name: string, extension: string): string {
+  const dot = name.lastIndexOf('.');
+  const base = dot > 0 ? name.slice(0, dot) : name;
   return fileNameForTitle(base, extension);
 }

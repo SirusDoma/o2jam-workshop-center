@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
-import { ChevronDown, FolderOpen, Play, Plus, Square, Trash2 } from 'lucide-react';
+import { ChevronDown, FolderOpen, Play, Plus, Square, Trash2, TriangleAlert } from 'lucide-react';
 import { collectDropped } from '../DropZone';
 import { scrollNearest } from '../../features/note-tool/dom';
 import {
@@ -23,6 +23,7 @@ export function SamplesSection({
   samples,
   selectedSample,
   ojmFileName,
+  ojmLoaded,
   format,
   encryption,
   onSamplesChange,
@@ -34,6 +35,7 @@ export function SamplesSection({
   samples: OjmSample[];
   selectedSample: Pick<OjmSample, 'id' | 'type'>;
   ojmFileName: string;
+  ojmLoaded: boolean;
   format: OjmFormat;
   encryption: OjmEncryption;
   onSamplesChange: (samples: OjmSample[]) => void;
@@ -191,6 +193,12 @@ export function SamplesSection({
       </button>
       {open ? (
         <div className="nt-samples-panel">
+          {!ojmLoaded ? (
+            <div className="nt-missing-file-warning" role="status">
+              <TriangleAlert aria-hidden="true" />
+              <span><b>OJM is not loaded.</b></span>
+            </div>
+          ) : null}
           <div className="nt-fields nt-sample-bank-fields">
             <label className="nt-field">
               <span>OJM filename</span>
@@ -203,7 +211,7 @@ export function SamplesSection({
                   className="sr-only"
                   ref={ojmInput}
                   type="file"
-                  accept=".ojm,.omc,.m30,application/octet-stream"
+                  accept=".ojm,application/octet-stream"
                   onChange={(event) => {
                     const file = event.currentTarget.files?.[0];
                     event.currentTarget.value = '';

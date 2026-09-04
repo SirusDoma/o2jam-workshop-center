@@ -26,7 +26,7 @@ export function classifyNoteToolFiles<T extends { name: string; }>(files: readon
       } else {
         ojn = file;
       }
-    } else if (extension === 'ojm' || extension === 'omc' || extension === 'm30') {
+    } else if (extension === 'ojm') {
       if (ojm) {
         duplicates.push(file);
       } else {
