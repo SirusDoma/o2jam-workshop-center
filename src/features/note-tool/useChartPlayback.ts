@@ -36,7 +36,8 @@ export function useChartPlayback({
 }) {
   const context = useRef<AudioContext | null>(null);
   const decoded = useRef(new Map<number, DecodedSample>());
-  const sources = useRef<AudioBufferSourceNode[]>([]);
+  const sources = useRef(new Map<AudioBufferSourceNode, () => void>());
+  const scheduler = useRef<ReturnType<typeof setInterval> | null>(null);
   const animation = useRef<number | null>(null);
   const startedAt = useRef(0);
   const startedFromSeconds = useRef(0);
@@ -65,15 +66,23 @@ export function useChartPlayback({
 
   const stopSources = useCallback(() => {
     playbackRun.current += 1;
-    for (const source of sources.current) {
+    if (scheduler.current !== null) {
+      clearInterval(scheduler.current);
+      scheduler.current = null;
+    }
+
+    for (const [source, disconnect] of sources.current) {
       try {
         source.stop();
       }
       catch {
         // The source may already have ended.
       }
+      finally {
+        disconnect();
+      }
     }
-    sources.current = [];
+
     if (animation.current !== null) {
       cancelAnimationFrame(animation.current);
       animation.current = null;
@@ -156,32 +165,67 @@ export function useChartPlayback({
     });
 
     const eventById = new Map(events.map((event) => [event.id, event]));
-    const now = audioContext.currentTime;
+    const now = audioContext.currentTime + 0.05;
+    let nextEvent = 0;
 
-    for (const item of schedule) {
-      const decodedSample = decoded.current.get(item.sampleId);
-      const event = eventById.get(item.eventId);
-      if (!decodedSample || !event || item.offset >= decodedSample.buffer.duration) {
-        continue;
+    const scheduleAhead = () => {
+      if (run !== playbackRun.current) {
+        return;
       }
 
-      const source = audioContext.createBufferSource();
-      const gain = audioContext.createGain();
-      const panner = audioContext.createStereoPanner();
-      source.buffer = decodedSample.buffer;
-      gain.gain.value = Math.max(0, Math.min(1, (event.volume ?? 100) / 100));
-      panner.pan.value = Math.max(-1, Math.min(1, (event.pan ?? 0) / 7));
-      source.connect(gain).connect(panner).connect(audioContext.destination);
-      source.start(now + item.delay, item.offset);
-      sources.current.push(source);
-    }
+      const currentTime = audioContext.currentTime;
+      while (nextEvent < schedule.length && now + schedule[nextEvent]!.delay <= currentTime + 0.25) {
+        const item = schedule[nextEvent++]!;
+        const decodedSample = decoded.current.get(item.sampleId);
+        const event = eventById.get(item.eventId);
+        const when = now + item.delay;
+        const offset = item.offset + Math.max(0, currentTime - when);
+        if (!sampleById.has(item.sampleId) || !decodedSample || !event || offset >= decodedSample.buffer.duration) {
+          continue;
+        }
+
+        const startTime = Math.max(when, currentTime);
+        const duration = decodedSample.buffer.duration - offset;
+        const volume = Math.max(0, Math.min(1, (event.volume ?? 100) / 100));
+        const source = audioContext.createBufferSource();
+        const gain = audioContext.createGain();
+        const panner = audioContext.createStereoPanner();
+        const disconnect = () => {
+          source.onended = null;
+          source.disconnect();
+          gain.disconnect();
+          panner.disconnect();
+          sources.current.delete(source);
+        };
+
+        source.buffer = decodedSample.buffer;
+
+        // Smooth abrupt waveform edges that otherwise produce an audible click.
+        const fadeDuration = Math.min(0.002, duration / 2);
+        gain.gain.setValueAtTime(offset > 0 ? 0 : volume, startTime);
+        if (offset > 0) {
+          gain.gain.linearRampToValueAtTime(volume, startTime + fadeDuration);
+        }
+
+        gain.gain.setValueAtTime(volume, startTime + duration - fadeDuration);
+        gain.gain.linearRampToValueAtTime(0, startTime + duration);
+
+        panner.pan.value = Math.max(-1, Math.min(1, (event.pan ?? 0) / 7));
+        source.onended = disconnect;
+        source.connect(gain).connect(panner).connect(audioContext.destination);
+        sources.current.set(source, disconnect);
+        source.start(startTime, offset, duration);
+      }
+    };
 
     startedAt.current = now;
     startedFromSeconds.current = positionToSeconds(startPosition, baseBpm, bpmChanges, measureFractions);
+    scheduleAhead();
+    scheduler.current = setInterval(scheduleAhead, 25);
     setPlaying(true);
 
     const update = () => {
-      const elapsed = audioContext.currentTime - startedAt.current;
+      const elapsed = Math.max(0, audioContext.currentTime - startedAt.current);
       const next = secondsToPosition(startedFromSeconds.current + elapsed, baseBpm, bpmChanges, measureFractions);
 
       if (next >= endPosition) {
