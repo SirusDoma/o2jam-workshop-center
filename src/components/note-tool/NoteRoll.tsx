@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent, type UIEvent, type WheelEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent, type UIEvent, type WheelEvent } from 'react';
 import {
   DEFAULT_NOTE_TOOL_SETTINGS,
   MAX_LANE_WIDTH,
@@ -19,7 +19,7 @@ import {
 import type { AutoplayChartNote, EditorChart, EditorChartNote, InspectorEvent, KeyMode } from '../../features/note-tool/types';
 import { clampAutoplayToNoteLane, type EventMovement } from '../../features/note-tool/document';
 import { listenForControlWheel } from '../../features/note-tool/dom';
-import { alignToDevicePixel, chartPositionAtY, chartPositionY, edgeScrollDelta, edgeScrollTop, gridLineHeight, gridPositionAtY, laneLabelFits, longNoteBox, measurePixelHeight, nextHiSpeed, noteCellBox } from '../../features/note-tool/rollLayout';
+import { alignToDevicePixel, chartPositionAtY, chartPositionY, edgeScrollDelta, edgeScrollTop, gridLineHeight, gridPositionAtY, laneLabelFits, longNoteBox, measurePixelHeight, nextHiSpeed, noteCellBox, playbackRenderWindow } from '../../features/note-tool/rollLayout';
 import { formatBpmValue } from '../../features/note-tool/timingValues';
 import { isEventSelected, playbackScrollTop, selectionForEventDrag } from '../../features/note-tool/selection';
 import type { PlaybackPositionSubscription } from '../../features/note-tool/useChartPlayback';
@@ -92,6 +92,7 @@ export function NoteRoll({
   notePlacementMode,
   longNoteMode,
   readOnly = false,
+  playing = false,
   allowColumnResize = false,
   subscribePosition,
   onSeek,
@@ -117,6 +118,7 @@ export function NoteRoll({
   notePlacementMode: boolean;
   longNoteMode: boolean;
   readOnly?: boolean;
+  playing?: boolean;
   allowColumnResize?: boolean;
   subscribePosition: PlaybackPositionSubscription;
   onSeek: (position: number) => void;
@@ -137,6 +139,9 @@ export function NoteRoll({
   const playhead = useRef<HTMLDivElement>(null);
   const previousScrollHeight = useRef(0);
   const previousScrollTop = useRef(0);
+  const viewport = useRef({ height: 0, maxScrollTop: 0 });
+  const renderWindowRef = useRef<ReturnType<typeof playbackRenderWindow> | null>(null);
+  const [renderWindow, setRenderWindow] = useState<ReturnType<typeof playbackRenderWindow> | null>(null);
   const loadingMeasures = useRef(false);
   const suppressGridClick = useRef(false);
   const rulerSeek = useRef<{ pointerId: number; target: HTMLDivElement; clientY: number } | null>(null);
@@ -206,9 +211,7 @@ export function NoteRoll({
   const currentSampleWidths = SAMPLE_LANE_KEYS.map((key) => settings.lanes[key].width);
   const sampleWidth = currentSampleWidths.reduce((total, width) => total + width, 0);
   const sampleColumns = currentSampleWidths.map((width) => `${width}px`).join(' ');
-  const notesByKey = useMemo(() => new Map(KEYS_7.map((key) => [key, notes.filter((note) => note.key === key)])), [notes]);
-  const autoplayByLane = useMemo(() => new Map(SAMPLE_LANES.map((lane) => [lane, autoplayNotes.filter((note) => note.lane === lane)])), [autoplayNotes]);
-  const measures = Array.from({ length: measureCount }, (_, index) => measureCount - index - 1);
+  const measures = useMemo(() => Array.from({ length: measureCount }, (_, index) => measureCount - index - 1), [measureCount]);
   const measureHeight = 320 * Number(hiSpeed);
   const gridDivision = Number(grid.split('/')[1]);
   const measureFractions = chart.measureFractions;
@@ -218,6 +221,48 @@ export function NoteRoll({
   const gridGeometry = useRef({ measureCount, measureHeight, gridDivision, measureFractions });
   gridGeometry.current = { measureCount, measureHeight, gridDivision, measureFractions };
   const canResizeColumns = !readOnly || allowColumnResize;
+
+  const renderedChart = useMemo(() => {
+    if (!playing || !renderWindow) {
+      return chart;
+    }
+
+    const visible = (position: number, duration = 0, height = settings.noteHeight) => {
+      const bottom = chartPositionY(position, measureCount, measureHeight, measureFractions);
+      const end = chartPositionY(position + duration, measureCount, measureHeight, measureFractions);
+      const box = longNoteBox(bottom, 0, bottom - end, height);
+      return box.top <= renderWindow.bottom && box.top + box.height >= renderWindow.top;
+    };
+
+    return {
+      ...chart,
+      notes: chart.notes.filter((note) => visible(note.absolutePosition, note.duration)),
+      autoplayNotes: chart.autoplayNotes.filter((note) => visible(note.absolutePosition)),
+      bpmChanges: chart.bpmChanges.filter((item) => visible(item.absolutePosition, 0, DEFAULT_NOTE_TOOL_SETTINGS.noteHeight)),
+      measureFractions: chart.measureFractions.filter((item) => visible(item.measure, 0, DEFAULT_NOTE_TOOL_SETTINGS.noteHeight)),
+    };
+  }, [chart, playing, renderWindow, measureCount, measureHeight, measureFractions, settings.noteHeight]);
+
+  const notesByKey = useMemo(() => new Map(KEYS_7.map((key) => [key, renderedChart.notes.filter((note) => note.key === key)])), [renderedChart.notes]);
+  const autoplayByLane = useMemo(() => new Map(SAMPLE_LANES.map((lane) => [lane, renderedChart.autoplayNotes.filter((note) => note.lane === lane)])), [renderedChart.autoplayNotes]);
+  const measureRows = measures.map((measure) => `${measurePixelHeight(measure, measureHeight, measureFractions)}px`).join(' ');
+  const renderedMeasures = playing && renderWindow
+    ? measures.filter((measure) => positionY(measure + 1) <= renderWindow.bottom && positionY(measure) >= renderWindow.top)
+    : measures;
+
+  const updateRenderWindow = useCallback((scrollTop: number) => {
+    if (!playing) {
+      return;
+    }
+
+    // Update by viewport-sized steps, with enough overscan to cover the next React commit.
+    const next = playbackRenderWindow(scrollTop, viewport.current.height);
+    const current = renderWindowRef.current;
+    if (!current || current.top !== next.top || current.bottom !== next.bottom) {
+      renderWindowRef.current = next;
+      setRenderWindow(next);
+    }
+  }, [playing]);
 
   useEffect(() => {
     const element = wrapper.current;
@@ -232,20 +277,25 @@ export function NoteRoll({
 
   useLayoutEffect(() => {
     const element = wrapper.current;
-    if (!element || readOnly) {
+    if (!element) {
       return;
     }
 
     const fillViewport = () => {
-      const missingHeight = Math.max(0, element.clientHeight - 34 - rollBodyHeight);
-      setMeasureCount((count) => Math.max(count, chartMeasures, count + Math.ceil(missingHeight / measureHeight)));
+      const height = element.clientHeight;
+      viewport.current = { height, maxScrollTop: Math.max(0, element.scrollHeight - height) };
+      updateRenderWindow(element.scrollTop);
+      if (!readOnly) {
+        const missingHeight = Math.max(0, height - 34 - rollBodyHeight);
+        setMeasureCount((count) => Math.max(count, chartMeasures, count + Math.ceil(missingHeight / measureHeight)));
+      }
     };
 
     const observer = new ResizeObserver(fillViewport);
     fillViewport();
     observer.observe(element);
     return () => observer.disconnect();
-  }, [chartMeasures, measureHeight, readOnly, rollBodyHeight]);
+  }, [chartMeasures, measureHeight, readOnly, rollBodyHeight, updateRenderWindow]);
 
   useLayoutEffect(() => {
     const element = wrapper.current;
@@ -253,33 +303,45 @@ export function NoteRoll({
       return;
     }
 
+    const height = element.clientHeight;
+    const scrollHeight = element.scrollHeight;
+    const maxScrollTop = Math.max(0, scrollHeight - height);
+    let scrollTop = element.scrollTop;
     if (previousScrollHeight.current === 0) {
-      element.scrollTop = Math.max(0, element.scrollHeight - element.clientHeight);
-    } else if (element.scrollHeight > previousScrollHeight.current) {
-      element.scrollTop += element.scrollHeight - previousScrollHeight.current;
+      scrollTop = maxScrollTop;
+    } else if (scrollHeight > previousScrollHeight.current) {
+      scrollTop += scrollHeight - previousScrollHeight.current;
     }
 
-    previousScrollHeight.current = element.scrollHeight;
-    previousScrollTop.current = element.scrollTop;
+    scrollTop = Math.max(0, Math.min(maxScrollTop, scrollTop));
+    viewport.current = { height, maxScrollTop };
+    element.scrollTop = scrollTop;
+    previousScrollHeight.current = scrollHeight;
+    previousScrollTop.current = scrollTop;
+    updateRenderWindow(scrollTop);
     loadingMeasures.current = false;
-  }, [measureCount, hiSpeed, rollBodyHeight]);
+  }, [measureCount, hiSpeed, rollBodyHeight, updateRenderWindow]);
 
   useLayoutEffect(() => subscribePosition((position) => {
     const geometry = gridGeometry.current;
     const pixelRatio = window.devicePixelRatio || 1;
     const offset = alignToDevicePixel(chartPositionY(position, geometry.measureCount, geometry.measureHeight, geometry.measureFractions), pixelRatio);
-    playhead.current?.style.setProperty('--nt-playhead-y', `${offset}px`);
-
     const element = wrapper.current;
     const rulerSeeking = suppressPlayheadScroll.current;
     suppressPlayheadScroll.current = false;
-    if (!element || rulerSeeking) {
-      return;
+    if (element && !rulerSeeking) {
+      const { height, maxScrollTop } = viewport.current;
+      const scrollTop = Math.max(0, Math.min(maxScrollTop, alignToDevicePixel(playbackScrollTop(34 + offset, height, settings.playheadPosition, settings.playheadGrid), pixelRatio)));
+      if (scrollTop !== previousScrollTop.current) {
+        element.scrollTop = scrollTop;
+        previousScrollTop.current = scrollTop;
+      }
+
+      updateRenderWindow(scrollTop);
     }
 
-    element.scrollTop = alignToDevicePixel(playbackScrollTop(34 + offset, element.clientHeight, settings.playheadPosition, settings.playheadGrid), pixelRatio);
-    previousScrollTop.current = element.scrollTop;
-  }), [measureCount, measureFractions, measureHeight, settings.playheadGrid, settings.playheadPosition, subscribePosition]);
+    playhead.current?.style.setProperty('--nt-playhead-y', `${offset}px`);
+  }), [measureCount, measureFractions, measureHeight, settings.playheadGrid, settings.playheadPosition, subscribePosition, updateRenderWindow]);
 
   const resetLaneWidth = (lane: NoteAreaLaneKey, event: MouseEvent<HTMLElement>) => {
     event.preventDefault();
@@ -348,6 +410,10 @@ export function NoteRoll({
     const top = event.currentTarget.scrollTop;
     const scrollingUp = top < previousScrollTop.current;
     previousScrollTop.current = top;
+    updateRenderWindow(top);
+    if (readOnly) {
+      return;
+    }
 
     if (scrollingUp && top <= 96 && !loadingMeasures.current) {
       loadingMeasures.current = true;
@@ -906,7 +972,7 @@ export function NoteRoll({
   };
 
   return (
-    <div className="nt-roll-wrap" ref={wrapper} onScroll={readOnly ? undefined : loadMoreMeasures} onWheel={readOnly ? undefined : loadMoreMeasuresWithWheel}>
+    <div className="nt-roll-wrap" ref={wrapper} onScroll={loadMoreMeasures} onWheel={readOnly ? undefined : loadMoreMeasuresWithWheel}>
       <div
         className={`nt-roll keys-${keyMode}${selectMode ? ' is-select-mode' : ''}${readOnly ? ' is-read-only' : ''}`}
         role="img"
@@ -1008,23 +1074,27 @@ export function NoteRoll({
             className="nt-ruler"
             style={{
               ...getLaneStyle(settings.lanes.measure),
-              gridTemplateRows: measures.map((measure) => `${measurePixelHeight(measure, measureHeight, measureFractions)}px`).join(' '),
+              gridTemplateRows: measureRows,
             }}
             onPointerDown={readOnly ? undefined : startRulerSeek}
             onPointerMove={readOnly ? undefined : moveRulerSeek}
             onPointerUp={readOnly ? undefined : finishRulerSeek}
             onPointerCancel={readOnly ? undefined : finishRulerSeek}
           >
-            {measures.map((measure) => <span key={measure}>{measure}</span>)}
+            {renderedMeasures.map((measure) => <span style={{ gridRow: measureCount - measure }} key={measure}>{measure}</span>)}
           </div>
           <div className="nt-roll-grid" aria-hidden="true">
-            {measures.map((measure) => {
+            {renderedMeasures.map((measure) => {
               const height = measurePixelHeight(measure, measureHeight, measureFractions);
               const localSubGridHeight = gridLineHeight(measureHeight, subGrid);
               return (
                 <span
                   className={localSubGridHeight > 0 ? '' : 'no-sub-grid'}
                   style={{
+                    position: 'absolute',
+                    top: positionY(measure + 1),
+                    left: 0,
+                    right: 0,
                     height,
                     '--nt-local-grid-height': `${gridLineHeight(measureHeight, grid)}px`,
                     '--nt-local-sub-grid-height': `${localSubGridHeight}px`,
@@ -1036,14 +1106,14 @@ export function NoteRoll({
           </div>
           <div className="nt-timing-lanes">
             <div className="nt-event-lane measure" style={getLaneStyle(settings.lanes.fraction)} aria-label="Measure fraction event lane" onClick={readOnly ? undefined : (event) => selectGridEvent('fraction', event)}>
-              {chart.measureFractions.map((item) => {
+              {renderedChart.measureFractions.map((item) => {
                 const selection = { kind: 'fraction', id: item.id } as const;
                 const box = noteCellBox(positionY(item.measure), cellHeightAt(item.measure));
                 return <span className={`nt-timing-event${isEventSelected(selectedEvents, selection) ? ' is-selected' : ''}`} style={{ top: `${box.top}px`, height: `${box.height}px`, ...dragStyle(selection, 0) }} key={item.id} {...eventHandlers(selection, 0)}>{item.fraction.toFixed(2)}</span>;
               })}
             </div>
             <div className="nt-event-lane bpm" style={getLaneStyle(settings.lanes.bpm)} aria-label="BPM event lane" onClick={readOnly ? undefined : (event) => selectGridEvent('bpm', event)}>
-              {chart.bpmChanges.map((item) => {
+              {renderedChart.bpmChanges.map((item) => {
                 const selection = { kind: 'bpm', id: item.id } as const;
                 const box = noteCellBox(positionY(item.absolutePosition), cellHeightAt(item.absolutePosition));
                 return <span className={`nt-timing-event${isEventSelected(selectedEvents, selection) ? ' is-selected' : ''}`} style={{ top: `${box.top}px`, height: `${box.height}px`, ...dragStyle(selection, 0) }} key={item.id} {...eventHandlers(selection, 0)}>{formatBpmValue(item.bpm)}</span>;
@@ -1074,10 +1144,10 @@ export function NoteRoll({
           </div>
           <div
             className="nt-measure-watermarks"
-            style={{ gridTemplateRows: measures.map((measure) => `${measurePixelHeight(measure, measureHeight, measureFractions)}px`).join(' ') }}
+            style={{ gridTemplateRows: measureRows }}
             aria-hidden="true"
           >
-            {measures.map((measure) => <span key={measure}>#{String(measure).padStart(3, '0')}</span>)}
+            {renderedMeasures.map((measure) => <span style={{ gridRow: measureCount - measure }} key={measure}>#{String(measure).padStart(3, '0')}</span>)}
           </div>
           <div className="nt-sample-lanes" aria-label="Autoplay sample lanes" onClick={readOnly ? undefined : (event) => selectGridEvent('autoplay', event)}>
             {SAMPLE_LANES.map((lane, index) => {

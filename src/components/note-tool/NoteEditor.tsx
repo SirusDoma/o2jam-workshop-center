@@ -416,6 +416,7 @@ export function NoteEditor({
           onHiSpeedChange={(value) => updateHiSpeed(value.toFixed(1))}
           onSettingsChange={onSettingsChange}
           readOnly={playbackLocked}
+          playing={playback.playing}
           onGridEvent={handleGridEvent}
           onLongNoteDrag={handleLongNoteDrag}
           onSelectEvent={(selection, additive) => setSelectedEvents((current) => updateEventSelection(current, selection, additive))}

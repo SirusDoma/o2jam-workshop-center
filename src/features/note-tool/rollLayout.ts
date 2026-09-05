@@ -3,6 +3,12 @@ import { chartPositionAtScaledPosition, measureFractionAt, scaledChartPosition, 
 
 const NOTE_CELL_INSET = 1;
 
+export function playbackRenderWindow(scrollTop: number, viewportHeight: number): { top: number; bottom: number } {
+  const height = Math.max(1, viewportHeight);
+  const page = Math.floor(Math.max(0, scrollTop) / height);
+  return { top: (page - 1) * height - 34, bottom: (page + 3) * height };
+}
+
 export function alignToDevicePixel(value: number, pixelRatio = 1): number {
   const scale = Number.isFinite(pixelRatio) && pixelRatio > 0 ? pixelRatio : 1;
   return Math.round(value * scale) / scale;
