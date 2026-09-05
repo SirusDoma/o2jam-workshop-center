@@ -2054,6 +2054,7 @@ select.secinput {
 .nt-roll.is-select-mode .nt-chart-note:active,
 .nt-roll.is-select-mode .nt-timing-event:active { cursor: grabbing; }
 .nt-chart-note.is-selected,
+.nt-chart-note.long.is-selected > .nt-long-note-marker,
 .nt-timing-event.is-selected { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 72%, white); }
 .nt-selection-marquee {
   position: absolute;
@@ -2074,11 +2075,6 @@ select.secinput {
   border: var(--nt-note-border-width, 1.5px) solid var(--nt-note-border-color, color-mix(in srgb, var(--nt-lane-color) 70%, #fff));
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.nt-chart-note.tap.nt-pending-note {
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  border-style: dashed;
 }
 .nt-chart-note.long.nt-pending-note { opacity: 0.72; pointer-events: none; }
 .nt-chart-note.long {
