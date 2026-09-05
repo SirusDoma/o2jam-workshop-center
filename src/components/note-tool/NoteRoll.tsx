@@ -90,9 +90,9 @@ export function NoteRoll({
   selectedEvents,
   selectMode,
   notePlacementMode,
-  longNoteMode,
   readOnly = false,
   playing = false,
+  measureScrollRequest,
   allowColumnResize = false,
   subscribePosition,
   onSeek,
@@ -100,6 +100,8 @@ export function NoteRoll({
   onSettingsChange,
   onGridEvent,
   onLongNoteDrag,
+  formatDraftNoteLabel,
+  onCursorMove,
   onSelectEvent,
   onDeleteEvent,
   onMoveEvents,
@@ -119,6 +121,7 @@ export function NoteRoll({
   longNoteMode: boolean;
   readOnly?: boolean;
   playing?: boolean;
+  measureScrollRequest?: { direction: 1 | -1 } | null;
   allowColumnResize?: boolean;
   subscribePosition: PlaybackPositionSubscription;
   onSeek: (position: number) => void;
@@ -126,6 +129,8 @@ export function NoteRoll({
   onSettingsChange: (settings: NoteToolSettings) => void;
   onGridEvent: (kind: InspectorEvent['kind'], event: NoteGridEvent) => void;
   onLongNoteDrag: (event: LongNoteGridEvent) => void;
+  formatDraftNoteLabel?: (key: NoteLaneKey) => string;
+  onCursorMove?: (readPosition: (() => number) | null) => void;
   onSelectEvent: (selection: InspectorEvent, additive: boolean) => void;
   onDeleteEvent: (selection: InspectorEvent) => void;
   onMoveEvents: (selection: readonly InspectorEvent[], movement: EventMovement) => void;
@@ -157,6 +162,7 @@ export function NoteRoll({
     lane: number;
     startPosition: number;
     endPosition: number;
+    startClientY: number;
     clientY: number;
   } | null>(null);
 
@@ -270,6 +276,18 @@ export function NoteRoll({
       ? listenForControlWheel(element, (deltaY) => onHiSpeedChange(nextHiSpeed(Number(hiSpeed), deltaY)))
       : undefined;
   }, [hiSpeed, onHiSpeedChange]);
+
+  useEffect(() => {
+    const element = wrapper.current;
+    if (!element || !measureScrollRequest) {
+      return;
+    }
+
+    const { measureCount, measureHeight, measureFractions } = gridGeometry.current;
+    const position = chartPositionAtY(element.scrollTop, measureCount, measureHeight, measureCount, measureFractions);
+    const next = Math.max(0, Math.min(measureCount, position + measureScrollRequest.direction));
+    element.scrollTop = chartPositionY(next, measureCount, measureHeight, measureFractions);
+  }, [measureScrollRequest]);
 
   useLayoutEffect(() => {
     setMeasureCount((count) => Math.max(count, chartMeasures));
@@ -618,8 +636,8 @@ export function NoteRoll({
     }
 
     const bounds = element.getBoundingClientRect();
-    const delta = edgeScrollDelta(drag.clientY, bounds.top + 34, bounds.bottom - 16);
-    if (delta === 0) {
+    const delta = Math.min(0, edgeScrollDelta(drag.clientY, bounds.top + 34, bounds.bottom - 16));
+    if (delta === 0 || drag.clientY >= drag.startClientY) {
       return;
     }
 
@@ -635,7 +653,7 @@ export function NoteRoll({
   };
 
   const startLongNoteDrag = (event: PointerEvent<HTMLDivElement>) => {
-    if (!notePlacementMode || event.button !== 0 || (!longNoteMode && !event.shiftKey)) {
+    if (!notePlacementMode || event.button !== 0) {
       return;
     }
 
@@ -657,6 +675,7 @@ export function NoteRoll({
       lane,
       startPosition,
       endPosition: startPosition,
+      startClientY: event.clientY,
       clientY: event.clientY,
     };
 
@@ -695,6 +714,9 @@ export function NoteRoll({
 
     if (commit && drag.endPosition > drag.startPosition) {
       onLongNoteDrag({ lane: drag.lane + 1, startPosition: drag.startPosition, endPosition: drag.endPosition });
+    } else if (commit) {
+      const measure = Math.floor(drag.startPosition);
+      onGridEvent('note', { measure, position: drag.startPosition - measure, lane: drag.lane + 1, additive: false });
     }
 
     longNoteDrag.current = null;
@@ -833,7 +855,9 @@ export function NoteRoll({
     onContextMenu: (event) => {
       event.preventDefault();
       event.stopPropagation();
-      onDeleteEvent(selection);
+      if (notePlacementMode) {
+        onDeleteEvent(selection);
+      }
     },
     onClick: (event) => {
       if (selectMode) {
@@ -1064,6 +1088,15 @@ export function NoteRoll({
         </div>
         <div
           className="nt-roll-body"
+          onPointerMoveCapture={readOnly || !onCursorMove ? undefined : (event) => {
+            const target = event.currentTarget;
+            const clientY = event.clientY;
+            onCursorMove(() => {
+              const geometry = gridGeometry.current;
+              return gridPositionAtY(clientY - target.getBoundingClientRect().top, geometry.measureCount, geometry.measureHeight, geometry.gridDivision, geometry.measureFractions);
+            });
+          }}
+          onPointerLeave={onCursorMove ? () => onCursorMove(null) : undefined}
           onPointerDown={readOnly ? undefined : startMarquee}
           onPointerMove={readOnly ? undefined : moveMarquee}
           onPointerUp={readOnly ? undefined : (event) => finishMarquee(event, true)}
@@ -1137,7 +1170,7 @@ export function NoteRoll({
                   return renderNote(note, key, positionY, cellHeightAt, settings, isEventSelected(selectedEvents, selection), eventHandlers(selection, lane), dragStyle(selection, lane));
                 })}
                 {longNoteDraft?.key === key
-                  ? renderLongNoteDraft(longNoteDraft, positionY, cellHeightAt, settings)
+                  ? renderLongNoteDraft(longNoteDraft, positionY, cellHeightAt, settings, formatDraftNoteLabel?.(key) ?? '')
                   : null}
               </div>
             ))}
@@ -1235,12 +1268,13 @@ function renderLongNoteDraft(
   positionY: (position: number) => number,
   cellHeightAt: (position: number) => number,
   settings: NoteToolSettings,
+  label: string,
 ) {
   const start = positionY(draft.startPosition);
   const gridHeight = cellHeightAt(draft.startPosition);
   const duration = draft.endPosition - draft.startPosition;
   if (duration <= 0) {
-    return <span className="nt-chart-note tap nt-pending-note" style={noteCellStyle(start, gridHeight, settings.noteHeight)} aria-hidden="true">START</span>;
+    return <span className="nt-chart-note tap nt-pending-note" style={noteCellStyle(start, gridHeight, settings.noteHeight)} aria-hidden="true">{label}</span>;
   }
 
   const box = longNoteBox(start, gridHeight, start - positionY(draft.endPosition), settings.noteHeight);

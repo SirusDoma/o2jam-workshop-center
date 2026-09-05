@@ -1292,6 +1292,19 @@ select.secinput {
 .nt-workspace[aria-busy="true"] .nt-missing-file-chip,
 .nt-workspace[aria-busy="true"] .nt-missing-file-warning { display: none; }
 .nt-dialogs .overlay { z-index: 130; }
+.nt-dialogs .overlay-panel:has(> .nt-shortcuts-dialog) { width: min(1080px, 100%); }
+.nt-shortcuts-dialog { display: flex; flex-direction: column; min-height: 0; }
+.nt-shortcuts-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 20px; }
+.nt-shortcuts-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+.nt-shortcuts-columns > div > section:first-child h3 { margin-top: 0; }
+.nt-shortcuts-body h3 { margin: 20px 0 8px; font-size: 12px; }
+.nt-shortcuts-body dl { margin: 0; }
+.nt-shortcuts-body dl > div { display: grid; grid-template-columns: minmax(160px, 1fr) 2fr; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.nt-shortcuts-body dd { margin: 0; color: var(--ink-2); }
+.nt-shortcuts-body kbd { font-family: var(--font-mono); font-size: 11px; }
+@media (max-width: 760px) {
+  .nt-shortcuts-columns { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+}
 .nt-companion-file-button { flex-shrink: 0; width: 26px; height: 26px; }
 .nt-companion-file-button svg { width: 13px; height: 13px; }
 .nt-filebar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }

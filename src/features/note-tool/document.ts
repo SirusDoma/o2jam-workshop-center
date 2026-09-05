@@ -30,6 +30,40 @@ export type FoundChartEvent =
   | { kind: 'bpm'; event: EditorBpmChange }
   | { kind: 'fraction'; event: EditorMeasureFraction };
 
+export type CopiedChartNotes = Pick<EditorChart, 'notes' | 'autoplayNotes'>;
+
+export function copyChartNotes(chart: EditorChart, selection: readonly InspectorEvent[]): CopiedChartNotes {
+  const noteIds = new Set(selection.filter((item) => item.kind === 'note').map((item) => item.id));
+  const autoplayIds = new Set(selection.filter((item) => item.kind === 'autoplay').map((item) => item.id));
+  return {
+    notes: chart.notes.filter((note) => noteIds.has(note.id)).map((note) => ({ ...note })),
+    autoplayNotes: chart.autoplayNotes.filter((note) => autoplayIds.has(note.id)).map((note) => ({ ...note })),
+  };
+}
+
+export function pasteChartNotes(
+  chart: EditorChart,
+  copied: CopiedChartNotes,
+  position: number | null,
+  createId: () => string,
+): { chart: EditorChart; selection: InspectorEvent[] } {
+  const positions = [...copied.notes, ...copied.autoplayNotes].map((note) => note.absolutePosition);
+  if (positions.length === 0) {
+    return { chart, selection: [] };
+  }
+
+  const offset = position === null ? 0 : Math.max(0, position) - Math.min(...positions);
+  const notes = copied.notes.map((note) => ({ ...note, id: createId(), absolutePosition: note.absolutePosition + offset }));
+  const autoplayNotes = copied.autoplayNotes.map((note) => ({ ...note, id: createId(), absolutePosition: note.absolutePosition + offset }));
+  return {
+    chart: withMeasureCount({ ...chart, notes: [...chart.notes, ...notes], autoplayNotes: [...chart.autoplayNotes, ...autoplayNotes] }),
+    selection: [
+      ...notes.map((note) => ({ kind: 'note' as const, id: note.id })),
+      ...autoplayNotes.map((note) => ({ kind: 'autoplay' as const, id: note.id })),
+    ],
+  };
+}
+
 export type EventMovement = {
   positionDelta: number;
   noteLaneDelta?: number;

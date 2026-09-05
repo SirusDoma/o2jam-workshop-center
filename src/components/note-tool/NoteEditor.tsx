@@ -1,17 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { ChevronDown, Eraser, MousePointer2, Pause, Pencil, Play, Square } from 'lucide-react';
-import { NOTE_LANE_KEYS, NOTE_LANE_KEYS_3, type NoteLaneKey, type NoteToolSettings } from '../../features/note-tool/settings';
+import { NOTE_LANE_KEYS, NOTE_LANE_KEYS_3, formatNoteLabel, type NoteLaneKey, type NoteToolSettings } from '../../features/note-tool/settings';
 import { playbackEvents, tempoChanges } from '../../features/note-tool/chart';
 import {
   chartEndPosition,
+  copyChartNotes,
   defaultBpmAtPosition,
   findChartEvent,
   moveChartEvents,
+  pasteChartNotes,
   placeAutoplayNote,
   placeBpmChange,
   placeMeasureFraction,
   removeChartEvent,
   updateChartEvent,
+  type CopiedChartNotes,
 } from '../../features/note-tool/document';
 import { findNote, placeLongNote, placeTapNote, volumeLevelToPercent } from '../../features/note-tool/editor';
 import { EventInspector } from './EventInspector';
@@ -51,6 +54,7 @@ export function NoteEditor({
   onSelectedSampleChange,
   onPlaybackChange,
   onChartChange,
+  onToggleMaximized,
 }: {
   chart: EditorChart;
   difficulty: Difficulty;
@@ -66,6 +70,7 @@ export function NoteEditor({
   onSelectedSampleChange: (sample: Pick<OjmSample, 'id' | 'type'>) => void;
   onPlaybackChange: (playing: boolean) => void;
   onChartChange: (chart: EditorChart) => void;
+  onToggleMaximized: () => void;
 }) {
   const [tool, setTool] = useState<EditTool>('select');
   const [longNote, setLongNote] = useState(false);
@@ -80,7 +85,10 @@ export function NoteEditor({
   const [inspectorOpen, setInspectorOpen] = useState(true);
   const [inspectorTab, setInspectorTab] = useState<'inspector' | 'summary'>('inspector');
   const [seekingDuringPlayback, setSeekingDuringPlayback] = useState(false);
+  const [measureScrollRequest, setMeasureScrollRequest] = useState<{ direction: 1 | -1 } | null>(null);
   const noteSequence = useRef(0);
+  const copiedNotes = useRef<CopiedChartNotes | null>(null);
+  const readCursorPosition = useRef<(() => number) | null>(null);
   const resumeAfterSeek = useRef(false);
   const editorNotes = chart.notes;
   const endPosition = playbackEndPosition(chartEndPosition(chart));
@@ -122,13 +130,134 @@ export function NoteEditor({
 
   useEffect(() => {
     const press = (event: globalThis.KeyboardEvent) => {
+      if (event.defaultPrevented || event.isComposing || document.querySelector('[role="dialog"], [role="alertdialog"], .nt-image-preview-overlay')) {
+        return;
+      }
+
       if (event.key === 'Escape') {
+        if (playback.playing) {
+          event.preventDefault();
+          playback.stop();
+        }
+
         setSelectedEvents([]);
         return;
       }
 
-      if (event.key === 'Shift' && tool === 'note' && !isEditableTarget(event.target)) {
+      if (isEditableTarget(event.target) || event.altKey || event.metaKey) {
+        return;
+      }
+
+      if (event.key === 'Shift' && tool === 'note' && !playbackLocked) {
         setShiftLongNote(true);
+      }
+
+      if (event.code === 'Space') {
+        event.preventDefault();
+        if (event.repeat || seekingDuringPlayback) {
+          return;
+        }
+
+        if (event.ctrlKey) {
+          playback.stop();
+          if (!playback.playing) {
+            void playback.play();
+          }
+        } else if (playback.playing) {
+          playback.pause();
+        } else {
+          void playback.play();
+        }
+
+        return;
+      }
+
+      if (!event.ctrlKey) {
+        if (event.shiftKey) {
+          return;
+        }
+
+        const key = event.key.toLowerCase();
+        if (key === 'f2') {
+          event.preventDefault();
+          if (!event.repeat) {
+            onToggleMaximized();
+          }
+
+          return;
+        }
+
+        if (key !== 's' && key !== 'e' && key !== 'd' && key !== 'delete' && key !== 'pageup' && key !== 'pagedown') {
+          return;
+        }
+
+        event.preventDefault();
+        if (event.repeat) {
+          return;
+        }
+
+        if (key === 'pageup' || key === 'pagedown') {
+          setMeasureScrollRequest({ direction: key === 'pageup' ? 1 : -1 });
+          return;
+        }
+
+        if (playbackLocked) {
+          return;
+        }
+
+        if (key === 'delete') {
+          const noteIds = new Set(selectedEvents.filter((item) => item.kind === 'note').map((item) => item.id));
+          const autoplayIds = new Set(selectedEvents.filter((item) => item.kind === 'autoplay').map((item) => item.id));
+          if (noteIds.size === 0 && autoplayIds.size === 0) {
+            return;
+          }
+
+          onChartChange({
+            ...chart,
+            notes: chart.notes.filter((note) => !noteIds.has(note.id)),
+            autoplayNotes: chart.autoplayNotes.filter((note) => !autoplayIds.has(note.id)),
+          });
+          setSelectedEvents((current) => current.filter((item) => item.kind !== 'note' && item.kind !== 'autoplay'));
+        } else {
+          setTool(key === 's' ? 'select' : key === 'e' ? 'note' : 'erase');
+        }
+
+        return;
+      }
+
+      const key = event.key.toLowerCase();
+      if ((event.shiftKey && key !== 'v') || (key !== 'a' && key !== 'c' && key !== 'd' && key !== 'v')) {
+        return;
+      }
+
+      event.preventDefault();
+      if (event.repeat || playbackLocked) {
+        return;
+      }
+
+      if (key === 'a') {
+        setSelectedEvents([
+          ...chart.notes.map((note) => ({ kind: 'note' as const, id: note.id })),
+          ...chart.autoplayNotes.map((note) => ({ kind: 'autoplay' as const, id: note.id })),
+        ]);
+      } else if (key === 'd') {
+        setSelectedEvents([]);
+      } else if (key === 'c') {
+        const copied = copyChartNotes(chart, selectedEvents);
+        if (copied.notes.length > 0 || copied.autoplayNotes.length > 0) {
+          copiedNotes.current = copied;
+        }
+      } else if (key === 'v') {
+        const position = event.shiftKey ? null : readCursorPosition.current?.();
+        if (!copiedNotes.current || position === undefined) {
+          return;
+        }
+
+        const pasted = pasteChartNotes(chart, copiedNotes.current, position, () => `placed-${Date.now()}-${noteSequence.current += 1}`);
+        onChartChange(pasted.chart);
+        setSelectedEvents(pasted.selection);
+        setTool('select');
+        setShiftLongNote(false);
       }
     };
 
@@ -150,7 +279,7 @@ export function NoteEditor({
       window.removeEventListener('keyup', release);
       window.removeEventListener('blur', blur);
     };
-  }, [tool]);
+  }, [chart, onChartChange, onToggleMaximized, playback.play, playback.pause, playback.stop, playback.playing, playbackLocked, seekingDuringPlayback, selectedEvents, tool]);
 
   const selectTool = (nextTool: EditTool) => {
     setTool(nextTool);
@@ -319,12 +448,12 @@ export function NoteEditor({
             className="icon-btn nt-play"
             type="button"
             aria-label={playback.playing ? 'Pause' : 'Play'}
-            title={playback.playing ? 'Pause' : 'Play'}
+            title={playback.playing ? 'Pause (Space)' : 'Play (Space)'}
             onClick={() => playback.playing ? playback.pause() : void playback.play()}
           >
             {playback.playing ? <Pause /> : <Play />}
           </button>
-          <button className="icon-btn" type="button" disabled={!playback.playing && playback.position <= 0} aria-label="Stop and return to start" title="Stop and return to start" onClick={playback.stop}>
+          <button className="icon-btn" type="button" disabled={!playback.playing && playback.position <= 0} aria-label="Stop and return to start" title="Stop and return to start (Ctrl+Space / Esc)" onClick={playback.stop}>
             <Square />
           </button>
         </div>
@@ -417,8 +546,11 @@ export function NoteEditor({
           onSettingsChange={onSettingsChange}
           readOnly={playbackLocked}
           playing={playback.playing}
+          measureScrollRequest={measureScrollRequest}
           onGridEvent={handleGridEvent}
           onLongNoteDrag={handleLongNoteDrag}
+          formatDraftNoteLabel={(lane) => formatNoteLabel(settings.noteTemplate, { lane, sampleId: selectedSampleId, sampleType: selectedSampleType })}
+          onCursorMove={(readPosition) => { readCursorPosition.current = readPosition; }}
           onSelectEvent={(selection, additive) => setSelectedEvents((current) => updateEventSelection(current, selection, additive))}
           onSelectEvents={(selection, additive) => setSelectedEvents((current) => updateMarqueeSelection(current, selection, additive))}
           onDeleteEvent={deleteEvent}
@@ -480,7 +612,7 @@ export function NoteEditor({
 
 function isEditableTarget(target: EventTarget | null): boolean {
   return target instanceof HTMLElement
-    && (target.isContentEditable || target.matches('input, textarea, select, button'));
+    && (target.isContentEditable || target.closest('input:not([type="range"]), textarea, select') !== null);
 }
 
 function PlaybackReadout({

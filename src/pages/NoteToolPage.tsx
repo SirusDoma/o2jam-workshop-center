@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type CSSProperties, type DragEvent, type KeyboardEvent, type PointerEvent } from 'react';
-import { FilePlus2, FolderOpen, Maximize2, Minimize2, Save, Settings2, TriangleAlert, Upload, X } from 'lucide-react';
+import { FilePlus2, FolderOpen, Keyboard, Maximize2, Minimize2, Save, Settings2, TriangleAlert, Upload, X } from 'lucide-react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { collectDropped } from '../components/DropZone';
 import { ChartSidebar } from '../components/note-tool/ChartSidebar';
 import { documentFromOjn, emptyEditorDocument, emptyMetadata, metadataFromOjn, resolveChartLevel } from '../features/note-tool/chart';
 import { SettingsDialog } from '../components/note-tool/SettingsDialog';
+import { ShortcutsDialog } from '../components/note-tool/ShortcutsDialog';
 import { NoteEditor } from '../components/note-tool/NoteEditor';
 import { SamplesSection } from '../components/note-tool/SamplesSection';
 import { SaveAsDialog } from '../components/note-tool/SaveAsDialog';
@@ -62,6 +63,7 @@ export default function NoteToolPage() {
   const [chartTab, setChartTab] = useState<ChartTab>('metadata');
   const [panelWidth, setPanelWidth] = useState(320);
   const [maximized, setMaximized] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [coverImage, setCoverImage] = useState<PreviewImage | null>(null);
   const [thumbnailImage, setThumbnailImage] = useState<PreviewImage | null>(null);
   const [previewImage, setPreviewImage] = useState<PreviewImage | null>(null);
@@ -778,8 +780,9 @@ export default function NoteToolPage() {
           </div>
           <div className="nt-filebar-actions">
             <FpsCounter />
+            <button className="icon-btn" type="button" aria-label="Show shortcuts" aria-haspopup="dialog" aria-expanded={shortcutsOpen} title="Shortcuts" onClick={() => setShortcutsOpen(true)}><Keyboard /></button>
             <button className="icon-btn nt-note-settings-toggle" type="button" disabled={playbackActive} aria-label="Open settings" aria-haspopup="dialog" aria-expanded={settingsOpen} title="Settings" onClick={() => setSettingsOpen(true)}><Settings2 /></button>
-            <button className="icon-btn nt-maximize-toggle" type="button" aria-label={maximized ? 'Restore Note Tool panel' : 'Maximize Note Tool panel'} aria-pressed={maximized} title={maximized ? 'Restore panel' : 'Maximize panel'} onClick={() => setMaximized((value) => !value)}>
+            <button className="icon-btn nt-maximize-toggle" type="button" aria-label={maximized ? 'Restore Note Tool panel' : 'Maximize Note Tool panel'} aria-pressed={maximized} title={maximized ? 'Restore panel (F2)' : 'Maximize panel (F2)'} onClick={() => setMaximized((value) => !value)}>
               {maximized ? <Minimize2 /> : <Maximize2 />}
             </button>
             <button className="icon-btn nt-close-toggle" type="button" disabled={playbackActive} aria-label="Close current file" title="Close current file" onClick={() => requestFileAction({ kind: 'close' })}>
@@ -870,6 +873,7 @@ export default function NoteToolPage() {
             onSettingsChange={setToolSettings}
             onSelectedSampleChange={setSelectedSample}
             onPlaybackChange={setPlaybackActive}
+            onToggleMaximized={() => setMaximized((value) => !value)}
             onChartChange={(chart) => {
               setEditorDocument((current) => ({ ...current, [difficulty]: chart }));
               setDirty(true);
@@ -897,6 +901,7 @@ export default function NoteToolPage() {
       ) : null}
 
       <div className="nt-dialogs">
+        {shortcutsOpen ? <ShortcutsDialog onClose={() => setShortcutsOpen(false)} /> : null}
         {errorMessage ? (
           <ConfirmDialog
             title="Error"
