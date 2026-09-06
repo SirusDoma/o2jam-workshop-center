@@ -1,3 +1,5 @@
+import { hasPrimaryModifier } from './shortcuts.ts';
+
 type ScrollTarget = {
   scrollIntoView?: (options?: ScrollIntoViewOptions) => unknown;
 };
@@ -18,13 +20,14 @@ export function scrollNearest(element: ScrollTarget | null): void {
 
 type ControlWheelEvent = Event & {
   readonly ctrlKey: boolean;
+  readonly metaKey: boolean;
   readonly deltaY: number;
 };
 
 export function listenForControlWheel(target: EventTarget, onDelta: (deltaY: number) => void): () => void {
   const handleWheel = (event: Event) => {
     const wheel = event as ControlWheelEvent;
-    if (!wheel.ctrlKey) {
+    if (!wheel.ctrlKey && !hasPrimaryModifier(wheel)) {
       return;
     }
 

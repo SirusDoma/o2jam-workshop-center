@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type CSSProperties, type DragEvent, type KeyboardEvent, type PointerEvent } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState, type ChangeEvent, type CSSProperties, type DragEvent, type KeyboardEvent, type PointerEvent } from 'react';
 import { FilePlus2, FolderOpen, Keyboard, Maximize2, Minimize2, Save, Settings2, TriangleAlert, Upload, X } from 'lucide-react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { collectDropped } from '../components/DropZone';
@@ -13,12 +13,15 @@ import { parseOjmBank, writeOjmBank, writeOjnFile } from '../features/note-tool/
 import { NOTE_TOOL_SETTINGS_KEY, clampPlayheadThickness, createDefaultNoteToolSettings, normalizePlayheadGrid, parseNoteToolSettings, snapPlayheadPosition, type NoteToolSettings } from '../features/note-tool/settings';
 import { MAX_SAMPLE_BANK_BYTES, classifyNoteToolFiles, musicFileName, noteToolStatesEqual, sampleBankFileName, sampleSlotIds, type OjmEncryption, type OjmFormat, type OjmSample } from '../features/note-tool/model';
 import { measuredFrameRate } from '../features/note-tool/playback';
+import { createEditorHistory, editorHistoryReducer } from '../features/note-tool/history';
 import { saveBytesAs, type SaveFilePicker } from '../features/note-tool/dom';
-import type { ChartMetadata, ChartTab, Difficulty, EditorDocument, KeyMode, LoadedChart, PreviewImage } from '../features/note-tool/types';
+import type { ChartMetadata, ChartTab, Difficulty, KeyMode, LoadedChart, PreviewImage } from '../features/note-tool/types';
 import { CloseButton, Overlay } from '../components/Overlay';
 import { PageHead } from '../components/Shell';
 import { detectOjnHeaderEncoding, parseOjn, type O2Encoding } from '../o2jam';
 import { reportDirty } from '../dirty';
+import { useToolActive } from '../context/ToolActiveContext';
+import { formatShortcut, hasPrimaryModifier } from '../features/note-tool/shortcuts';
 
 const MAX_OJN_BYTES = 128 * 1024 * 1024;
 
@@ -58,6 +61,7 @@ function loadSettings(): NoteToolSettings {
 }
 
 export default function NoteToolPage() {
+  const active = useToolActive();
   const [difficulty, setDifficulty] = useState<Difficulty>('EX');
   const [keyMode, setKeyMode] = useState<KeyMode>(7);
   const [chartTab, setChartTab] = useState<ChartTab>('metadata');
@@ -83,7 +87,8 @@ export default function NoteToolPage() {
 
   const [metadata, setMetadata] = useState<ChartMetadata>(emptyMetadata);
   const [levels, setLevels] = useState<Record<Difficulty, number>>({ EX: 0, NX: 0, HX: 0 });
-  const [editorDocument, setEditorDocument] = useState<EditorDocument>(emptyEditorDocument);
+  const [editorHistory, dispatchHistory] = useReducer(editorHistoryReducer, undefined, () => createEditorHistory(emptyEditorDocument()));
+  const editorDocument = editorHistory.document;
   const [loaded, setLoaded] = useState<LoadedChart | null>(null);
   const [ojnFileLoaded, setOjnFileLoaded] = useState(true);
   const [ojmFileLoaded, setOjmFileLoaded] = useState(true);
@@ -172,7 +177,7 @@ export default function NoteToolPage() {
     setChartTab('metadata');
     setMetadata(emptyMetadata());
     setLevels({ EX: 0, NX: 0, HX: 0 });
-    setEditorDocument(emptyEditorDocument());
+    dispatchHistory({ type: 'reset', document: emptyEditorDocument() });
     setLoaded(null);
     setOjnFileLoaded(true);
     setOjmFileLoaded(true);
@@ -226,7 +231,7 @@ export default function NoteToolPage() {
       setThumbnailImage(nextThumbnail);
       setMetadata(nextMetadata);
       setLevels({ EX: parsed.header.levelEx, NX: parsed.header.levelNx, HX: parsed.header.levelHx });
-      setEditorDocument(document);
+      dispatchHistory({ type: 'reset', document });
       setLoaded({ name: file.name, file: parsed });
       setOjnFileLoaded(true);
       setDocumentName(file.name);
@@ -648,6 +653,37 @@ export default function NoteToolPage() {
     }
   };
 
+  useEffect(() => {
+    if (!active) {
+      return;
+    }
+
+    const press = (event: globalThis.KeyboardEvent) => {
+      if (event.defaultPrevented || event.isComposing || event.altKey || event.shiftKey || !hasPrimaryModifier(event)) {
+        return;
+      }
+
+      const key = event.key.toLowerCase();
+      if (key !== 's' && key !== 'o') {
+        return;
+      }
+
+      event.preventDefault();
+      if (event.repeat || playbackActive || filesLoading || document.querySelector('[role="dialog"], [role="alertdialog"], .nt-image-preview-overlay')) {
+        return;
+      }
+
+      if (key === 'o') {
+        void browseFiles();
+      } else if (dirty) {
+        requestSave();
+      }
+    };
+
+    window.addEventListener('keydown', press);
+    return () => window.removeEventListener('keydown', press);
+  }, [active, browseFiles, dirty, filesLoading, playbackActive, requestSave]);
+
   return (
     <>
       <PageHead
@@ -657,8 +693,8 @@ export default function NoteToolPage() {
         actions={
           <>
             <button className="btn nt-page-action" type="button" disabled={playbackActive || filesLoading} onClick={() => requestFileAction({ kind: 'new' })}><FilePlus2 size={14} />New</button>
-            <button className="btn nt-page-action" type="button" disabled={playbackActive || filesLoading} onClick={() => void browseFiles()}><FolderOpen size={14} />Browse</button>
-            <button className="btn primary nt-page-action" type="button" disabled={playbackActive || filesLoading || !dirty} onClick={requestSave}><Save size={14} />Save</button>
+            <button className="btn nt-page-action" type="button" title={`Open (${formatShortcut('Ctrl + O')})`} disabled={playbackActive || filesLoading} onClick={() => void browseFiles()}><FolderOpen size={14} />Browse</button>
+            <button className="btn primary nt-page-action" type="button" title={`Save (${formatShortcut('Ctrl + S')})`} disabled={playbackActive || filesLoading || !dirty} onClick={requestSave}><Save size={14} />Save</button>
           </>
         }
       />
@@ -874,9 +910,12 @@ export default function NoteToolPage() {
             onSelectedSampleChange={setSelectedSample}
             onPlaybackChange={setPlaybackActive}
             onToggleMaximized={() => setMaximized((value) => !value)}
+            canUndo={editorHistory.charts[difficulty].past.length > 0}
+            canRedo={editorHistory.charts[difficulty].future.length > 0}
+            onUndo={() => dispatchHistory({ type: 'undo', difficulty })}
+            onRedo={() => dispatchHistory({ type: 'redo', difficulty })}
             onChartChange={(chart) => {
-              setEditorDocument((current) => ({ ...current, [difficulty]: chart }));
-              setDirty(true);
+              dispatchHistory({ type: 'edit', difficulty, chart });
             }}
           />
         </div>

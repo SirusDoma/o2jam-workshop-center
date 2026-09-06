@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { ChevronDown, Eraser, MousePointer2, Pause, Pencil, Play, Square } from 'lucide-react';
+import { ChevronDown, Eraser, MousePointer2, Pause, Pencil, Play, Redo2, Square, Undo2 } from 'lucide-react';
 import { NOTE_LANE_KEYS, NOTE_LANE_KEYS_3, formatNoteLabel, type NoteLaneKey, type NoteToolSettings } from '../../features/note-tool/settings';
 import { playbackEvents, tempoChanges } from '../../features/note-tool/chart';
 import {
@@ -29,6 +29,8 @@ import type { Difficulty, EditorChart, EditorChartNote, EditorMeasureFraction, E
 import { updateEventSelection, updateMarqueeSelection } from '../../features/note-tool/selection';
 import { bpmAtPosition, playbackEndPosition, positionToSeconds, shouldRefreshPlaybackReadout, type TempoChange } from '../../features/note-tool/playback';
 import { useChartPlayback, type PlaybackPositionSubscription } from '../../features/note-tool/useChartPlayback';
+import { formatShortcut, hasPrimaryModifier, historyShortcut, isMacPlatform, playbackShortcut } from '../../features/note-tool/shortcuts';
+import { useToolActive } from '../../context/ToolActiveContext';
 
 type PendingTimingEvent = {
   kind: 'bpm' | 'fraction';
@@ -54,6 +56,10 @@ export function NoteEditor({
   onSelectedSampleChange,
   onPlaybackChange,
   onChartChange,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
   onToggleMaximized,
 }: {
   chart: EditorChart;
@@ -70,8 +76,13 @@ export function NoteEditor({
   onSelectedSampleChange: (sample: Pick<OjmSample, 'id' | 'type'>) => void;
   onPlaybackChange: (playing: boolean) => void;
   onChartChange: (chart: EditorChart) => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
   onToggleMaximized: () => void;
 }) {
+  const active = useToolActive();
   const [tool, setTool] = useState<EditTool>('select');
   const [longNote, setLongNote] = useState(false);
   const [noteVolume, setNoteVolume] = useState('16');
@@ -115,6 +126,20 @@ export function NoteEditor({
     onHiSpeedChange(value);
   }, [onHiSpeedChange]);
 
+  const restoreHistory = useCallback((redo: boolean) => {
+    if (playbackLocked || (redo ? !canRedo : !canUndo)) {
+      return;
+    }
+
+    if (redo) {
+      onRedo();
+    } else {
+      onUndo();
+    }
+    setSelectedEvents([]);
+    setPendingTimingEvent(null);
+  }, [canRedo, canUndo, onRedo, onUndo, playbackLocked]);
+
   useEffect(() => {
     onPlaybackChange(playbackLocked);
     if (playbackLocked) {
@@ -129,6 +154,10 @@ export function NoteEditor({
   }, [difficulty]);
 
   useEffect(() => {
+    if (!active) {
+      return;
+    }
+
     const press = (event: globalThis.KeyboardEvent) => {
       if (event.defaultPrevented || event.isComposing || document.querySelector('[role="dialog"], [role="alertdialog"], .nt-image-preview-overlay')) {
         return;
@@ -144,7 +173,21 @@ export function NoteEditor({
         return;
       }
 
-      if (isEditableTarget(event.target) || event.altKey || event.metaKey) {
+      if (isEditableTarget(event.target) || event.altKey) {
+        return;
+      }
+
+      const historyAction = historyShortcut(event);
+      if (historyAction) {
+        event.preventDefault();
+        if (!event.repeat) {
+          restoreHistory(historyAction === 'redo');
+        }
+        return;
+      }
+
+      const primaryModifier = hasPrimaryModifier(event);
+      if ((event.ctrlKey || event.metaKey) && !primaryModifier) {
         return;
       }
 
@@ -153,12 +196,17 @@ export function NoteEditor({
       }
 
       if (event.code === 'Space') {
+        const action = playbackShortcut(event);
+        if (!action) {
+          return;
+        }
+
         event.preventDefault();
         if (event.repeat || seekingDuringPlayback) {
           return;
         }
 
-        if (event.ctrlKey) {
+        if (action === 'restart') {
           playback.stop();
           if (!playback.playing) {
             void playback.play();
@@ -172,12 +220,12 @@ export function NoteEditor({
         return;
       }
 
-      if (!event.ctrlKey) {
+      if (!primaryModifier) {
         if (event.shiftKey) {
           return;
         }
 
-        const key = event.key.toLowerCase();
+        const key = isMacPlatform() && event.key === 'Backspace' ? 'delete' : event.key.toLowerCase();
         if (key === 'f2') {
           event.preventDefault();
           if (!event.repeat) {
@@ -279,7 +327,7 @@ export function NoteEditor({
       window.removeEventListener('keyup', release);
       window.removeEventListener('blur', blur);
     };
-  }, [chart, onChartChange, onToggleMaximized, playback.play, playback.pause, playback.stop, playback.playing, playbackLocked, seekingDuringPlayback, selectedEvents, tool]);
+  }, [active, chart, onChartChange, onToggleMaximized, playback.play, playback.pause, playback.stop, playback.playing, playbackLocked, restoreHistory, seekingDuringPlayback, selectedEvents, tool]);
 
   const selectTool = (nextTool: EditTool) => {
     setTool(nextTool);
@@ -453,7 +501,7 @@ export function NoteEditor({
           >
             {playback.playing ? <Pause /> : <Play />}
           </button>
-          <button className="icon-btn" type="button" disabled={!playback.playing && playback.position <= 0} aria-label="Stop and return to start" title="Stop and return to start (Ctrl+Space / Esc)" onClick={playback.stop}>
+          <button className="icon-btn" type="button" disabled={!playback.playing && playback.position <= 0} aria-label="Stop and return to start" title={`Stop and return to start (${formatShortcut('Ctrl + Space')} / Esc)`} onClick={playback.stop}>
             <Square />
           </button>
         </div>
@@ -493,6 +541,10 @@ export function NoteEditor({
           <EditButton icon={<MousePointer2 />} label="Select" id="select" active={tool} onSelect={selectTool} />
           <EditButton icon={<Pencil />} label="Note" id="note" active={tool} onSelect={selectTool} />
           <EditButton icon={<Eraser />} label="Erase" id="erase" active={tool} onSelect={selectTool} />
+        </div>
+        <div className="nt-tools" role="group" aria-label="Event history">
+          <button className="icon-btn" type="button" aria-label="Undo" title={`Undo (${formatShortcut('Ctrl + Z')})`} disabled={playbackLocked || !canUndo} onClick={() => restoreHistory(false)}><Undo2 /></button>
+          <button className="icon-btn" type="button" aria-label="Redo" title={`Redo (${formatShortcut('Ctrl + Shift + Z')})`} disabled={playbackLocked || !canRedo} onClick={() => restoreHistory(true)}><Redo2 /></button>
         </div>
         {tool === 'note' ? (
           <>

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { CloseButton, Overlay } from '../Overlay';
+import { formatShortcut, isMacPlatform } from '../../features/note-tool/shortcuts';
 
 const SHORTCUT_GROUPS = [
   ['Selection Tool', [
@@ -34,6 +35,14 @@ const SHORTCUT_GROUPS = [
     ['PgUp / PgDn', 'Scroll to the next / previous measure'],
     ['Ctrl + Scroll', 'Change hi-speed over the note grid'],
     ['Right-click header', 'Reset column width'],
+  ]],
+  ['Events', [
+    ['Ctrl + Z', 'Undo the last event edit'],
+    ['Ctrl + Shift + Z', 'Redo the last event edit'],
+  ]],
+  ['Files', [
+    ['Ctrl + S', 'Save the chart and sample bank'],
+    ['Ctrl + O', 'Open OJN / OJM files'],
   ]],
 ] as const;
 
@@ -70,8 +79,9 @@ export function ShortcutsDialog({ onClose }: { onClose: () => void }) {
                   <section key={title}>
                     <h3>{title}</h3>
                     <dl>{shortcuts.map(([keys, description]) => (
-                      <div key={keys}><dt><kbd>{keys}</kbd></dt><dd>{description}</dd></div>
+                      <div key={keys}><dt><kbd>{formatShortcut(keys)}</kbd></dt><dd>{description}</dd></div>
                     ))}</dl>
+                    {title === 'Events' && !isMacPlatform() ? <dl><div><dt><kbd>Ctrl + Y</kbd></dt><dd>Redo the last event edit</dd></div></dl> : null}
                   </section>
                 ))}
               </div>

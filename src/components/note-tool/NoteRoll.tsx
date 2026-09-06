@@ -507,7 +507,7 @@ export function NoteRoll({
   };
 
   const loadMoreMeasuresWithWheel = (event: WheelEvent<HTMLDivElement>) => {
-    if (event.ctrlKey) {
+    if (event.ctrlKey || event.metaKey) {
       return;
     }
 
