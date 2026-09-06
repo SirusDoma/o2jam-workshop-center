@@ -516,6 +516,7 @@ export function NoteRoll({
   };
 
   const loadMoreMeasures = (event: UIEvent<HTMLDivElement>) => {
+    const started = diagnostic.recording ? performance.now() : 0;
     updateEventDrag();
     updateMarquee();
     const top = event.currentTarget.scrollTop;
@@ -527,14 +528,11 @@ export function NoteRoll({
     const scrollingUp = top < previousScrollTop.current;
     previousScrollTop.current = top;
     updateRenderWindow(top);
-    if (readOnly) {
-      return;
-    }
-
-    if (scrollingUp && top <= 96 && !loadingMeasures.current) {
+    if (!readOnly && scrollingUp && top <= 96 && !loadingMeasures.current) {
       loadingMeasures.current = true;
       setMeasureCount((count) => count + 4);
     }
+    if (diagnostic.recording) diagnostic.record('roll.scrollEvent', performance.now() - started);
   };
 
   const loadMoreMeasuresWithWheel = (event: WheelEvent<HTMLDivElement>) => {

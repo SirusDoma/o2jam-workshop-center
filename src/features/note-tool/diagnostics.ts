@@ -1,5 +1,9 @@
 export const DIAGNOSTIC_MODES = {
   normal: 'Normal playback',
+  'auto-scrollbar': 'Automatic panel scrollbar',
+  'full-sample-layout': 'All sample rows laid out',
+  'no-readout': 'Transport readout paused',
+  idle: 'Paused baseline',
   'no-follow': 'Auto-scroll off',
   'no-playhead': 'Playhead hidden',
   'no-overlays': 'Grid and watermarks hidden',
@@ -59,13 +63,23 @@ export class PlaybackDiagnostics {
   private slowWork: { stage: string; at: number; duration: number }[] = [];
   private observers: PerformanceObserver[] = [];
   private initialContext: Context = {};
+  private modeListeners = new Set<() => void>();
+
+  subscribeMode = (listener: () => void) => {
+    this.modeListeners.add(listener);
+    return () => { this.modeListeners.delete(listener); };
+  };
+
+  getMode = () => this.mode;
 
   setMode(mode: DiagnosticMode) {
+    const previous = this.mode;
     this.mode = this.enabled ? mode : 'normal';
     if (typeof document !== 'undefined') {
       if (this.mode === 'normal') delete document.documentElement.dataset.ntDiagnostic;
       else document.documentElement.dataset.ntDiagnostic = this.mode;
     }
+    if (previous !== this.mode) this.modeListeners.forEach((listener) => listener());
   }
 
   begin(context: Context = {}) {

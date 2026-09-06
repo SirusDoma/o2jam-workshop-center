@@ -1333,6 +1333,7 @@ select.secinput {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--ink-3) transparent;
@@ -2352,6 +2353,7 @@ select.secinput {
 [data-nt-diagnostic="no-roll"] .nt-roll {
   visibility: hidden !important;
 }
+[data-nt-diagnostic="auto-scrollbar"] .nt-chart { scrollbar-gutter: auto; }
 
 .nt-diagnostics {
   position: fixed;

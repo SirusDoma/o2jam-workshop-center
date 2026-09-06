@@ -4,6 +4,7 @@ import { DIAGNOSTIC_MODES, diagnosticEnabled, type PlaybackDiagnostics, type Dia
 import type { useChartPlayback } from '../../features/note-tool/useChartPlayback';
 
 type Playback = ReturnType<typeof useChartPlayback>;
+const PLAYBACK_TEST: DiagnosticMode[] = ['normal', 'auto-scrollbar', 'full-sample-layout', 'normal', 'idle'];
 
 function wait(milliseconds: number, signal: AbortSignal) {
   return new Promise<void>((resolve, reject) => {
@@ -76,6 +77,10 @@ export function PlaybackDiagnosticsPanel({ playback, diagnostic }: { playback: P
   if (!enabled) return null;
 
   const capture = async (modes: DiagnosticMode[]) => {
+    if (modes.includes('full-sample-layout') && !document.querySelector('.nt-sample-list')) {
+      setStatus('Expand Samples before running the comparison.');
+      return;
+    }
     const controller = new AbortController();
     run.current = controller;
     const startPosition = position.current;
@@ -84,6 +89,7 @@ export function PlaybackDiagnosticsPanel({ playback, diagnostic }: { playback: P
     setReportEnvironment(environment());
     if (panel.current) panel.current.open = false;
     let result = 'Complete';
+    let idleFrame = 0;
     const visibilityChanged = () => {
       if (document.visibilityState !== 'visible') {
         result = 'Page hidden during capture';
@@ -98,9 +104,9 @@ export function PlaybackDiagnosticsPanel({ playback, diagnostic }: { playback: P
         diagnostic.setMode(mode);
         controls.current.setPosition(startPosition);
         setStatus(`Warming up: ${DIAGNOSTIC_MODES[mode]}`);
-        await controls.current.play();
+        if (mode !== 'idle') await controls.current.play();
         await wait(1500, controller.signal);
-        if (!controls.current.playing) throw new Error('Playback ended before capture. Seek to an earlier section.');
+        if (mode !== 'idle' && !controls.current.playing) throw new Error('Playback ended before capture. Seek to an earlier section.');
         const roll = document.querySelector<HTMLElement>('.nt-roll-wrap');
         diagnostic.begin({
           startPosition, visibility: document.visibilityState,
@@ -108,10 +114,21 @@ export function PlaybackDiagnosticsPanel({ playback, diagnostic }: { playback: P
           documentNodes: document.getElementsByTagName('*').length,
           rollNodes: roll?.getElementsByTagName('*').length ?? 0,
           viewportWidth: roll?.clientWidth ?? 0, viewportHeight: roll?.clientHeight ?? 0,
+          renderedSampleRows: document.querySelectorAll('.nt-sample-list [role="option"]').length,
+          sampleSlots: Number(document.querySelector('.nt-sample-list [role="option"]')?.getAttribute('aria-setsize') ?? 0),
+          panelScrollbarGutter: getComputedStyle(document.querySelector('.nt-chart')!).scrollbarGutter,
+          pageFocused: document.hasFocus(),
         });
+        if (mode === 'idle') {
+          const frame = (now: number) => { diagnostic.frame(now); idleFrame = requestAnimationFrame(frame); };
+          idleFrame = requestAnimationFrame(frame);
+        }
         setStatus(`Recording 8s: ${DIAGNOSTIC_MODES[mode]}`);
         await wait(8000, controller.signal);
-        const complete = controls.current.playing && document.visibilityState === 'visible';
+        cancelAnimationFrame(idleFrame);
+        idleFrame = 0;
+        diagnostic.context.pageFocused = document.hasFocus();
+        const complete = controls.current.playing === (mode !== 'idle') && document.visibilityState === 'visible';
         const captured = diagnostic.finish(complete ? 'complete' : 'playback stopped or page hidden');
         if (!captured.metrics['frame.interval']?.count) {
           throw new Error('No playback frames recorded. An app update may have interrupted capture; start a new capture.');
@@ -126,6 +143,7 @@ export function PlaybackDiagnosticsPanel({ playback, diagnostic }: { playback: P
         setCaptures((previous) => [...previous, partial]);
       }
     } finally {
+      cancelAnimationFrame(idleFrame);
       document.removeEventListener('visibilitychange', visibilityChanged);
       if (mounted.current) {
         diagnostic.setMode('normal');
@@ -139,7 +157,7 @@ export function PlaybackDiagnosticsPanel({ playback, diagnostic }: { playback: P
     }
   };
 
-  const report = { version: 1, capturedAt: new Date().toISOString(), environment: reportEnvironment, captures };
+  const report = { version: 2, revision: 'stable-sidebar-v1', capturedAt: new Date().toISOString(), environment: reportEnvironment, captures };
   const exportReport = () => {
     const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' }));
     const link = document.createElement('a');
@@ -154,23 +172,26 @@ export function PlaybackDiagnosticsPanel({ playback, diagnostic }: { playback: P
     <details className="nt-diagnostics" ref={panel} open>
       <summary>Playback diagnostics · {status}</summary>
       <div className="nt-diagnostics-content">
-        <p>Run diagnostics by running multiple tests in the same section.</p>
+        <p>Test playback compares the same section with the current layout, automatic panel scrollbars, all sample rows, and paused playback. Keep this window visible until it finishes.</p>
         <div className="nt-diagnostics-actions">
+          <button type="button" disabled={running} onClick={() => void capture(PLAYBACK_TEST)}>Test playback (48s)</button>
           <button type="button" disabled={running} onClick={() => void capture(['normal'])}>Capture 8s</button>
-          <button type="button" disabled={running} onClick={() => void capture(Object.keys(DIAGNOSTIC_MODES) as DiagnosticMode[])}>Compare all (57s)</button>
+          <button type="button" disabled={running} onClick={() => void capture(Object.keys(DIAGNOSTIC_MODES) as DiagnosticMode[])}>Compare all ({Math.ceil(Object.keys(DIAGNOSTIC_MODES).length * 9.5)}s)</button>
           <button type="button" disabled={!running} onClick={() => { run.current?.abort(); controls.current.pause(); }}>Cancel capture</button>
           <button type="button" disabled={running || !captures.length} onClick={exportReport}>Export JSON</button>
         </div>
         {captures.length > 0 ? <>
           <table>
-            <thead><tr><th>Test</th><th>RAF FPS</th><th>Frame p95</th><th>Callback p95</th><th>Scroll p95</th><th>Cull max</th><th>Scrolls</th></tr></thead>
-            <tbody>{captures.map((item) => <tr key={item.mode}>
+            <thead><tr><th>Test</th><th>RAF FPS</th><th>Frame p95</th><th>Callback p95</th><th>Scroll p95</th><th>Scroll event p95</th><th>Cull max</th><th>Scrolls</th><th>Sample rows</th></tr></thead>
+            <tbody>{captures.map((item, index) => <tr key={`${index}-${item.mode}`}>
               <th>{DIAGNOSTIC_MODES[item.mode]}</th><td>{item.fps.toFixed(1)}</td>
               <td>{format(item.metrics['frame.interval']?.p95)}</td>
               <td>{format(item.metrics['playback.callback']?.p95)}</td>
               <td>{format(item.metrics['roll.scroll']?.p95)}</td>
+              <td>{format(item.metrics['roll.scrollEvent']?.p95)}</td>
               <td>{format(item.metrics['roll.cull']?.max)}</td>
               <td>{item.counters.scrollWrites ?? 0}</td>
+              <td>{item.context.renderedSampleRows}</td>
             </tr>)}</tbody>
           </table>
           <details><summary>Report data</summary><pre aria-label="Playback diagnostic report">{JSON.stringify(report, null, 2)}</pre></details>

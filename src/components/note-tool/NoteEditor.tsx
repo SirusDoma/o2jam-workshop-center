@@ -24,7 +24,7 @@ import { NoteRoll, type LongNoteGridEvent, type NoteGridEvent } from './NoteRoll
 import { RollViewControls } from './RollViewControls';
 import { SampleBankPicker } from './SampleBankPicker';
 import { PlaybackDiagnosticsPanel } from './PlaybackDiagnosticsPanel';
-import { PlaybackDiagnostics } from '../../features/note-tool/diagnostics';
+import type { PlaybackDiagnostics } from '../../features/note-tool/diagnostics';
 import { TimingValueDialog } from './TimingValueDialog';
 import { DEFAULT_FRACTION_VALUE } from '../../features/note-tool/timingValues';
 import type { Difficulty, EditorChart, EditorChartNote, EditorMeasureFraction, EditTool, InspectorEvent, KeyMode } from '../../features/note-tool/types';
@@ -42,6 +42,7 @@ type PendingTimingEvent = {
 };
 
 export function NoteEditor({
+  diagnostic,
   chart,
   difficulty,
   baseBpm,
@@ -58,6 +59,7 @@ export function NoteEditor({
   onChartChange,
   onToggleMaximized,
 }: {
+  diagnostic: PlaybackDiagnostics;
   chart: EditorChart;
   difficulty: Difficulty;
   baseBpm: number;
@@ -74,7 +76,6 @@ export function NoteEditor({
   onChartChange: (chart: EditorChart) => void;
   onToggleMaximized: () => void;
 }) {
-  const [diagnostic] = useState(() => new PlaybackDiagnostics());
   const [tool, setTool] = useState<EditTool>('select');
   const [longNote, setLongNote] = useState(false);
   const [noteVolume, setNoteVolume] = useState('16');
@@ -463,7 +464,9 @@ export function NoteEditor({
           </button>
         </div>
         <PlaybackReadout
+          diagnostic={diagnostic}
           initialPosition={playback.position}
+          playing={playback.playing}
           endPosition={endPosition}
           baseBpm={baseBpm}
           bpmChanges={bpmChanges}
@@ -616,7 +619,9 @@ function isEditableTarget(target: EventTarget | null): boolean {
 }
 
 function PlaybackReadout({
+  diagnostic,
   initialPosition,
+  playing,
   endPosition,
   baseBpm,
   bpmChanges,
@@ -626,7 +631,9 @@ function PlaybackReadout({
   onSeekStart,
   onSeekEnd,
 }: {
+  diagnostic: PlaybackDiagnostics;
   initialPosition: number;
+  playing: boolean;
   endPosition: number;
   baseBpm: number;
   bpmChanges: readonly TempoChange[];
@@ -639,14 +646,17 @@ function PlaybackReadout({
   const [position, setPosition] = useState(initialPosition);
   const previousRefresh = useRef(0);
 
-  useEffect(() => setPosition(initialPosition), [initialPosition]);
+  useEffect(() => {
+    if (!playing) setPosition(initialPosition);
+  }, [initialPosition, playing]);
   useEffect(() => subscribePosition((next) => {
+    if (playing && diagnostic.mode === 'no-readout') return;
     const now = performance.now();
     if (next === 0 || next === endPosition || shouldRefreshPlaybackReadout(previousRefresh.current, now)) {
       previousRefresh.current = now;
       setPosition(next);
     }
-  }), [endPosition, subscribePosition]);
+  }), [diagnostic, playing, endPosition, subscribePosition]);
 
   const measure = Math.floor(position);
   const fraction = Math.floor((position - measure) * 16) + 1;
