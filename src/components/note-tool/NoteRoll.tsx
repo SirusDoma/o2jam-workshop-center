@@ -18,14 +18,15 @@ import {
   type SampleLaneKey,
 } from '../../features/note-tool/settings';
 import type { AutoplayChartNote, EditorChart, EditorChartNote, InspectorEvent, KeyMode } from '../../features/note-tool/types';
-import { clampAutoplayToNoteLane, type EventMovement } from '../../features/note-tool/document';
+import { clampNoteLaneDelta, type EventMovement } from '../../features/note-tool/document';
 import { listenForControlWheel } from '../../features/note-tool/dom';
 import { alignToDevicePixel, chartPositionAtY, chartPositionY, edgeScrollDelta, edgeScrollTop, gridLineHeight, gridPositionAtY, laneLabelFits, longNoteBox, measurePixelHeight, nextHiSpeed, noteCellBox, playbackRenderWindow } from '../../features/note-tool/rollLayout';
 import { formatBpmValue } from '../../features/note-tool/timingValues';
-import { isEventSelected, playbackScrollTop, selectionForEventDrag } from '../../features/note-tool/selection';
+import { isEventSelected, playbackScrollTop, selectionForEventDrag, updateMarqueeSelection } from '../../features/note-tool/selection';
 import type { PlaybackPositionSubscription } from '../../features/note-tool/useChartPlayback';
 
 const KEYS_7: NoteLaneKey[] = [...NOTE_LANE_KEYS];
+const AUDIO_LANE_KEYS = [...NOTE_LANE_KEYS, ...SAMPLE_LANE_KEYS];
 const SAMPLE_LANES = SAMPLE_LANE_KEYS.map((_, index) => index + 1);
 type ResizableLaneKey = NoteLaneKey | SampleLaneKey;
 
@@ -183,24 +184,21 @@ export function NoteRoll({
     selection: InspectorEvent[];
     target: InspectorEvent;
     kind: InspectorEvent['kind'];
-    startX: number;
-    startY: number;
+    body: Element;
+    clientX: number;
+    clientY: number;
+    grabOffsetY: number;
     startPosition: number;
     startLane: number;
     positionDelta: number;
     laneDelta: number;
-    noteToAutoplayLane: number | null;
-    autoplayToNoteLane: number | null;
   } | null>(null);
 
+  const eventDragAnimation = useRef<number | null>(null);
   const [dragPreview, setDragPreview] = useState<{
     selection: InspectorEvent[];
     positionDelta: number;
-    noteLaneDelta: number;
-    autoplayLaneDelta: number;
-    sourceNoteLane: number;
-    noteToAutoplayLane: number | null;
-    autoplayToNoteLane: number | null;
+    laneDelta: number;
   } | null>(null);
 
   const [marquee, setMarquee] = useState<{
@@ -213,6 +211,19 @@ export function NoteRoll({
   } | null>(null);
 
   const keys = KEYS_7;
+  const marqueeDrag = useRef<{
+    pointerId: number;
+    target: HTMLDivElement;
+    startX: number;
+    startPosition: number;
+    clientX: number;
+    clientY: number;
+    additive: boolean;
+    initialSelection: readonly InspectorEvent[];
+    selection: readonly InspectorEvent[];
+  } | null>(null);
+
+  const marqueeAnimation = useRef<number | null>(null);
   const rulerWidth = settings.lanes.measure.width;
   const measureWidth = settings.lanes.fraction.width;
   const bpmWidth = settings.lanes.bpm.width;
@@ -475,6 +486,8 @@ export function NoteRoll({
   };
 
   const loadMoreMeasures = (event: UIEvent<HTMLDivElement>) => {
+    updateEventDrag();
+    updateMarquee();
     const top = event.currentTarget.scrollTop;
     if (playing && Math.abs(top - previousScrollTop.current) > 1) {
       manualScrollUntil.current = performance.now() + 400;
@@ -790,6 +803,14 @@ export function NoteRoll({
   };
 
   useLayoutEffect(() => () => {
+    if (eventDragAnimation.current !== null) {
+      window.cancelAnimationFrame(eventDragAnimation.current);
+    }
+
+    if (marqueeAnimation.current !== null) {
+      window.cancelAnimationFrame(marqueeAnimation.current);
+    }
+
     if (rulerSeekAnimation.current !== null) {
       window.cancelAnimationFrame(rulerSeekAnimation.current);
     }
@@ -798,6 +819,76 @@ export function NoteRoll({
       window.cancelAnimationFrame(longNoteAnimation.current);
     }
   }, []);
+
+  const updateEventDrag = () => {
+    const drag = eventDrag.current;
+    if (!drag) {
+      return;
+    }
+
+    const geometry = gridGeometry.current;
+    const targetY = drag.clientY - drag.body.getBoundingClientRect().top - drag.grabOffsetY;
+    const targetPosition = drag.kind === 'fraction'
+      ? Math.floor(chartPositionAtY(targetY, geometry.measureCount, geometry.measureHeight, geometry.measureCount, geometry.measureFractions))
+      : gridPositionAtY(targetY, geometry.measureCount, geometry.measureHeight, geometry.gridDivision, geometry.measureFractions);
+
+    let positionDelta = targetPosition - drag.startPosition;
+    positionDelta = clampSelectionPositionDelta(drag.selection, positionDelta, chart);
+    let laneDelta = 0;
+    if (drag.kind === 'note' || drag.kind === 'autoplay') {
+      const body = drag.body;
+      const sampleBounds = body.querySelector('.nt-sample-lanes')?.getBoundingClientRect();
+      const mainBounds = body.querySelector('.nt-lanes')?.getBoundingClientRect();
+      if (sampleBounds && drag.clientX >= sampleBounds.left) {
+        laneDelta = keys.length + laneIndexAt(drag.clientX - sampleBounds.left, currentSampleWidths) - drag.startLane;
+      } else if (mainBounds) {
+        laneDelta = laneIndexAt(drag.clientX - mainBounds.left, currentKeyWidths) - drag.startLane;
+      }
+    }
+
+    laneDelta = clampNoteLaneDelta(chart, drag.selection, laneDelta, keys);
+
+    drag.positionDelta = positionDelta;
+    drag.laneDelta = laneDelta;
+    setDragPreview({
+      selection: drag.selection,
+      positionDelta,
+      laneDelta,
+    });
+  };
+
+  const runEventDragAutoScroll = () => {
+    eventDragAnimation.current = null;
+    const drag = eventDrag.current;
+    const element = wrapper.current;
+    if (!drag || !element) {
+      return;
+    }
+
+    const bounds = element.getBoundingClientRect();
+    const deltaY = edgeScrollDelta(drag.clientY, bounds.top + 34, bounds.bottom - 16);
+    const deltaX = drag.kind === 'note' || drag.kind === 'autoplay'
+      ? edgeScrollDelta(drag.clientX, bounds.left, bounds.right - 16)
+      : 0;
+
+    if (deltaX === 0 && deltaY === 0) {
+      return;
+    }
+
+    if (deltaY < 0 && element.scrollTop <= 96 && !loadingMeasures.current) {
+      loadingMeasures.current = true;
+      setMeasureCount((count) => count + 4);
+    }
+
+    element.scrollLeft = edgeScrollTop(element.scrollLeft, element.scrollWidth, element.clientWidth, deltaX);
+    element.scrollTop = edgeScrollTop(element.scrollTop, element.scrollHeight, element.clientHeight, deltaY);
+    updateEventDrag();
+    eventDragAnimation.current = window.requestAnimationFrame(runEventDragAutoScroll);
+  };
+
+  useLayoutEffect(() => {
+    updateEventDrag();
+  }, [measureCount, measureHeight, measureFractions, gridDivision]);
 
   const eventHandlers = (selection: InspectorEvent, lane: number): EventHandlers => readOnly ? {
     'data-event-kind': selection.kind,
@@ -820,7 +911,8 @@ export function NoteRoll({
 
       const dragSelection = selectionForEventDrag(selectedEvents, selection);
       const startPosition = eventPosition(chart, selection);
-      if (startPosition === null) {
+      const body = event.currentTarget.closest('.nt-roll-body');
+      if (startPosition === null || !body) {
         return;
       }
 
@@ -834,25 +926,23 @@ export function NoteRoll({
         selection: dragSelection,
         target: selection,
         kind: selection.kind,
-        startX: event.clientX,
-        startY: event.clientY,
+        body,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        grabOffsetY: event.clientY - body.getBoundingClientRect().top - positionY(startPosition),
         startPosition,
-        startLane: lane,
+        startLane: lane + (selection.kind === 'autoplay' ? keys.length : 0),
         positionDelta: 0,
         laneDelta: 0,
-        noteToAutoplayLane: null,
-        autoplayToNoteLane: null,
       };
 
       setDragPreview({
         selection: dragSelection,
         positionDelta: 0,
-        noteLaneDelta: 0,
-        autoplayLaneDelta: 0,
-        sourceNoteLane: lane,
-        noteToAutoplayLane: null,
-        autoplayToNoteLane: null,
+        laneDelta: 0,
       });
+
+      eventDragAnimation.current = window.requestAnimationFrame(runEventDragAutoScroll);
     },
     onPointerMove: (event) => {
       const drag = eventDrag.current;
@@ -860,59 +950,12 @@ export function NoteRoll({
         return;
       }
 
-      const targetY = positionY(drag.startPosition) + event.clientY - drag.startY;
-      const targetPosition = drag.kind === 'fraction'
-        ? Math.floor(chartPositionAtY(targetY, measureCount, measureHeight, measureCount, measureFractions))
-        : gridPositionAtY(targetY, measureCount, measureHeight, gridDivision, measureFractions);
-
-      let positionDelta = targetPosition - drag.startPosition;
-      positionDelta = clampSelectionPositionDelta(drag.selection, positionDelta, chart);
-      let laneDelta = 0;
-      let noteToAutoplayLane: number | null = null;
-      let autoplayToNoteLane: number | null = null;
-      if (drag.kind === 'note') {
-        const body = event.currentTarget.closest('.nt-roll-body');
-        const sampleBounds = body?.querySelector('.nt-sample-lanes')?.getBoundingClientRect();
-        if (sampleBounds && event.clientX >= sampleBounds.left) {
-          const requestedLane = laneIndexAt(event.clientX - sampleBounds.left, currentSampleWidths) + 1;
-          noteToAutoplayLane = clampNoteToAutoplayLane(requestedLane, drag.startLane, drag.selection, chart, keys);
-        } else {
-          const bounds = event.currentTarget.closest('.nt-lanes')?.getBoundingClientRect();
-          if (bounds) {
-            laneDelta = laneIndexAt(event.clientX - bounds.left, currentKeyWidths) - drag.startLane;
-          }
-        }
-      } else if (drag.kind === 'autoplay') {
-        const bounds = event.currentTarget.closest('.nt-sample-lanes')?.getBoundingClientRect();
-        const mainBounds = event.currentTarget.closest('.nt-roll-body')?.querySelector('.nt-lanes')?.getBoundingClientRect();
-        if (mainBounds && event.clientX < mainBounds.right) {
-          const selectedIds = new Set(drag.selection.filter((item) => item.kind === 'autoplay').map((item) => item.id));
-          autoplayToNoteLane = clampAutoplayToNoteLane(
-            laneIndexAt(event.clientX - mainBounds.left, currentKeyWidths),
-            drag.startLane + 1,
-            chart.autoplayNotes.filter((note) => selectedIds.has(note.id)).map((note) => note.lane),
-            keys.length,
-          );
-        } else if (bounds) {
-          laneDelta = laneIndexAt(event.clientX - bounds.left, currentSampleWidths) - drag.startLane;
-        }
+      drag.clientX = event.clientX;
+      drag.clientY = event.clientY;
+      updateEventDrag();
+      if (eventDragAnimation.current === null) {
+        eventDragAnimation.current = window.requestAnimationFrame(runEventDragAutoScroll);
       }
-
-      laneDelta = clampSelectionLaneDelta(drag.kind, drag.selection, laneDelta, chart, keys);
-
-      drag.positionDelta = positionDelta;
-      drag.laneDelta = laneDelta;
-      drag.noteToAutoplayLane = noteToAutoplayLane;
-      drag.autoplayToNoteLane = autoplayToNoteLane;
-      setDragPreview({
-        selection: drag.selection,
-        positionDelta,
-        noteLaneDelta: drag.kind === 'note' ? laneDelta : 0,
-        autoplayLaneDelta: drag.kind === 'autoplay' ? laneDelta : 0,
-        sourceNoteLane: drag.startLane,
-        noteToAutoplayLane,
-        autoplayToNoteLane,
-      });
     },
     onPointerUp: (event) => finishEventDrag(event, true),
     onPointerCancel: (event) => finishEventDrag(event, false),
@@ -932,23 +975,30 @@ export function NoteRoll({
 
   const finishEventDrag = (event: PointerEvent<HTMLSpanElement>, commit: boolean) => {
     const drag = eventDrag.current;
-    const sourceLane = drag ? keys[drag.startLane] : undefined;
-    if (commit && drag?.pointerId === event.pointerId && (drag.positionDelta !== 0 || drag.laneDelta !== 0 || drag.noteToAutoplayLane !== null || drag.autoplayToNoteLane !== null)) {
+    if (!drag || drag.pointerId !== event.pointerId) {
+      return;
+    }
+
+    if (eventDragAnimation.current !== null) {
+      window.cancelAnimationFrame(eventDragAnimation.current);
+      eventDragAnimation.current = null;
+    }
+
+    if (commit) {
+      drag.clientX = event.clientX;
+      drag.clientY = event.clientY;
+      updateEventDrag();
+    }
+
+    if (commit && (drag.positionDelta !== 0 || drag.laneDelta !== 0)) {
       onMoveEvents(drag.selection, {
         positionDelta: drag.positionDelta,
-        ...(drag.kind === 'note' && drag.noteToAutoplayLane === null ? { noteLaneDelta: drag.laneDelta } : {}),
-        ...(drag.kind === 'note' && drag.noteToAutoplayLane !== null && sourceLane
-          ? { noteToAutoplay: { sourceLane, targetLane: drag.noteToAutoplayLane } }
-          : {}),
-        ...(drag.kind === 'autoplay' ? { autoplayLaneDelta: drag.laneDelta } : {}),
-        ...(drag.autoplayToNoteLane !== null
-          ? { autoplayToNote: { sourceLane: drag.startLane + 1, targetLane: keys[drag.autoplayToNoteLane]! } }
-          : {}),
+        laneDelta: drag.laneDelta,
       });
 
       suppressGridClick.current = true;
       window.setTimeout(() => { suppressGridClick.current = false; }, 0);
-    } else if (commit && drag?.pointerId === event.pointerId) {
+    } else if (commit) {
       onSelectEvent(drag.target, false);
     }
 
@@ -963,37 +1013,117 @@ export function NoteRoll({
     setDragPreview(null);
   };
 
+  const dragLane = (selection: InspectorEvent, lane: number): ResizableLaneKey | undefined => {
+    if (!dragPreview || !isEventSelected(dragPreview.selection, selection)) {
+      return undefined;
+    }
+
+    if (selection.kind === 'note' || selection.kind === 'autoplay') {
+      const source = lane + (selection.kind === 'autoplay' ? keys.length : 0);
+      return AUDIO_LANE_KEYS[source + dragPreview.laneDelta];
+    }
+
+    return undefined;
+  };
+
   const dragStyle = (selection: InspectorEvent, lane: number): CSSProperties => {
     if (!dragPreview || !isEventSelected(dragPreview.selection, selection)) {
       return {};
     }
 
-    const laneDelta = selection.kind === 'note'
-      ? dragPreview.noteToAutoplayLane === null
-        ? laneDragOffset(currentKeyWidths, lane, dragPreview.noteLaneDelta)
-        : noteToAutoplayDragOffset(
-          currentKeyWidths,
-          currentSampleWidths,
-          lane,
-          dragPreview.sourceNoteLane,
-          dragPreview.noteToAutoplayLane,
-        )
-      : selection.kind === 'autoplay'
-        ? dragPreview.autoplayToNoteLane === null
-          ? laneDragOffset(currentSampleWidths, lane, dragPreview.autoplayLaneDelta)
-          : -noteToAutoplayDragOffset(
-            currentKeyWidths,
-            currentSampleWidths,
-            dragPreview.autoplayToNoteLane + lane - dragPreview.sourceNoteLane,
-            dragPreview.autoplayToNoteLane,
-            dragPreview.sourceNoteLane + 1,
-          )
-        : 0;
+    let laneDelta = 0;
+    if (selection.kind === 'note' || selection.kind === 'autoplay') {
+      const source = lane + (selection.kind === 'autoplay' ? keys.length : 0);
+      const target = source + dragPreview.laneDelta;
+      const borderOffset = (target >= keys.length ? 2 : 0) - (source >= keys.length ? 2 : 0);
+      laneDelta = laneDragOffset([...currentKeyWidths, ...currentSampleWidths], source, dragPreview.laneDelta) + borderOffset;
+    }
 
     const originalPosition = eventPosition(chart, selection);
     const positionDelta = selection.kind === 'fraction' ? Math.round(dragPreview.positionDelta) : dragPreview.positionDelta;
     const translateY = originalPosition === null ? 0 : positionY(originalPosition + positionDelta) - positionY(originalPosition);
-    return { zIndex: 4, transform: `translate(${laneDelta}px, ${translateY}px)` };
+    const targetKey = dragLane(selection, lane);
+    const targetNoteLane = keys.findIndex((key) => key === targetKey);
+    const targetWidth = targetKey
+      ? targetNoteLane >= 0 ? currentKeyWidths[targetNoteLane]! : settings.lanes[targetKey].width
+      : 0;
+
+    return {
+      ...(targetKey ? {
+        ...getLaneStyle(settings.lanes[targetKey]),
+        width: Math.max(0, targetWidth - (targetKey === 'L' ? 2 : 3)),
+        right: 'auto',
+        visibility: targetWidth === 0 ? 'hidden' : 'visible',
+      } : {}),
+      zIndex: 4,
+      transform: `translate(${laneDelta}px, ${translateY}px)`,
+    };
+  };
+
+  const updateMarquee = () => {
+    const drag = marqueeDrag.current;
+    if (!drag) {
+      return;
+    }
+
+    const bounds = drag.target.getBoundingClientRect();
+    const geometry = gridGeometry.current;
+    const startY = chartPositionY(drag.startPosition, geometry.measureCount, geometry.measureHeight, geometry.measureFractions);
+    const point = localPoint(drag.clientX, drag.clientY, bounds);
+    const box = {
+      left: Math.min(drag.startX, point.x),
+      right: Math.max(drag.startX, point.x),
+      top: Math.min(startY, point.y),
+      bottom: Math.max(startY, point.y),
+    };
+
+    const targets = box.right - box.left >= 4 || box.bottom - box.top >= 4
+      ? Array.from(drag.target.querySelectorAll<HTMLElement>('[data-event-kind][data-event-id]'))
+        .filter((element) => element.getClientRects().length > 0 && getComputedStyle(element).visibility !== 'hidden' && intersectsMarquee(element.getBoundingClientRect(), bounds, box))
+        .map((element) => ({ kind: element.dataset.eventKind as InspectorEvent['kind'], id: element.dataset.eventId ?? '' }))
+        .filter((item) => item.id)
+      : [];
+
+    const selection = updateMarqueeSelection(drag.initialSelection, targets, drag.additive);
+    if (selection.length !== drag.selection.length || selection.some((item, index) => item.kind !== drag.selection[index]?.kind || item.id !== drag.selection[index]?.id)) {
+      drag.selection = selection;
+      onSelectEvents(selection, false);
+    }
+
+    setMarquee({
+      pointerId: drag.pointerId,
+      startX: drag.startX,
+      startY,
+      currentX: point.x,
+      currentY: point.y,
+      additive: drag.additive,
+    });
+  };
+
+  const runMarqueeAutoScroll = () => {
+    marqueeAnimation.current = null;
+    const drag = marqueeDrag.current;
+    const element = wrapper.current;
+    if (!drag || !element) {
+      return;
+    }
+
+    const bounds = element.getBoundingClientRect();
+    const delta = edgeScrollDelta(drag.clientY, bounds.top + 34, bounds.bottom - 16);
+    const deltaX = edgeScrollDelta(drag.clientX, bounds.left, bounds.right - 16);
+    if (delta === 0 && deltaX === 0) {
+      return;
+    }
+
+    if (delta < 0 && element.scrollTop <= 96 && !loadingMeasures.current) {
+      loadingMeasures.current = true;
+      setMeasureCount((count) => count + 4);
+    }
+
+    element.scrollTop = edgeScrollTop(element.scrollTop, element.scrollHeight, element.clientHeight, delta);
+    element.scrollLeft = edgeScrollTop(element.scrollLeft, element.scrollWidth, element.clientWidth, deltaX);
+    updateMarquee();
+    marqueeAnimation.current = window.requestAnimationFrame(runMarqueeAutoScroll);
   };
 
   const startMarquee = (event: PointerEvent<HTMLDivElement>) => {
@@ -1004,58 +1134,62 @@ export function NoteRoll({
     const bounds = event.currentTarget.getBoundingClientRect();
     const point = localPoint(event.clientX, event.clientY, bounds);
     event.currentTarget.setPointerCapture(event.pointerId);
-    setMarquee({
+    marqueeDrag.current = {
       pointerId: event.pointerId,
+      target: event.currentTarget,
       startX: point.x,
-      startY: point.y,
-      currentX: point.x,
-      currentY: point.y,
+      startPosition: chartPositionAtY(point.y, measureCount, measureHeight, measureCount, measureFractions),
+      clientX: event.clientX,
+      clientY: event.clientY,
       additive: event.shiftKey || event.ctrlKey || event.metaKey,
-    });
+      initialSelection: selectedEvents,
+      selection: selectedEvents,
+    };
+
+    updateMarquee();
+    marqueeAnimation.current = window.requestAnimationFrame(runMarqueeAutoScroll);
   };
 
   const moveMarquee = (event: PointerEvent<HTMLDivElement>) => {
-    if (!marquee || marquee.pointerId !== event.pointerId || !event.currentTarget.hasPointerCapture(event.pointerId)) {
+    const drag = marqueeDrag.current;
+    if (!drag || drag.pointerId !== event.pointerId || !event.currentTarget.hasPointerCapture(event.pointerId)) {
       return;
     }
 
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const point = localPoint(event.clientX, event.clientY, bounds);
-    setMarquee((current) => current ? { ...current, currentX: point.x, currentY: point.y } : null);
+    drag.clientX = event.clientX;
+    drag.clientY = event.clientY;
+    updateMarquee();
+    if (marqueeAnimation.current === null) {
+      marqueeAnimation.current = window.requestAnimationFrame(runMarqueeAutoScroll);
+    }
   };
 
   const finishMarquee = (event: PointerEvent<HTMLDivElement>, commit: boolean) => {
-    if (!marquee || marquee.pointerId !== event.pointerId) {
+    const drag = marqueeDrag.current;
+    if (!drag || drag.pointerId !== event.pointerId) {
       return;
+    }
+
+    if (commit) {
+      drag.clientX = event.clientX;
+      drag.clientY = event.clientY;
+      updateMarquee();
+      suppressGridClick.current = true;
+      window.setTimeout(() => { suppressGridClick.current = false; }, 0);
+    } else {
+      onSelectEvents(drag.initialSelection, false);
     }
 
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
 
-    const left = Math.min(marquee.startX, marquee.currentX);
-    const right = Math.max(marquee.startX, marquee.currentX);
-    const top = Math.min(marquee.startY, marquee.currentY);
-    const bottom = Math.max(marquee.startY, marquee.currentY);
-    if (commit && (right - left >= 4 || bottom - top >= 4)) {
-      const bodyBounds = event.currentTarget.getBoundingClientRect();
-      const selection = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('[data-event-kind][data-event-id]'))
-        .filter((element) => intersectsMarquee(element.getBoundingClientRect(), bodyBounds, { left, right, top, bottom }))
-        .map((element) => ({
-          kind: element.dataset.eventKind as InspectorEvent['kind'],
-          id: element.dataset.eventId ?? '',
-        }))
-        .filter((item) => item.id);
-
-      onSelectEvents(selection, marquee.additive);
-      suppressGridClick.current = true;
-      window.setTimeout(() => { suppressGridClick.current = false; }, 0);
-    } else if (commit) {
-      onSelectEvents([], false);
-      suppressGridClick.current = true;
-      window.setTimeout(() => { suppressGridClick.current = false; }, 0);
+    if (marqueeAnimation.current !== null) {
+      window.cancelAnimationFrame(marqueeAnimation.current);
+      marqueeAnimation.current = null;
     }
 
+    marqueeDrag.current = null;
     setMarquee(null);
   };
 
@@ -1237,7 +1371,9 @@ export function NoteRoll({
                 {(notesByKey.get(key) ?? []).map((note) => {
                   const selection = { kind: 'note', id: note.id } as const;
                   const lane = keys.indexOf(key);
-                  return renderNote(note, key, positionY, cellHeightAt, settings, isEventSelected(selectedEvents, selection), eventHandlers(selection, lane), dragStyle(selection, lane));
+                  const targetKey = dragLane(selection, lane) ?? key;
+                  const previewNote = targetKey.startsWith('sample-') ? { ...note, duration: 0 } : note;
+                  return renderNote(previewNote, targetKey.replace('sample-', 'Sample '), positionY, cellHeightAt, settings, isEventSelected(selectedEvents, selection), eventHandlers(selection, lane), dragStyle(selection, lane));
                 })}
                 {longNoteDraft?.key === key
                   ? renderLongNoteDraft(longNoteDraft, positionY, cellHeightAt, settings, formatDraftNoteLabel?.(key) ?? '')
@@ -1262,9 +1398,10 @@ export function NoteRoll({
               return (
                 <div className="nt-sample-lane" style={{ ...getLaneStyle(settings.lanes[laneKey]), visibility: currentSampleWidths[index] === 0 ? 'hidden' : undefined }} key={lane}>
                   {(autoplayByLane.get(lane) ?? []).map((note) => {
-                    const label = formatNoteLabel(settings.noteTemplate, { lane: `Sample ${lane}`, sampleId: note.sampleId, sampleType: note.sampleType });
                     const box = noteCellBox(positionY(note.absolutePosition), cellHeightAt(note.absolutePosition), settings.noteHeight);
                     const selection = { kind: 'autoplay', id: note.id } as const;
+                    const targetKey = dragLane(selection, lane - 1) ?? laneKey;
+                    const label = formatNoteLabel(settings.noteTemplate, { lane: targetKey.replace('sample-', 'Sample '), sampleId: note.sampleId, sampleType: note.sampleType });
                     return <span className={`nt-chart-note tap nt-autoplay-note${isEventSelected(selectedEvents, selection) ? ' is-selected' : ''}`} style={{ top: `${box.top}px`, height: `${box.height}px`, ...dragStyle(selection, lane - 1) }} key={note.id} {...eventHandlers(selection, lane - 1)}>{label}</span>;
                   })}
                 </div>
@@ -1300,7 +1437,7 @@ export function NoteRoll({
 
 function renderNote(
   note: EditorChartNote,
-  key: NoteLaneKey,
+  laneLabel: string,
   positionY: (position: number) => number,
   cellHeightAt: (position: number) => number,
   settings: NoteToolSettings,
@@ -1311,7 +1448,7 @@ function renderNote(
   const duration = note.duration ?? 0;
   const start = positionY(note.absolutePosition);
   const gridHeight = cellHeightAt(note.absolutePosition);
-  const label = formatNoteLabel(settings.noteTemplate, { lane: key, sampleId: note.sampleId, sampleType: note.sampleType });
+  const label = formatNoteLabel(settings.noteTemplate, { lane: laneLabel, sampleId: note.sampleId, sampleType: note.sampleType });
 
   if (duration <= 0) {
     return <span className={`nt-chart-note tap${selected ? ' is-selected' : ''}`} style={{ ...noteCellStyle(start, gridHeight, settings.noteHeight), ...dragStyle }} key={note.id} {...handlers}>{label}</span>;
@@ -1383,61 +1520,6 @@ function laneDragOffset(widths: readonly number[], lane: number, delta: number):
   const start = widths.slice(0, lane).reduce((total, width) => total + width, 0);
   const end = widths.slice(0, target).reduce((total, width) => total + width, 0);
   return end - start;
-}
-
-function noteToAutoplayDragOffset(
-  noteWidths: readonly number[],
-  sampleWidths: readonly number[],
-  noteLane: number,
-  sourceNoteLane: number,
-  targetSampleLane: number,
-): number {
-  const target = targetSampleLane - 1 + noteLane - sourceNoteLane;
-  const sourceStart = noteWidths.slice(0, noteLane).reduce((total, width) => total + width, 0);
-  const targetStart = sampleWidths.slice(0, target).reduce((total, width) => total + width, 0);
-  return noteWidths.reduce((total, width) => total + width, 0) + 2 + targetStart - sourceStart;
-}
-
-function clampNoteToAutoplayLane(
-  requested: number,
-  sourceLane: number,
-  selection: readonly InspectorEvent[],
-  chart: EditorChart,
-  keys: readonly NoteLaneKey[],
-): number {
-  const selectedIds = new Set(selection.filter((event) => event.kind === 'note').map((event) => event.id));
-  const offsets = chart.notes
-    .filter((note) => selectedIds.has(note.id))
-    .map((note) => keys.indexOf(note.key) - sourceLane)
-    .filter((offset) => offset + sourceLane >= 0);
-
-  if (offsets.length === 0) {
-    return Math.max(1, Math.min(SAMPLE_LANES.length, requested));
-  }
-
-  return Math.max(1 - Math.min(...offsets), Math.min(SAMPLE_LANES.length - Math.max(...offsets), requested));
-}
-
-function clampSelectionLaneDelta(
-  kind: InspectorEvent['kind'],
-  selection: readonly InspectorEvent[],
-  requested: number,
-  chart: EditorChart,
-  keys: readonly NoteLaneKey[],
-): number {
-  const selectedIds = new Set(selection.filter((event) => event.kind === kind).map((event) => event.id));
-  const indexes = kind === 'note'
-    ? chart.notes.filter((note) => selectedIds.has(note.id)).map((note) => keys.indexOf(note.key)).filter((index) => index >= 0)
-    : kind === 'autoplay'
-      ? chart.autoplayNotes.filter((note) => selectedIds.has(note.id)).map((note) => note.lane - 1)
-      : [];
-
-  if (indexes.length === 0) {
-    return 0;
-  }
-
-  const laneCount = kind === 'note' ? keys.length : SAMPLE_LANES.length;
-  return Math.max(-Math.min(...indexes), Math.min(laneCount - 1 - Math.max(...indexes), requested));
 }
 
 function clampSelectionPositionDelta(

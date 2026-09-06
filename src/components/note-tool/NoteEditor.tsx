@@ -555,18 +555,12 @@ export function NoteEditor({
           onSelectEvents={(selection, additive) => setSelectedEvents((current) => updateMarqueeSelection(current, selection, additive))}
           onDeleteEvent={deleteEvent}
           onMoveEvents={(selection, movement) => {
-            onChartChange(moveChartEvents(chart, selection, { ...movement, noteLanes: NOTE_LANE_KEYS }));
-            if (movement.noteToAutoplay) {
-              const converted = new Set(selection.filter((event) => event.kind === 'note').map((event) => event.id));
-              setSelectedEvents((current) => current.map((event) => event.kind === 'note' && converted.has(event.id)
-                ? { kind: 'autoplay', id: event.id }
-                : event));
-            } else if (movement.autoplayToNote) {
-              const converted = new Set(selection.filter((event) => event.kind === 'autoplay').map((event) => event.id));
-              setSelectedEvents((current) => current.map((event) => event.kind === 'autoplay' && converted.has(event.id)
-                ? { kind: 'note', id: event.id }
-                : event));
-            }
+            const next = moveChartEvents(chart, selection, { ...movement, noteLanes: NOTE_LANE_KEYS });
+            const mainIds = new Set(next.notes.map((note) => note.id));
+            onChartChange(next);
+            setSelectedEvents((current) => current.map((event) => event.kind === 'note' || event.kind === 'autoplay'
+              ? { kind: mainIds.has(event.id) ? 'note' : 'autoplay', id: event.id }
+              : event));
           }}
         />
         {!playbackLocked ? <details className="nt-floating-inspector" open={inspectorOpen} onToggle={(event) => setInspectorOpen(event.currentTarget.open)}>

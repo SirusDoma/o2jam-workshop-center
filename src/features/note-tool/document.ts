@@ -66,31 +66,18 @@ export function pasteChartNotes(
 
 export type EventMovement = {
   positionDelta: number;
-  noteLaneDelta?: number;
-  autoplayLaneDelta?: number;
+  laneDelta?: number;
   noteLanes?: readonly NoteLaneKey[];
-  noteToAutoplay?: {
-    sourceLane: NoteLaneKey;
-    targetLane: number;
-  };
-  autoplayToNote?: {
-    sourceLane: number;
-    targetLane: NoteLaneKey;
-  };
 };
 
-export function clampAutoplayToNoteLane(requested: number, sourceLane: number, lanes: readonly number[], laneCount: number): number | null {
-  if (lanes.length === 0) {
-    return null;
-  }
+export function clampNoteLaneDelta(chart: EditorChart, selection: readonly InspectorEvent[], requested: number, noteLanes: readonly NoteLaneKey[] = NOTE_LANE_KEYS): number {
+  const selected = new Set(selection.map(eventKey));
+  const indexes = [
+    ...chart.notes.filter((note) => selected.has(eventKey({ kind: 'note', id: note.id }))).map((note) => noteLanes.indexOf(note.key)),
+    ...chart.autoplayNotes.filter((note) => selected.has(eventKey({ kind: 'autoplay', id: note.id }))).map((note) => noteLanes.length + note.lane - 1),
+  ];
 
-  const minOffset = Math.min(...lanes) - sourceLane;
-  const maxOffset = Math.max(...lanes) - sourceLane;
-  if (maxOffset - minOffset >= laneCount) {
-    return null;
-  }
-
-  return clamp(requested, -minOffset, laneCount - 1 - maxOffset);
+  return clampLaneDelta(requested, indexes, noteLanes.length + SAMPLE_LANE_COUNT);
 }
 
 export function defaultBpmAtPosition(chart: EditorChart, position: number, baseBpm: number): number {
@@ -268,76 +255,47 @@ export function moveChartEvents(
   const noteLanes = movement.noteLanes ?? NOTE_LANE_KEYS;
   const selectedNotes = chart.notes.filter((note) => selected.has(eventKey({ kind: 'note', id: note.id })));
   const selectedAutoplay = chart.autoplayNotes.filter((note) => selected.has(eventKey({ kind: 'autoplay', id: note.id })));
-  const noteLaneDelta = clampLaneDelta(
-    movement.noteLaneDelta ?? 0,
-    selectedNotes.map((note) => noteLanes.indexOf(note.key)),
-    noteLanes.length,
-  );
+  const laneDelta = clampNoteLaneDelta(chart, selection, movement.laneDelta ?? 0, noteLanes);
+  const movedNotes: EditorChartNote[] = [];
+  const movedAutoplay: AutoplayChartNote[] = [];
+  const convertedCells = new Set<string>();
+  const convertedMainCells = new Set<string>();
 
-  const autoplayLaneDelta = clampLaneDelta(
-    movement.autoplayLaneDelta ?? 0,
-    selectedAutoplay.map((note) => note.lane - 1),
-    SAMPLE_LANE_COUNT,
-  );
-
-  const convertedNotes = movement.noteToAutoplay
-    ? selectedNotes.map((note): AutoplayChartNote => {
-      const sourceLane = noteLanes.indexOf(movement.noteToAutoplay?.sourceLane ?? note.key);
-      const noteLane = noteLanes.indexOf(note.key);
+  for (const note of selectedNotes) {
+    const target = noteLanes.indexOf(note.key) + laneDelta;
+    const absolutePosition = note.absolutePosition + positionDelta;
+    if (target < noteLanes.length) {
+      movedNotes.push({ ...note, key: noteLanes[target] ?? note.key, absolutePosition });
+    } else {
       const { key: _key, duration: _duration, ...audioEvent } = note;
-      return {
-        ...audioEvent,
-        lane: clamp((movement.noteToAutoplay?.targetLane ?? 1) + Math.max(0, noteLane) - Math.max(0, sourceLane), 1, SAMPLE_LANE_COUNT),
-        absolutePosition: note.absolutePosition + positionDelta,
-      };
-    })
-    : [];
+      const lane = target - noteLanes.length + 1;
+      movedAutoplay.push({ ...audioEvent, lane, absolutePosition });
+      convertedCells.add(`${lane}:${absolutePosition}`);
+    }
+  }
 
-  const convertedCells = new Set(convertedNotes.map((note) => `${note.lane}:${note.absolutePosition}`));
-  const mainLane = movement.autoplayToNote
-    ? clampAutoplayToNoteLane(noteLanes.indexOf(movement.autoplayToNote.targetLane), movement.autoplayToNote.sourceLane, selectedAutoplay.map((note) => note.lane), noteLanes.length)
-    : null;
-
-  const convertedAutoplay = mainLane !== null && movement.autoplayToNote
-    ? selectedAutoplay.map((note): EditorChartNote => {
+  for (const note of selectedAutoplay) {
+    const target = noteLanes.length + note.lane - 1 + laneDelta;
+    const absolutePosition = note.absolutePosition + positionDelta;
+    if (target < noteLanes.length) {
       const { lane, ...audioEvent } = note;
-      return {
-        ...audioEvent,
-        key: noteLanes[mainLane + lane - movement.autoplayToNote!.sourceLane]!,
-        absolutePosition: note.absolutePosition + positionDelta,
-      };
-    })
-    : [];
-
-  const convertedMainCells = new Set(convertedAutoplay.map((note) => `${note.key}:${note.absolutePosition}`));
+      const key = noteLanes[target]!;
+      movedNotes.push({ ...audioEvent, key, absolutePosition });
+      convertedMainCells.add(`${key}:${absolutePosition}`);
+    } else {
+      movedAutoplay.push({ ...note, lane: target - noteLanes.length + 1, absolutePosition });
+    }
+  }
 
   return withMeasureCount({
     ...chart,
-    notes: chart.notes.flatMap((note) => {
-      if (!selected.has(eventKey({ kind: 'note', id: note.id }))) {
-        return [note];
-      }
-
-      if (movement.noteToAutoplay) {
-        return [];
-      }
-
-      const laneIndex = noteLanes.indexOf(note.key);
-      return [{
-        ...note,
-        absolutePosition: note.absolutePosition + positionDelta,
-        key: laneIndex < 0 ? note.key : noteLanes[laneIndex + noteLaneDelta] ?? note.key,
-      }];
-    }).filter((note) => !convertedMainCells.has(`${note.key}:${note.absolutePosition}`))
-      .concat(convertedAutoplay)
+    notes: chart.notes
+      .filter((note) => !selected.has(eventKey({ kind: 'note', id: note.id })) && !convertedMainCells.has(`${note.key}:${note.absolutePosition}`))
+      .concat(movedNotes)
       .sort(byPosition),
     autoplayNotes: chart.autoplayNotes
-      .filter((note) => mainLane === null || !selected.has(eventKey({ kind: 'autoplay', id: note.id })))
-      .map((note) => selected.has(eventKey({ kind: 'autoplay', id: note.id }))
-        ? { ...note, absolutePosition: note.absolutePosition + positionDelta, lane: note.lane + autoplayLaneDelta }
-        : note)
-      .filter((note) => !convertedCells.has(`${note.lane}:${note.absolutePosition}`))
-      .concat(convertedNotes)
+      .filter((note) => !selected.has(eventKey({ kind: 'autoplay', id: note.id })) && !convertedCells.has(`${note.lane}:${note.absolutePosition}`))
+      .concat(movedAutoplay)
       .sort(byPosition),
     bpmChanges: chart.bpmChanges.map((event) => selected.has(eventKey({ kind: 'bpm', id: event.id }))
       ? { ...event, absolutePosition: event.absolutePosition + positionDelta }
