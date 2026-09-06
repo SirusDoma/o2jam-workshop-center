@@ -2347,35 +2347,3 @@ select.secinput {
   .nt-roll-wrap { height: 560px; }
   .nt-panel-resizer { display: none; }
 }
-[data-nt-diagnostic="no-playhead"] .nt-playhead,
-[data-nt-diagnostic="no-overlays"] .nt-roll-grid,
-[data-nt-diagnostic="no-overlays"] .nt-measure-watermarks,
-[data-nt-diagnostic="no-roll"] .nt-roll {
-  visibility: hidden !important;
-}
-[data-nt-diagnostic="auto-scrollbar"] .nt-chart { scrollbar-gutter: auto; }
-
-.nt-diagnostics {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  z-index: 100;
-  width: min(720px, calc(100vw - 32px));
-  color: var(--ink);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 12px;
-  contain: layout paint;
-}
-
-.nt-diagnostics > summary { padding: 10px; cursor: pointer; }
-.nt-diagnostics-content { padding: 0 10px 10px; max-height: 40vh; overflow: auto; }
-.nt-diagnostics p { margin: 8px 0; }
-.nt-diagnostics-actions { display: flex; flex-wrap: wrap; gap: 6px; }
-.nt-diagnostics button { padding: 5px 8px; cursor: pointer; }
-.nt-diagnostics button:disabled { opacity: .5; cursor: default; }
-.nt-diagnostics table { width: 100%; margin-top: 10px; border-collapse: collapse; }
-.nt-diagnostics th, .nt-diagnostics td { padding: 5px; text-align: right; white-space: nowrap; }
-.nt-diagnostics th:first-child { text-align: left; }
-.nt-diagnostics pre { max-height: 200px; overflow: auto; font-size: 10px; }

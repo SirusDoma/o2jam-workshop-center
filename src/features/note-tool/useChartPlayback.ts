@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { OjmSample } from './model';
 import type { EditorMeasureFraction } from './types';
-import type { PlaybackDiagnostics } from './diagnostics';
 import {
   buildPlaybackSchedule,
   playableAudioContext,
@@ -21,7 +20,6 @@ export type PlaybackPositionListener = (position: number, scrollIntoView?: boole
 export type PlaybackPositionSubscription = (listener: PlaybackPositionListener) => () => void;
 
 export function useChartPlayback({
-  diagnostic,
   baseBpm,
   bpmChanges,
   events,
@@ -29,7 +27,6 @@ export function useChartPlayback({
   samples,
   endPosition,
 }: {
-  diagnostic: PlaybackDiagnostics;
   baseBpm: number;
   bpmChanges: readonly TempoChange[];
   events: readonly PlaybackEvent[];
@@ -158,7 +155,7 @@ export function useChartPlayback({
 
     const durations = new Map<number, number>();
     decoded.current.forEach((sample, id) => durations.set(id, sample.buffer.duration));
-    const scheduleStarted = diagnostic.recording ? performance.now() : 0;
+
     const schedule = buildPlaybackSchedule({
       startPosition,
       baseBpm,
@@ -167,33 +164,19 @@ export function useChartPlayback({
       measureFractions,
       sampleDurations: durations,
     });
-    if (diagnostic.enabled) {
-      diagnostic.record('audio.buildSchedule', performance.now() - scheduleStarted);
-      Object.assign(diagnostic.context, {
-        sampleRate: audioContext.sampleRate, baseLatencyMs: audioContext.baseLatency * 1000,
-        outputLatencyMs: (audioContext.outputLatency ?? 0) * 1000,
-        samples: samples.length, decodedSamples: decoded.current.size,
-        events: events.length, tempoChanges: bpmChanges.length, measureFractions: measureFractions.length,
-      });
-    }
 
     const eventById = new Map(events.map((event) => [event.id, event]));
     const now = audioContext.currentTime + 0.05;
     let nextEvent = 0;
-    let previousSchedulerTime = 0;
 
     const scheduleAhead = () => {
       if (run !== playbackRun.current) {
         return;
       }
 
-      const scheduleTime = diagnostic.recording ? performance.now() : 0;
-      if (diagnostic.recording && previousSchedulerTime) diagnostic.record('audio.schedulerInterval', scheduleTime - previousSchedulerTime);
-      previousSchedulerTime = scheduleTime;
       const currentTime = audioContext.currentTime;
       while (nextEvent < schedule.length && now + schedule[nextEvent]!.delay <= currentTime + 0.25) {
         const item = schedule[nextEvent++]!;
-        if (diagnostic.mode === 'no-audio') continue;
         const decodedSample = decoded.current.get(item.sampleId);
         const event = eventById.get(item.eventId);
         const when = now + item.delay;
@@ -203,8 +186,6 @@ export function useChartPlayback({
         }
 
         const startTime = Math.max(when, currentTime);
-        if (when < currentTime) diagnostic.count('lateAudioEvents');
-        diagnostic.count('scheduledAudioEvents');
         const duration = decodedSample.buffer.duration - offset;
         const volume = Math.max(0, Math.min(1, (event.volume ?? 100) / 100));
         const source = audioContext.createBufferSource();
@@ -236,10 +217,6 @@ export function useChartPlayback({
         sources.current.set(source, disconnect);
         source.start(startTime, offset, duration);
       }
-      if (diagnostic.recording) {
-        diagnostic.record('audio.schedulerWork', performance.now() - scheduleTime);
-        diagnostic.record('audio.activeSources', sources.current.size);
-      }
     };
 
     startedAt.current = now;
@@ -249,10 +226,7 @@ export function useChartPlayback({
     setPlaying(true);
     emitPosition(startPosition, true);
 
-    let previousOutputTime = -1;
-    const update = (frameTime: number) => {
-      diagnostic.frame(frameTime);
-      const updateStarted = diagnostic.recording ? performance.now() : 0;
+    const update = () => {
       const outputTimestamp = audioContext.getOutputTimestamp();
       const renderedTime = outputTimestamp.contextTime ?? 0;
       const outputTime = renderedTime > 0
@@ -261,15 +235,6 @@ export function useChartPlayback({
 
       const elapsed = Math.max(0, outputTime - startedAt.current);
       const next = secondsToPosition(startedFromSeconds.current + elapsed, baseBpm, bpmChanges, measureFractions);
-      if (diagnostic.recording) {
-        diagnostic.record('playback.clockAndPosition', performance.now() - updateStarted);
-        diagnostic.record('audio.timestampAge', performance.now() - (outputTimestamp.performanceTime ?? performance.now()));
-        if (outputTime === previousOutputTime) diagnostic.count('unchangedAudioTimestamps');
-        diagnostic.count('playbackCallbacks');
-        diagnostic.context.position = next;
-        diagnostic.context.audioState = audioContext.state;
-      }
-      previousOutputTime = outputTime;
 
       if (next >= endPosition) {
         commitPosition(endPosition);
@@ -279,12 +244,11 @@ export function useChartPlayback({
       }
 
       emitPosition(next);
-      if (diagnostic.recording) diagnostic.record('playback.callback', performance.now() - updateStarted);
       animation.current = requestAnimationFrame(update);
     };
 
     animation.current = requestAnimationFrame(update);
-  }, [baseBpm, bpmChanges, commitPosition, diagnostic, emitPosition, endPosition, events, measureFractions, samples, stopSources]);
+  }, [baseBpm, bpmChanges, commitPosition, emitPosition, endPosition, events, measureFractions, samples, stopSources]);
 
   useEffect(() => {
     if (playing) {

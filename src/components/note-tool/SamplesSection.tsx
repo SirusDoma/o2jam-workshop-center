@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ChangeEvent, type DragEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import { ChevronDown, FolderOpen, Play, Plus, Square, Trash2, TriangleAlert } from 'lucide-react';
 import { collectDropped } from '../DropZone';
 import { scrollNearest } from '../../features/note-tool/dom';
-import type { PlaybackDiagnostics } from '../../features/note-tool/diagnostics';
 import {
   MAX_SAMPLE_FILES,
   MAX_SAMPLE_BANK_BYTES,
@@ -20,7 +19,6 @@ import {
 } from '../../features/note-tool/model';
 
 export function SamplesSection({
-  diagnostic,
   disabled = false,
   samples,
   selectedSample,
@@ -33,7 +31,6 @@ export function SamplesSection({
   onOjmFileNameChange,
   onOpenFiles,
 }: {
-  diagnostic: PlaybackDiagnostics;
   disabled?: boolean;
   samples: OjmSample[];
   selectedSample: Pick<OjmSample, 'id' | 'type'>;
@@ -50,32 +47,38 @@ export function SamplesSection({
   const [dragging, setDragging] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [sampleViewport, setSampleViewport] = useState({ top: 0, height: 600 });
   const fileInput = useRef<HTMLInputElement>(null);
   const ojmInput = useRef<HTMLInputElement>(null);
   const audio = useRef<HTMLAudioElement | null>(null);
   const audioUrl = useRef<string | null>(null);
   const selectedRow = useRef<HTMLDivElement>(null);
   const sampleList = useRef<HTMLDivElement>(null);
-  const [sampleViewport, setSampleViewport] = useState({ top: 0, height: 600 });
-  const fullSampleLayout = useSyncExternalStore(diagnostic.subscribeMode, diagnostic.getMode) === 'full-sample-layout';
   const { id: selectedId, type } = selectedSample;
   const settings = resolveOjmSettings(format, encryption);
   const slots = sampleSlotIds(type);
   const sampleById = useMemo(() => new Map(samples.filter((sample) => sample.type === type).map((sample) => [sample.id, sample])), [samples, type]);
   const rowOffsets = useMemo(() => {
     const offsets = [0];
-    for (const id of slots) offsets.push(offsets[offsets.length - 1]! + (sampleById.has(id) ? 41 : 32));
+    for (const id of slots) {
+      offsets.push(offsets[offsets.length - 1]! + (sampleById.has(id) ? 41 : 32));
+    }
+
     return offsets;
   }, [sampleById, slots]);
+
   const firstRow = Math.max(0, rowOffsets.findIndex((offset) => offset > sampleViewport.top) - 9);
   const lastVisibleRow = rowOffsets.findIndex((offset) => offset >= sampleViewport.top + sampleViewport.height);
   const lastRow = lastVisibleRow < 0 ? slots.length : Math.min(slots.length, lastVisibleRow + 8);
-  const renderedSlots = fullSampleLayout ? slots : slots.filter((id, index) => id === selectedId || (index >= firstRow && index < lastRow));
+  const renderedSlots = slots.filter((id, index) => id === selectedId || (index >= firstRow && index < lastRow));
   const selected = samples.find((sample) => sample.id === selectedId && sample.type === type) ?? null;
 
   const updateSampleViewport = useCallback(() => {
     const list = sampleList.current;
-    if (!list) return;
+    if (!list) {
+      return;
+    }
+
     const top = list.scrollTop;
     const height = list.clientHeight;
     setSampleViewport((current) => current.top === top && current.height === height ? current : { top, height });
@@ -83,10 +86,14 @@ export function SamplesSection({
 
   useLayoutEffect(() => {
     const list = sampleList.current;
-    if (!list) return;
+    if (!list) {
+      return;
+    }
+
     const observer = new ResizeObserver(updateSampleViewport);
     observer.observe(list);
     updateSampleViewport();
+
     return () => observer.disconnect();
   }, [open, rowOffsets, updateSampleViewport]);
 
@@ -289,68 +296,69 @@ export function SamplesSection({
             }}
           >
             <div className="nt-panel-tabs nt-sample-tabs" role="tablist" aria-label="OJM sample type">
-            {(['wav', 'ogg'] as const).map((sampleType) => (
-              <button
-                className={`${type === sampleType ? 'on' : ''}${dragging && type === sampleType ? ' drop-target' : ''}`}
-                type="button"
-                role="tab"
-                aria-selected={type === sampleType}
-                key={sampleType}
-                onClick={() => {
-                  onSelectedSampleChange({ id: sampleSlotIds(sampleType)[0] ?? 0, type: sampleType });
-                }}
-              >
-                {sampleType.toUpperCase()}
-              </button>
-            ))}
+              {(['wav', 'ogg'] as const).map((sampleType) => (
+                <button
+                  className={`${type === sampleType ? 'on' : ''}${dragging && type === sampleType ? ' drop-target' : ''}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={type === sampleType}
+                  key={sampleType}
+                  onClick={() => {
+                    onSelectedSampleChange({ id: sampleSlotIds(sampleType)[0] ?? 0, type: sampleType });
+                  }}
+                >
+                  {sampleType.toUpperCase()}
+                </button>
+              ))}
             </div>
             <div className="nt-sample-head" aria-hidden="true"><span>ID</span><span>Name</span><span /></div>
             <div className="nt-sample-list" role="listbox" aria-label={`${type.toUpperCase()} samples`} ref={sampleList} onScroll={updateSampleViewport}>
-              <div style={{ position: 'relative', height: fullSampleLayout ? undefined : rowOffsets[slots.length] }}>
-              {renderedSlots.map((id) => {
-                const sample = sampleById.get(id);
-                const index = id - slots[0]!;
-                return (
-                <div
-                  className={`nt-sample-row${selectedId === id ? ' on' : ''}${sample ? '' : ' empty'}`}
-                  style={{ position: fullSampleLayout ? undefined : 'absolute', top: rowOffsets[index], width: '100%', height: sample ? 41 : 32 }}
-                  role="option"
-                  aria-posinset={index + 1}
-                  aria-setsize={slots.length}
-                  tabIndex={selectedId === id ? 0 : -1}
-                  aria-selected={selectedId === id}
-                  key={id}
-                  ref={selectedId === id ? selectedRow : undefined}
-                  onClick={() => onSelectedSampleChange({ id, type })}
-                  onDoubleClick={() => {
-                    if (sample) {
-                      void playPreview(sample);
-                    }
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      onSelectedSampleChange({ id, type });
-                    }
-                  }}
-                >
-                  <span className="mono">{formatSampleSlot(type, id)}</span>
-                  <span>{sample?.name ?? 'Empty'}</span>
-                  {sample ? <button
-                    className="nt-sample-remove"
-                    type="button"
-                    aria-label={`Remove ${sample.name}`}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      removeSelected(sample.id);
-                    }}
-                    onDoubleClick={(event) => event.stopPropagation()}
-                  >
-                    <Trash2 />
-                  </button> : <span />}
-                </div>
-                );
-              })}
+              <div style={{ position: 'relative', height: rowOffsets[slots.length] }}>
+                {renderedSlots.map((id) => {
+                  const sample = sampleById.get(id);
+                  const index = id - slots[0]!;
+
+                  return (
+                    <div
+                      className={`nt-sample-row${selectedId === id ? ' on' : ''}${sample ? '' : ' empty'}`}
+                      style={{ position: 'absolute', top: rowOffsets[index], width: '100%', height: sample ? 41 : 32 }}
+                      role="option"
+                      aria-posinset={index + 1}
+                      aria-setsize={slots.length}
+                      tabIndex={selectedId === id ? 0 : -1}
+                      aria-selected={selectedId === id}
+                      key={id}
+                      ref={selectedId === id ? selectedRow : undefined}
+                      onClick={() => onSelectedSampleChange({ id, type })}
+                      onDoubleClick={() => {
+                        if (sample) {
+                          void playPreview(sample);
+                        }
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          onSelectedSampleChange({ id, type });
+                        }
+                      }}
+                    >
+                      <span className="mono">{formatSampleSlot(type, id)}</span>
+                      <span>{sample?.name ?? 'Empty'}</span>
+                      {sample ? <button
+                        className="nt-sample-remove"
+                        type="button"
+                        aria-label={`Remove ${sample.name}`}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          removeSelected(sample.id);
+                        }}
+                        onDoubleClick={(event) => event.stopPropagation()}
+                      >
+                        <Trash2 />
+                      </button> : <span />}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

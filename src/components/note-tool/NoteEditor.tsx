@@ -23,8 +23,6 @@ import type { OjmSample } from '../../features/note-tool/model';
 import { NoteRoll, type LongNoteGridEvent, type NoteGridEvent } from './NoteRoll';
 import { RollViewControls } from './RollViewControls';
 import { SampleBankPicker } from './SampleBankPicker';
-import { PlaybackDiagnosticsPanel } from './PlaybackDiagnosticsPanel';
-import type { PlaybackDiagnostics } from '../../features/note-tool/diagnostics';
 import { TimingValueDialog } from './TimingValueDialog';
 import { DEFAULT_FRACTION_VALUE } from '../../features/note-tool/timingValues';
 import type { Difficulty, EditorChart, EditorChartNote, EditorMeasureFraction, EditTool, InspectorEvent, KeyMode } from '../../features/note-tool/types';
@@ -42,7 +40,6 @@ type PendingTimingEvent = {
 };
 
 export function NoteEditor({
-  diagnostic,
   chart,
   difficulty,
   baseBpm,
@@ -59,7 +56,6 @@ export function NoteEditor({
   onChartChange,
   onToggleMaximized,
 }: {
-  diagnostic: PlaybackDiagnostics;
   chart: EditorChart;
   difficulty: Difficulty;
   baseBpm: number;
@@ -99,7 +95,6 @@ export function NoteEditor({
   const bpmChanges = useMemo(() => tempoChanges(chart), [chart]);
   const events = useMemo(() => playbackEvents(chart), [chart]);
   const playback = useChartPlayback({
-    diagnostic,
     baseBpm,
     bpmChanges,
     events,
@@ -447,7 +442,6 @@ export function NoteEditor({
 
   return (
     <section className="nt-editor" aria-label="Note editor">
-      <PlaybackDiagnosticsPanel playback={playback} diagnostic={diagnostic} />
       <div className="nt-transport" aria-label="Transport controls">
         <div className="nt-transport-group">
           <button
@@ -464,7 +458,6 @@ export function NoteEditor({
           </button>
         </div>
         <PlaybackReadout
-          diagnostic={diagnostic}
           initialPosition={playback.position}
           playing={playback.playing}
           endPosition={endPosition}
@@ -537,7 +530,6 @@ export function NoteEditor({
 
       <div className="nt-roll-stage">
         <NoteRoll
-          diagnostic={diagnostic}
           keyMode={keyMode}
           hiSpeed={hiSpeed}
           grid={grid}
@@ -619,7 +611,6 @@ function isEditableTarget(target: EventTarget | null): boolean {
 }
 
 function PlaybackReadout({
-  diagnostic,
   initialPosition,
   playing,
   endPosition,
@@ -631,7 +622,6 @@ function PlaybackReadout({
   onSeekStart,
   onSeekEnd,
 }: {
-  diagnostic: PlaybackDiagnostics;
   initialPosition: number;
   playing: boolean;
   endPosition: number;
@@ -647,16 +637,18 @@ function PlaybackReadout({
   const previousRefresh = useRef(0);
 
   useEffect(() => {
-    if (!playing) setPosition(initialPosition);
+    if (!playing) {
+      setPosition(initialPosition);
+    }
   }, [initialPosition, playing]);
+
   useEffect(() => subscribePosition((next) => {
-    if (playing && diagnostic.mode === 'no-readout') return;
     const now = performance.now();
     if (next === 0 || next === endPosition || shouldRefreshPlaybackReadout(previousRefresh.current, now)) {
       previousRefresh.current = now;
       setPosition(next);
     }
-  }), [diagnostic, playing, endPosition, subscribePosition]);
+  }), [playing, endPosition, subscribePosition]);
 
   const measure = Math.floor(position);
   const fraction = Math.floor((position - measure) * 16) + 1;

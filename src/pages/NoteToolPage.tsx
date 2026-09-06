@@ -13,7 +13,6 @@ import { parseOjmBank, writeOjmBank, writeOjnFile } from '../features/note-tool/
 import { NOTE_TOOL_SETTINGS_KEY, clampPlayheadThickness, createDefaultNoteToolSettings, normalizePlayheadGrid, parseNoteToolSettings, snapPlayheadPosition, type NoteToolSettings } from '../features/note-tool/settings';
 import { MAX_SAMPLE_BANK_BYTES, classifyNoteToolFiles, musicFileName, noteToolStatesEqual, sampleBankFileName, sampleSlotIds, type OjmEncryption, type OjmFormat, type OjmSample } from '../features/note-tool/model';
 import { measuredFrameRate } from '../features/note-tool/playback';
-import { PlaybackDiagnostics } from '../features/note-tool/diagnostics';
 import { saveBytesAs, type SaveFilePicker } from '../features/note-tool/dom';
 import type { ChartMetadata, ChartTab, Difficulty, EditorDocument, KeyMode, LoadedChart, PreviewImage } from '../features/note-tool/types';
 import { CloseButton, Overlay } from '../components/Overlay';
@@ -59,7 +58,6 @@ function loadSettings(): NoteToolSettings {
 }
 
 export default function NoteToolPage() {
-  const [diagnostic] = useState(() => new PlaybackDiagnostics());
   const [difficulty, setDifficulty] = useState<Difficulty>('EX');
   const [keyMode, setKeyMode] = useState<KeyMode>(7);
   const [chartTab, setChartTab] = useState<ChartTab>('metadata');
@@ -822,7 +820,6 @@ export default function NoteToolPage() {
               onImageRemove={removeImage}
             />
             <SamplesSection
-              diagnostic={diagnostic}
               disabled={playbackActive}
               samples={samples}
               selectedSample={selectedSample}
@@ -862,7 +859,6 @@ export default function NoteToolPage() {
           />
 
           <NoteEditor
-            diagnostic={diagnostic}
             key={editorRevision}
             chart={currentChart}
             difficulty={difficulty}
