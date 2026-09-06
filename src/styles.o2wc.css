@@ -1831,6 +1831,7 @@ select.secinput {
 .nt-hi-speed-option output { font-size: 9px; color: var(--ink-2); }
 .nt-roll-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; user-select: none; }
 .nt-roll-wrap {
+  will-change: transform;
   height: 100%;
   min-height: 0;
   overflow: scroll;

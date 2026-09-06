@@ -419,7 +419,9 @@ export function NoteRoll({
       updateRenderWindow(element.scrollTop);
     }
 
-    playhead.current?.style.setProperty('--nt-playhead-y', `${offset}px`);
+    if (playhead.current) {
+      playhead.current.style.transform = `translateY(${offset}px) translateY(-50%)`;
+    }
   }), [measureCount, measureFractions, measureHeight, playing, settings.playheadGrid, settings.playheadPosition, subscribePosition, updateRenderWindow]);
 
   const resetLaneWidth = (lane: NoteAreaLaneKey, event: MouseEvent<HTMLElement>) => {
