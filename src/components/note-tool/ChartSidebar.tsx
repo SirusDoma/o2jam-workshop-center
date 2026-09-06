@@ -1,4 +1,5 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
+import { Copy } from 'lucide-react';
 import { GENRES, type O2Encoding } from '../../o2jam';
 import { EncodingSelect } from '../EncodingSelect';
 import { normalizeDecimalInput } from '../../features/note-tool/dom';
@@ -26,6 +27,8 @@ export function ChartSidebar({
   onEncodingChange,
   onChartTabChange,
   onDifficultyChange,
+  onCopyEvents,
+  copyEventsDisabled,
   onLevelChange,
   onImageChange,
   onImagePreview,
@@ -45,6 +48,8 @@ export function ChartSidebar({
   onEncodingChange: (encoding: O2Encoding) => void;
   onChartTabChange: (tab: ChartTab) => void;
   onDifficultyChange: (difficulty: Difficulty) => void;
+  onCopyEvents: () => void;
+  copyEventsDisabled: boolean;
   onLevelChange: (difficulty: Difficulty, level: number) => void;
   onImageChange: (label: PreviewImage['label'], event: ChangeEvent<HTMLInputElement>) => void;
   onImagePreview: (image: PreviewImage) => void;
@@ -164,6 +169,9 @@ export function ChartSidebar({
             </div>
           ))}
         </div>
+        <button className="btn nt-copy-events" type="button" aria-haspopup="dialog" disabled={copyEventsDisabled} onClick={onCopyEvents}>
+          <Copy size={14} /> Copy notes…
+        </button>
       </CollapsibleSection>
 
       <CollapsibleSection title="Images" defaultOpen={false}>

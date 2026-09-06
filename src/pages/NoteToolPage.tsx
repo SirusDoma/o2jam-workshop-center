@@ -3,6 +3,7 @@ import { FilePlus2, FolderOpen, Keyboard, Maximize2, Minimize2, Save, Settings2,
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { collectDropped } from '../components/DropZone';
 import { ChartSidebar } from '../components/note-tool/ChartSidebar';
+import { CopyEventsDialog } from '../components/note-tool/CopyEventsDialog';
 import { documentFromOjn, emptyEditorDocument, emptyMetadata, metadataFromOjn, resolveChartLevel } from '../features/note-tool/chart';
 import { SettingsDialog } from '../components/note-tool/SettingsDialog';
 import { ShortcutsDialog } from '../components/note-tool/ShortcutsDialog';
@@ -68,6 +69,7 @@ export default function NoteToolPage() {
   const [panelWidth, setPanelWidth] = useState(320);
   const [maximized, setMaximized] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [copyEventsOpen, setCopyEventsOpen] = useState(false);
   const [coverImage, setCoverImage] = useState<PreviewImage | null>(null);
   const [thumbnailImage, setThumbnailImage] = useState<PreviewImage | null>(null);
   const [previewImage, setPreviewImage] = useState<PreviewImage | null>(null);
@@ -847,6 +849,8 @@ export default function NoteToolPage() {
               }}
               onChartTabChange={setChartTab}
               onDifficultyChange={changeDifficulty}
+              onCopyEvents={() => setCopyEventsOpen(true)}
+              copyEventsDisabled={playbackActive || filesLoading}
               onLevelChange={(id, level) => {
                 setLevels((current) => ({ ...current, [id]: level }));
                 setDirty(true);
@@ -940,6 +944,18 @@ export default function NoteToolPage() {
       ) : null}
 
       <div className="nt-dialogs">
+        {copyEventsOpen ? (
+          <CopyEventsDialog
+            document={editorDocument}
+            difficulty={difficulty}
+            onClose={() => setCopyEventsOpen(false)}
+            onCopy={(from, to) => {
+              dispatchHistory({ type: 'edit', difficulty: to, chart: structuredClone(editorDocument[from]) });
+              setDifficulty(to);
+              setCopyEventsOpen(false);
+            }}
+          />
+        ) : null}
         {shortcutsOpen ? <ShortcutsDialog onClose={() => setShortcutsOpen(false)} /> : null}
         {errorMessage ? (
           <ConfirmDialog

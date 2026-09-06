@@ -101,10 +101,10 @@ export function useChartPlayback({
     commitPosition(positionAfterTransportCommand(positionRef.current, 'stop'), true);
   }, [commitPosition, stopSources]);
 
-  const setPosition = useCallback((next: number) => {
+  const setPosition = useCallback((next: number, scrollIntoView = false) => {
     stopSources();
     setPlaying(false);
-    commitPosition(Math.max(0, Math.min(endPosition, next)));
+    commitPosition(Math.max(0, Math.min(endPosition, next)), scrollIntoView);
   }, [commitPosition, endPosition, stopSources]);
 
   const play = useCallback(async () => {

@@ -25,6 +25,7 @@ export function RollViewControls({
       <label className="nt-grid-option">
         <span>Grid</span>
         <select className="selctl" value={grid} onChange={(event) => onGridChange(event.currentTarget.value)}>
+          <option value="none">None</option>
           {GRID_DIVISIONS.map((division) => <option key={division}>{division}</option>)}
         </select>
       </label>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { ChevronDown, Eraser, MousePointer2, Pause, Pencil, Play, Redo2, Square, Undo2 } from 'lucide-react';
-import { NOTE_LANE_KEYS, NOTE_LANE_KEYS_3, formatNoteLabel, type NoteLaneKey, type NoteToolSettings } from '../../features/note-tool/settings';
+import { NOTE_LANE_KEYS, NOTE_LANE_KEYS_3, formatNoteLabel, noteGridDivision, type NoteLaneKey, type NoteToolSettings } from '../../features/note-tool/settings';
 import { playbackEvents, tempoChanges } from '../../features/note-tool/chart';
 import {
   chartEndPosition,
@@ -18,7 +18,7 @@ import {
 } from '../../features/note-tool/document';
 import { findNote, placeLongNote, placeTapNote, volumeLevelToPercent } from '../../features/note-tool/editor';
 import { EventInspector } from './EventInspector';
-import { ChartSummary } from './ChartSummary';
+import { ChartStatistic } from './ChartStatistic';
 import type { OjmSample } from '../../features/note-tool/model';
 import { NoteRoll, type LongNoteGridEvent, type NoteGridEvent } from './NoteRoll';
 import { RollViewControls } from './RollViewControls';
@@ -90,11 +90,12 @@ export function NoteEditor({
   const [hiSpeed, setHiSpeed] = useState(initialHiSpeed);
   const [subGrid, setSubGrid] = useState('1/4');
   const [grid, setGrid] = useState('1/16');
+  const gridDivision = noteGridDivision(grid);
   const [shiftLongNote, setShiftLongNote] = useState(false);
   const [selectedEvents, setSelectedEvents] = useState<InspectorEvent[]>([]);
   const [pendingTimingEvent, setPendingTimingEvent] = useState<PendingTimingEvent | null>(null);
   const [inspectorOpen, setInspectorOpen] = useState(true);
-  const [inspectorTab, setInspectorTab] = useState<'inspector' | 'summary'>('inspector');
+  const [inspectorTab, setInspectorTab] = useState<'inspector' | 'statistic'>('inspector');
   const [seekingDuringPlayback, setSeekingDuringPlayback] = useState(false);
   const [measureScrollRequest, setMeasureScrollRequest] = useState<{ direction: 1 | -1 } | null>(null);
   const noteSequence = useRef(0);
@@ -335,7 +336,7 @@ export function NoteEditor({
 
   const handleGridEvent = (kind: InspectorEvent['kind'], event: NoteGridEvent) => {
     const absolutePosition = event.measure + event.position;
-    const tolerance = 1 / Number(grid.split('/')[1]) / 3;
+    const tolerance = 1 / gridDivision / 3;
     const key = kind === 'note' ? NOTE_LANE_KEYS[event.lane - 1] : undefined;
     if (kind === 'note' && !key) {
       return;
@@ -513,7 +514,7 @@ export function NoteEditor({
           bpmChanges={bpmChanges}
           measureFractions={chart.measureFractions}
           subscribePosition={playback.subscribePosition}
-          onSeek={playback.setPosition}
+          onSeek={(position) => playback.setPosition(position, true)}
           onSeekStart={startPlaybackSeek}
           onSeekEnd={finishPlaybackSeek}
         />
@@ -602,7 +603,7 @@ export function NoteEditor({
           measureScrollRequest={measureScrollRequest}
           onGridEvent={handleGridEvent}
           onLongNoteDrag={handleLongNoteDrag}
-          formatDraftNoteLabel={(lane) => formatNoteLabel(settings.noteTemplate, { lane, sampleId: selectedSampleId, sampleType: selectedSampleType })}
+          formatDraftNoteLabel={(lane) => formatNoteLabel(settings.noteTemplate, { lane: lane.replace('sample-', 'Sample '), sampleId: selectedSampleId, sampleType: selectedSampleType })}
           onCursorMove={(readPosition) => { readCursorPosition.current = readPosition; }}
           onSelectEvent={(selection, additive) => setSelectedEvents((current) => updateEventSelection(current, selection, additive))}
           onSelectEvents={(selection, additive) => setSelectedEvents((current) => updateMarqueeSelection(current, selection, additive))}
@@ -618,19 +619,19 @@ export function NoteEditor({
         />
         {!playbackLocked ? <details className="nt-floating-inspector" open={inspectorOpen} onToggle={(event) => setInspectorOpen(event.currentTarget.open)}>
           <summary>
-            <span>{inspectorTab === 'inspector' ? 'Inspector' : 'Summary'}</span>
+            <span>{inspectorTab === 'inspector' ? 'Inspector' : 'Statistic'}</span>
             <ChevronDown aria-hidden="true" />
           </summary>
           <div className="nt-panel-tabs nt-inspector-tabs" role="tablist" aria-label="Inspector panel">
             <button className={inspectorTab === 'inspector' ? 'on' : ''} type="button" role="tab" aria-selected={inspectorTab === 'inspector'} onClick={() => setInspectorTab('inspector')}>Inspector</button>
-            <button className={inspectorTab === 'summary' ? 'on' : ''} type="button" role="tab" aria-selected={inspectorTab === 'summary'} onClick={() => setInspectorTab('summary')}>Summary</button>
+            <button className={inspectorTab === 'statistic' ? 'on' : ''} type="button" role="tab" aria-selected={inspectorTab === 'statistic'} onClick={() => setInspectorTab('statistic')}>Statistic</button>
           </div>
           {inspectorTab === 'inspector' ? (
             <EventInspector
               event={inspectedEvent}
               selectionCount={selectedEvents.length}
               keys={keys}
-              gridDivision={Number(grid.split('/')[1])}
+              gridDivision={gridDivision}
               measureFractions={chart.measureFractions}
               samples={samples}
               onChange={(patch) => {
@@ -640,14 +641,14 @@ export function NoteEditor({
               }}
             />
           ) : (
-            <ChartSummary difficulty={difficulty} chart={chart} baseBpm={baseBpm} />
+            <ChartStatistic difficulty={difficulty} chart={chart} baseBpm={baseBpm} />
           )}
         </details> : null}
       </div>
       {pendingTimingEvent ? (
         <TimingValueDialog
           kind={pendingTimingEvent.kind}
-          location={formatTimingLocation(pendingTimingEvent, Number(grid.split('/')[1]))}
+          location={formatTimingLocation(pendingTimingEvent, gridDivision)}
           defaultValue={pendingTimingEvent.defaultValue}
           onConfirm={confirmTimingEvent}
           onClose={() => setPendingTimingEvent(null)}

@@ -7,6 +7,7 @@ import {
   clampLaneWidth,
   effectiveNoteLaneWidth,
   formatNoteLabel,
+  noteGridDivision,
   playheadPositionFromChartPosition,
   playheadPositionStep,
   playheadTopRatio,
@@ -132,7 +133,7 @@ export function NoteRoll({
   onSettingsChange: (settings: NoteToolSettings) => void;
   onGridEvent: (kind: InspectorEvent['kind'], event: NoteGridEvent) => void;
   onLongNoteDrag: (event: LongNoteGridEvent) => void;
-  formatDraftNoteLabel?: (key: NoteLaneKey) => string;
+  formatDraftNoteLabel?: (key: NoteLaneKey | SampleLaneKey) => string;
   onCursorMove?: (readPosition: (() => number) | null) => void;
   onSelectEvent: (selection: InspectorEvent, additive: boolean) => void;
   onDeleteEvent: (selection: InspectorEvent) => void;
@@ -174,6 +175,8 @@ export function NoteRoll({
   } | null>(null);
 
   const longNoteAnimation = useRef<number | null>(null);
+  const hoverPointer = useRef<{ kind: 'note' | 'autoplay'; target: HTMLDivElement; clientX: number; clientY: number } | null>(null);
+  const [hoverNote, setHoverNote] = useState<{ key: NoteLaneKey | SampleLaneKey; position: number } | null>(null);
   const [longNoteDraft, setLongNoteDraft] = useState<{
     key: NoteLaneKey;
     startPosition: number;
@@ -236,7 +239,7 @@ export function NoteRoll({
   const sampleColumns = currentSampleWidths.map((width) => `${width}px`).join(' ');
   const measures = useMemo(() => Array.from({ length: measureCount }, (_, index) => measureCount - index - 1), [measureCount]);
   const measureHeight = 320 * Number(hiSpeed);
-  const gridDivision = Number(grid.split('/')[1]);
+  const gridDivision = noteGridDivision(grid);
   const measureFractions = chart.measureFractions;
   const rollBodyHeight = chartPositionY(0, measureCount, measureHeight, measureFractions);
   const positionY = (position: number) => chartPositionY(position, measureCount, measureHeight, measureFractions);
@@ -244,6 +247,47 @@ export function NoteRoll({
   const gridGeometry = useRef({ measureCount, measureHeight, gridDivision, measureFractions });
   gridGeometry.current = { measureCount, measureHeight, gridDivision, measureFractions };
   const canResizeColumns = !readOnly || allowColumnResize;
+
+  const updateHoverNote = useCallback(() => {
+    const pointer = hoverPointer.current;
+    if (!pointer || !notePlacementMode || readOnly || !pointer.target.isConnected) {
+      setHoverNote(null);
+      return;
+    }
+
+    const bounds = pointer.target.getBoundingClientRect();
+    const laneKeys = pointer.kind === 'note' ? NOTE_LANE_KEYS : SAMPLE_LANE_KEYS;
+    const widths = laneKeys.map((key) => pointer.kind === 'note'
+      ? effectiveNoteLaneWidth(keyMode, key as NoteLaneKey, settings.lanes[key].width)
+      : settings.lanes[key].width);
+    const lane = laneIndexAt(pointer.clientX - bounds.left, widths);
+    const key = laneKeys[lane];
+    if (!key || widths[lane] === 0) {
+      setHoverNote(null);
+      return;
+    }
+
+    const geometry = gridGeometry.current;
+    const position = gridPositionAtY(pointer.clientY - bounds.top, geometry.measureCount, geometry.measureHeight, geometry.gridDivision, geometry.measureFractions);
+    setHoverNote((current) => current?.key === key && current.position === position ? current : { key, position });
+  }, [keyMode, notePlacementMode, readOnly, settings.lanes]);
+
+  const clearHoverNote = () => {
+    hoverPointer.current = null;
+    setHoverNote(null);
+  };
+
+  const hoverLane = (kind: 'note' | 'autoplay', event: PointerEvent<HTMLDivElement>) => {
+    if (event.buttons !== 0 || event.pointerType === 'touch') {
+      clearHoverNote();
+      return;
+    }
+
+    hoverPointer.current = { kind, target: event.currentTarget, clientX: event.clientX, clientY: event.clientY };
+    updateHoverNote();
+  };
+
+  useLayoutEffect(updateHoverNote, [updateHoverNote, gridDivision, measureCount, measureHeight, measureFractions]);
 
   const renderedChart = useMemo(() => {
     if (!playing || !renderWindow) {
@@ -489,6 +533,7 @@ export function NoteRoll({
   };
 
   const loadMoreMeasures = (event: UIEvent<HTMLDivElement>) => {
+    updateHoverNote();
     updateEventDrag();
     updateMarquee();
     const top = event.currentTarget.scrollTop;
@@ -1325,7 +1370,7 @@ export function NoteRoll({
               const localSubGridHeight = gridLineHeight(measureHeight, subGrid);
               return (
                 <span
-                  className={localSubGridHeight > 0 ? '' : 'no-sub-grid'}
+                  className={`${grid === 'none' ? 'no-grid' : ''}${localSubGridHeight > 0 ? '' : ' no-sub-grid'}`}
                   style={{
                     position: 'absolute',
                     top: positionY(measure + 1),
@@ -1360,6 +1405,8 @@ export function NoteRoll({
             className="nt-lanes"
             aria-label="Playable note lanes"
             onClick={readOnly ? undefined : (event) => selectGridEvent('note', event)}
+            onPointerMoveCapture={readOnly ? undefined : (event) => hoverLane('note', event)}
+            onPointerLeave={clearHoverNote}
             onPointerDown={readOnly ? undefined : startLongNoteDrag}
             onPointerMove={readOnly ? undefined : moveLongNoteDrag}
             onPointerUp={readOnly ? undefined : (event) => finishLongNoteDrag(event, true)}
@@ -1377,6 +1424,9 @@ export function NoteRoll({
                 {longNoteDraft?.key === key
                   ? renderLongNoteDraft(longNoteDraft, positionY, cellHeightAt, settings, formatDraftNoteLabel?.(key) ?? '')
                   : null}
+                {notePlacementMode && !readOnly && !longNoteDraft && hoverNote?.key === key
+                  ? <span className="nt-chart-note tap nt-hover-note" style={noteCellStyle(positionY(hoverNote.position), cellHeightAt(hoverNote.position), settings.noteHeight)} aria-hidden="true">{formatDraftNoteLabel?.(key)}</span>
+                  : null}
               </div>
             ))}
           </div>
@@ -1387,7 +1437,7 @@ export function NoteRoll({
           >
             {renderedMeasures.map((measure) => <span style={{ gridRow: measureCount - measure }} key={measure}>#{String(measure).padStart(3, '0')}</span>)}
           </div>
-          <div className="nt-sample-lanes" aria-label="Autoplay sample lanes" onClick={readOnly ? undefined : (event) => selectGridEvent('autoplay', event)}>
+          <div className="nt-sample-lanes" aria-label="Autoplay sample lanes" onClick={readOnly ? undefined : (event) => selectGridEvent('autoplay', event)} onPointerMoveCapture={readOnly ? undefined : (event) => hoverLane('autoplay', event)} onPointerLeave={clearHoverNote}>
             {SAMPLE_LANES.map((lane, index) => {
               const laneKey = SAMPLE_LANE_KEYS[index];
               if (!laneKey) {
@@ -1403,6 +1453,9 @@ export function NoteRoll({
                     const label = formatNoteLabel(settings.noteTemplate, { lane: targetKey.replace('sample-', 'Sample '), sampleId: note.sampleId, sampleType: note.sampleType });
                     return <span className={`nt-chart-note tap nt-autoplay-note${isEventSelected(selectedEvents, selection) ? ' is-selected' : ''}`} style={{ top: `${box.top}px`, height: `${box.height}px`, ...dragStyle(selection, lane - 1) }} key={note.id} {...eventHandlers(selection, lane - 1)}>{label}</span>;
                   })}
+                  {notePlacementMode && !readOnly && hoverNote?.key === laneKey
+                    ? <span className="nt-chart-note tap nt-autoplay-note nt-hover-note" style={noteCellStyle(positionY(hoverNote.position), cellHeightAt(hoverNote.position), settings.noteHeight)} aria-hidden="true">{formatDraftNoteLabel?.(laneKey)}</span>
+                    : null}
                 </div>
               );
             })}

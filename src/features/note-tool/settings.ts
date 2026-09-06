@@ -190,7 +190,11 @@ export function normalizePlayheadGrid(grid: number): number {
 }
 
 export function effectivePlayheadGrid(grid: string, subGrid: string): number {
-  return normalizePlayheadGrid(Number((subGrid === 'none' ? grid : subGrid).split('/')[1]));
+  return normalizePlayheadGrid(noteGridDivision(subGrid === 'none' ? grid : subGrid));
+}
+
+export function noteGridDivision(grid: string): number {
+  return grid === 'none' ? 192 : Number(grid.split('/')[1]);
 }
 
 export function playheadPositionFromChartPosition(position: number, grid: number): number {

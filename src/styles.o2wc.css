@@ -1662,6 +1662,7 @@ select.secinput {
   .nt-settings-preview-options { flex-wrap: wrap; margin-left: 0; }
 }
 .nt-difficulties { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 14px 16px 18px; }
+.nt-copy-events { justify-content: center; width: calc(100% - 32px); margin: 0 16px 18px; }
 .nt-difficulty {
   display: flex;
   flex-direction: column;
@@ -1940,6 +1941,11 @@ select.secinput {
   background-image: linear-gradient(to bottom, color-mix(in srgb, var(--border) 45%, transparent) 1px, transparent 1px);
   background-size: 100% var(--nt-local-grid-height);
 }
+.nt-roll-grid > span.no-grid {
+  background-image: linear-gradient(to bottom, color-mix(in srgb, var(--border-strong) 72%, transparent) 1px, transparent 1px);
+  background-size: 100% var(--nt-local-sub-grid-height);
+}
+.nt-roll-grid > span.no-grid.no-sub-grid { background-image: none; }
 .nt-ruler {
   grid-column: 1;
   grid-row: 1;
@@ -2079,6 +2085,7 @@ select.secinput {
   white-space: nowrap;
 }
 .nt-chart-note.long.nt-pending-note { opacity: 0.72; pointer-events: none; }
+.nt-chart-note.nt-hover-note { opacity: 0.45; pointer-events: none; }
 .nt-chart-note.long {
   background: none;
   border: none;
@@ -2256,8 +2263,8 @@ select.secinput {
 .nt-sample-picker-results button:hover,
 .nt-sample-picker-results button[aria-selected='true'] { color: var(--ink); background: var(--accent-soft); }
 .nt-sample-picker-results button[aria-selected='true'] > .mono { color: var(--accent); }
-.nt-summary { margin: 0; }
-.nt-summary > div {
+.nt-statistic { margin: 0; }
+.nt-statistic > div {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2266,8 +2273,8 @@ select.secinput {
   padding: 0 16px;
   border-bottom: 1px solid var(--border);
 }
-.nt-summary dt { font-size: 11.5px; color: var(--ink-2); }
-.nt-summary dd { margin: 0; font-family: var(--font-mono); font-size: 11px; color: var(--ink); }
+.nt-statistic dt { font-size: 11.5px; color: var(--ink-2); }
+.nt-statistic dd { margin: 0; font-family: var(--font-mono); font-size: 11px; color: var(--ink); }
 .nt-ojm-control { display: grid; grid-template-columns: minmax(0, 1fr) 34px; gap: 6px; }
 .nt-ojm-control .icon-btn { width: 34px; height: 34px; }
 .nt-sample-tabs { padding-inline: 14px; background: var(--surface-2); }
@@ -2333,6 +2340,10 @@ select.secinput {
 .nt-timing-value-form { display: flex; flex-direction: column; min-height: 0; }
 .nt-timing-value-body { padding: 16px 20px; }
 .nt-timing-value-footer { justify-content: flex-end; }
+.nt-copy-events-body { padding: 16px 20px; }
+.nt-copy-events-body p { margin: 14px 0 0; font-size: 12px; line-height: 1.6; color: var(--ink-2); }
+.nt-copy-events-body > p:first-child { margin-top: 0; }
+.nt-copy-events-footer { justify-content: flex-end; }
 .nt-name-dialog-footer .btn { justify-content: center; width: 84px; height: 34px; padding: 0 12px; }
 .nt-sample-bank-fields { padding-bottom: 12px; }
 .nt-sample-format-row.single { grid-template-columns: minmax(0, 1fr); }
