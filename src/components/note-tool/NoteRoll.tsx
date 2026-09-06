@@ -9,6 +9,7 @@ import {
   formatNoteLabel,
   playheadPositionFromChartPosition,
   playheadPositionStep,
+  playheadTopRatio,
   updateNoteLaneSettings,
   type NoteAreaLaneKey,
   type NoteLaneKey,
@@ -144,6 +145,10 @@ export function NoteRoll({
   const playhead = useRef<HTMLDivElement>(null);
   const previousScrollHeight = useRef(0);
   const previousScrollTop = useRef(0);
+  const manualScrollUntil = useRef(0);
+  const previousFollowDistance = useRef<number | null>(null);
+  const previousPlaybackPosition = useRef<number | null>(null);
+  const scrollbarHeld = useRef(false);
   const viewport = useRef({ height: 0, maxScrollTop: 0 });
   const renderWindowRef = useRef<ReturnType<typeof playbackRenderWindow> | null>(null);
   const [renderWindow, setRenderWindow] = useState<ReturnType<typeof playbackRenderWindow> | null>(null);
@@ -277,6 +282,30 @@ export function NoteRoll({
       : undefined;
   }, [hiSpeed, onHiSpeedChange]);
 
+  useLayoutEffect(() => {
+    manualScrollUntil.current = 0;
+    previousFollowDistance.current = null;
+    scrollbarHeld.current = false;
+  }, [playing]);
+
+  useEffect(() => {
+    const releaseScrollbar = () => {
+      if (scrollbarHeld.current) {
+        scrollbarHeld.current = false;
+        manualScrollUntil.current = performance.now() + 400;
+      }
+    };
+
+    window.addEventListener('pointerup', releaseScrollbar);
+    window.addEventListener('pointercancel', releaseScrollbar);
+    window.addEventListener('blur', releaseScrollbar);
+    return () => {
+      window.removeEventListener('pointerup', releaseScrollbar);
+      window.removeEventListener('pointercancel', releaseScrollbar);
+      window.removeEventListener('blur', releaseScrollbar);
+    };
+  }, []);
+
   useEffect(() => {
     const element = wrapper.current;
     if (!element || !measureScrollRequest) {
@@ -337,29 +366,50 @@ export function NoteRoll({
     previousScrollHeight.current = scrollHeight;
     previousScrollTop.current = scrollTop;
     updateRenderWindow(scrollTop);
+    if (loadingMeasures.current) {
+      suppressPlayheadScroll.current = true;
+    }
+
     loadingMeasures.current = false;
   }, [measureCount, hiSpeed, rollBodyHeight, updateRenderWindow]);
 
-  useLayoutEffect(() => subscribePosition((position) => {
+  useLayoutEffect(() => subscribePosition((position, scrollIntoView = false) => {
+    const now = performance.now();
+    const advancing = previousPlaybackPosition.current !== null && position > previousPlaybackPosition.current;
+    previousPlaybackPosition.current = position;
     const geometry = gridGeometry.current;
     const pixelRatio = window.devicePixelRatio || 1;
     const offset = alignToDevicePixel(chartPositionY(position, geometry.measureCount, geometry.measureHeight, geometry.measureFractions), pixelRatio);
     const element = wrapper.current;
-    const rulerSeeking = suppressPlayheadScroll.current;
+    const preserveScroll = suppressPlayheadScroll.current;
     suppressPlayheadScroll.current = false;
-    if (element && !rulerSeeking) {
+    if (element && (scrollIntoView || (playing && !preserveScroll))) {
       const { height, maxScrollTop } = viewport.current;
-      const scrollTop = Math.max(0, Math.min(maxScrollTop, alignToDevicePixel(playbackScrollTop(34 + offset, height, settings.playheadPosition, settings.playheadGrid), pixelRatio)));
-      if (scrollTop !== previousScrollTop.current) {
-        element.scrollTop = scrollTop;
-        previousScrollTop.current = scrollTop;
+      const current = element.scrollTop;
+      if (Math.abs(current - previousScrollTop.current) > 1) {
+        manualScrollUntil.current = now + 400;
+        previousFollowDistance.current = null;
       }
 
-      updateRenderWindow(scrollTop);
+      const target = Math.max(0, Math.min(maxScrollTop, playbackScrollTop(34 + offset, height, settings.playheadPosition, settings.playheadGrid)));
+      const manual = manualScrollUntil.current > 0;
+      const distance = offset - current - Math.max(0, height - 34) * playheadTopRatio(settings.playheadPosition, settings.playheadGrid);
+      const idle = !scrollbarHeld.current && now >= manualScrollUntil.current;
+      const resume = idle && previousFollowDistance.current !== null && previousFollowDistance.current >= 0 && distance <= 0;
+      previousFollowDistance.current = manual && idle ? distance : null;
+
+      if (scrollIntoView || (advancing && (!manual || resume))) {
+        manualScrollUntil.current = 0;
+        previousFollowDistance.current = null;
+        element.scrollTop = alignToDevicePixel(target, pixelRatio);
+      }
+
+      previousScrollTop.current = element.scrollTop;
+      updateRenderWindow(element.scrollTop);
     }
 
     playhead.current?.style.setProperty('--nt-playhead-y', `${offset}px`);
-  }), [measureCount, measureFractions, measureHeight, settings.playheadGrid, settings.playheadPosition, subscribePosition, updateRenderWindow]);
+  }), [measureCount, measureFractions, measureHeight, playing, settings.playheadGrid, settings.playheadPosition, subscribePosition, updateRenderWindow]);
 
   const resetLaneWidth = (lane: NoteAreaLaneKey, event: MouseEvent<HTMLElement>) => {
     event.preventDefault();
@@ -426,6 +476,11 @@ export function NoteRoll({
 
   const loadMoreMeasures = (event: UIEvent<HTMLDivElement>) => {
     const top = event.currentTarget.scrollTop;
+    if (playing && Math.abs(top - previousScrollTop.current) > 1) {
+      manualScrollUntil.current = performance.now() + 400;
+      previousFollowDistance.current = null;
+    }
+
     const scrollingUp = top < previousScrollTop.current;
     previousScrollTop.current = top;
     updateRenderWindow(top);
@@ -441,6 +496,15 @@ export function NoteRoll({
 
   const loadMoreMeasuresWithWheel = (event: WheelEvent<HTMLDivElement>) => {
     if (event.ctrlKey) {
+      return;
+    }
+
+    if (playing && event.deltaY !== 0) {
+      manualScrollUntil.current = performance.now() + 400;
+      previousFollowDistance.current = null;
+    }
+
+    if (readOnly) {
       return;
     }
 
@@ -996,7 +1060,13 @@ export function NoteRoll({
   };
 
   return (
-    <div className="nt-roll-wrap" ref={wrapper} onScroll={loadMoreMeasures} onWheel={readOnly ? undefined : loadMoreMeasuresWithWheel}>
+    <div className="nt-roll-wrap" ref={wrapper} onScroll={loadMoreMeasures} onWheel={loadMoreMeasuresWithWheel} onPointerDown={(event) => {
+      if (playing && event.button === 0 && event.target === event.currentTarget) {
+        scrollbarHeld.current = true;
+        manualScrollUntil.current = performance.now() + 400;
+        previousFollowDistance.current = null;
+      }
+    }}>
       <div
         className={`nt-roll keys-${keyMode}${selectMode ? ' is-select-mode' : ''}${readOnly ? ' is-read-only' : ''}`}
         role="img"

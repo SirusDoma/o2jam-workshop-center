@@ -59,5 +59,5 @@ export function playbackScrollTop(
   viewportPosition = DEFAULT_PLAYHEAD_POSITION,
   viewportGrid = DEFAULT_PLAYHEAD_GRID,
 ): number {
-  return Math.max(0, playheadOffset - viewportHeight * playheadTopRatio(viewportPosition, viewportGrid));
+  return Math.max(0, playheadOffset - 34 - Math.max(0, viewportHeight - 34) * playheadTopRatio(viewportPosition, viewportGrid));
 }

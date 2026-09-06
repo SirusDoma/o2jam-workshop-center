@@ -16,7 +16,7 @@ type DecodedSample = {
   buffer: AudioBuffer;
 };
 
-export type PlaybackPositionListener = (position: number) => void;
+export type PlaybackPositionListener = (position: number, scrollIntoView?: boolean) => void;
 export type PlaybackPositionSubscription = (listener: PlaybackPositionListener) => () => void;
 
 export function useChartPlayback({
@@ -48,13 +48,13 @@ export function useChartPlayback({
   const [playing, setPlaying] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const emitPosition = useCallback((next: number) => {
+  const emitPosition = useCallback((next: number, scrollIntoView = false) => {
     positionRef.current = next;
-    positionListeners.current.forEach((listener) => listener(next));
+    positionListeners.current.forEach((listener) => listener(next, scrollIntoView));
   }, []);
 
-  const commitPosition = useCallback((next: number) => {
-    emitPosition(next);
+  const commitPosition = useCallback((next: number, scrollIntoView = false) => {
+    emitPosition(next, scrollIntoView);
     setPositionState(next);
   }, [emitPosition]);
 
@@ -98,7 +98,7 @@ export function useChartPlayback({
   const stop = useCallback(() => {
     stopSources();
     setPlaying(false);
-    commitPosition(positionAfterTransportCommand(positionRef.current, 'stop'));
+    commitPosition(positionAfterTransportCommand(positionRef.current, 'stop'), true);
   }, [commitPosition, stopSources]);
 
   const setPosition = useCallback((next: number) => {
@@ -223,6 +223,7 @@ export function useChartPlayback({
     scheduleAhead();
     scheduler.current = setInterval(scheduleAhead, 25);
     setPlaying(true);
+    emitPosition(startPosition, true);
 
     const update = () => {
       const outputTimestamp = audioContext.getOutputTimestamp();
