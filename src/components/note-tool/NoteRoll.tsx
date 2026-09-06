@@ -24,10 +24,12 @@ import { alignToDevicePixel, chartPositionAtY, chartPositionY, edgeScrollDelta, 
 import { formatBpmValue } from '../../features/note-tool/timingValues';
 import { isEventSelected, playbackScrollTop, selectionForEventDrag, updateMarqueeSelection } from '../../features/note-tool/selection';
 import type { PlaybackPositionSubscription } from '../../features/note-tool/useChartPlayback';
+import { PlaybackDiagnostics } from '../../features/note-tool/diagnostics';
 
 const KEYS_7: NoteLaneKey[] = [...NOTE_LANE_KEYS];
 const AUDIO_LANE_KEYS = [...NOTE_LANE_KEYS, ...SAMPLE_LANE_KEYS];
 const SAMPLE_LANES = SAMPLE_LANE_KEYS.map((_, index) => index + 1);
+const disabledDiagnostics = new PlaybackDiagnostics();
 type ResizableLaneKey = NoteLaneKey | SampleLaneKey;
 
 export type NoteGridEvent = {
@@ -82,6 +84,7 @@ type EventHandlers = {
 };
 
 export function NoteRoll({
+  diagnostic = disabledDiagnostics,
   keyMode,
   hiSpeed,
   grid,
@@ -110,6 +113,7 @@ export function NoteRoll({
   onSelectEvents,
   onPlayheadPositionChange,
 }: {
+  diagnostic?: PlaybackDiagnostics;
   keyMode: KeyMode;
   hiSpeed: string;
   grid: string;
@@ -249,6 +253,7 @@ export function NoteRoll({
       return chart;
     }
 
+    const started = diagnostic.recording ? performance.now() : 0;
     const visible = (position: number, duration = 0, height = settings.noteHeight) => {
       const bottom = chartPositionY(position, measureCount, measureHeight, measureFractions);
       const end = chartPositionY(position + duration, measureCount, measureHeight, measureFractions);
@@ -256,14 +261,16 @@ export function NoteRoll({
       return box.top <= renderWindow.bottom && box.top + box.height >= renderWindow.top;
     };
 
-    return {
+    const result = {
       ...chart,
       notes: chart.notes.filter((note) => visible(note.absolutePosition, note.duration)),
       autoplayNotes: chart.autoplayNotes.filter((note) => visible(note.absolutePosition)),
       bpmChanges: chart.bpmChanges.filter((item) => visible(item.absolutePosition, 0, DEFAULT_NOTE_TOOL_SETTINGS.noteHeight)),
       measureFractions: chart.measureFractions.filter((item) => visible(item.measure, 0, DEFAULT_NOTE_TOOL_SETTINGS.noteHeight)),
     };
-  }, [chart, playing, renderWindow, measureCount, measureHeight, measureFractions, settings.noteHeight]);
+    if (diagnostic.recording) diagnostic.record('roll.cull', performance.now() - started);
+    return result;
+  }, [chart, diagnostic, playing, renderWindow, measureCount, measureHeight, measureFractions, settings.noteHeight]);
 
   const notesByKey = useMemo(() => new Map(KEYS_7.map((key) => [key, renderedChart.notes.filter((note) => note.key === key)])), [renderedChart.notes]);
   const autoplayByLane = useMemo(() => new Map(SAMPLE_LANES.map((lane) => [lane, renderedChart.autoplayNotes.filter((note) => note.lane === lane)])), [renderedChart.autoplayNotes]);
@@ -271,6 +278,17 @@ export function NoteRoll({
   const renderedMeasures = playing && renderWindow
     ? measures.filter((measure) => positionY(measure + 1) <= renderWindow.bottom && positionY(measure) >= renderWindow.top)
     : measures;
+
+  useLayoutEffect(() => {
+    if (!diagnostic.enabled) return;
+    diagnostic.count('roll.commits');
+    Object.assign(diagnostic.context, {
+      chartNotes: notes.length, chartAutoplay: autoplayNotes.length, measures: measureCount,
+      renderedNotes: renderedChart.notes.length, renderedAutoplay: renderedChart.autoplayNotes.length,
+      hiSpeed, grid, subGrid, rollHeight: rollBodyHeight,
+      rollWidth: rulerWidth + measureWidth + bpmWidth + keyWidth + sampleWidth,
+    });
+  });
 
   const updateRenderWindow = useCallback((scrollTop: number) => {
     if (!playing) {
@@ -391,6 +409,8 @@ export function NoteRoll({
     const geometry = gridGeometry.current;
     const pixelRatio = window.devicePixelRatio || 1;
     const offset = alignToDevicePixel(chartPositionY(position, geometry.measureCount, geometry.measureHeight, geometry.measureFractions), pixelRatio);
+    if (diagnostic.recording) diagnostic.record('roll.positionGeometry', performance.now() - now);
+    const scrollStarted = diagnostic.recording ? performance.now() : 0;
     const element = wrapper.current;
     const preserveScroll = suppressPlayheadScroll.current;
     suppressPlayheadScroll.current = false;
@@ -409,20 +429,28 @@ export function NoteRoll({
       const resume = idle && previousFollowDistance.current !== null && previousFollowDistance.current >= 0 && distance <= 0;
       previousFollowDistance.current = manual && idle ? distance : null;
 
-      if (scrollIntoView || (advancing && (!manual || resume))) {
+      if (scrollIntoView || (diagnostic.mode !== 'no-follow' && advancing && (!manual || resume))) {
         manualScrollUntil.current = 0;
         previousFollowDistance.current = null;
         element.scrollTop = alignToDevicePixel(target, pixelRatio);
+        diagnostic.count('scrollWrites');
       }
 
       previousScrollTop.current = element.scrollTop;
       updateRenderWindow(element.scrollTop);
+      if (diagnostic.enabled) {
+        diagnostic.context.scrollTop = previousScrollTop.current;
+        diagnostic.context.following = diagnostic.mode !== 'no-follow' && manualScrollUntil.current === 0;
+      }
     }
+
+    if (diagnostic.recording) diagnostic.record('roll.scroll', performance.now() - scrollStarted);
 
     if (playhead.current) {
       playhead.current.style.transform = `translateY(${offset}px) translateY(-50%)`;
     }
-  }), [measureCount, measureFractions, measureHeight, playing, settings.playheadGrid, settings.playheadPosition, subscribePosition, updateRenderWindow]);
+    if (diagnostic.recording) diagnostic.record('roll.positionSubscriber', performance.now() - now);
+  }), [diagnostic, measureCount, measureFractions, measureHeight, playing, settings.playheadGrid, settings.playheadPosition, subscribePosition, updateRenderWindow]);
 
   const resetLaneWidth = (lane: NoteAreaLaneKey, event: MouseEvent<HTMLElement>) => {
     event.preventDefault();

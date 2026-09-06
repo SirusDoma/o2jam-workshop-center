@@ -23,6 +23,8 @@ import type { OjmSample } from '../../features/note-tool/model';
 import { NoteRoll, type LongNoteGridEvent, type NoteGridEvent } from './NoteRoll';
 import { RollViewControls } from './RollViewControls';
 import { SampleBankPicker } from './SampleBankPicker';
+import { PlaybackDiagnosticsPanel } from './PlaybackDiagnosticsPanel';
+import { PlaybackDiagnostics } from '../../features/note-tool/diagnostics';
 import { TimingValueDialog } from './TimingValueDialog';
 import { DEFAULT_FRACTION_VALUE } from '../../features/note-tool/timingValues';
 import type { Difficulty, EditorChart, EditorChartNote, EditorMeasureFraction, EditTool, InspectorEvent, KeyMode } from '../../features/note-tool/types';
@@ -72,6 +74,7 @@ export function NoteEditor({
   onChartChange: (chart: EditorChart) => void;
   onToggleMaximized: () => void;
 }) {
+  const [diagnostic] = useState(() => new PlaybackDiagnostics());
   const [tool, setTool] = useState<EditTool>('select');
   const [longNote, setLongNote] = useState(false);
   const [noteVolume, setNoteVolume] = useState('16');
@@ -95,6 +98,7 @@ export function NoteEditor({
   const bpmChanges = useMemo(() => tempoChanges(chart), [chart]);
   const events = useMemo(() => playbackEvents(chart), [chart]);
   const playback = useChartPlayback({
+    diagnostic,
     baseBpm,
     bpmChanges,
     events,
@@ -442,6 +446,7 @@ export function NoteEditor({
 
   return (
     <section className="nt-editor" aria-label="Note editor">
+      <PlaybackDiagnosticsPanel playback={playback} diagnostic={diagnostic} />
       <div className="nt-transport" aria-label="Transport controls">
         <div className="nt-transport-group">
           <button
@@ -529,6 +534,7 @@ export function NoteEditor({
 
       <div className="nt-roll-stage">
         <NoteRoll
+          diagnostic={diagnostic}
           keyMode={keyMode}
           hiSpeed={hiSpeed}
           grid={grid}
