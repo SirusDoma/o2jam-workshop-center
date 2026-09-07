@@ -1333,7 +1333,6 @@ select.secinput {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  scrollbar-gutter: stable;
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--ink-3) transparent;
