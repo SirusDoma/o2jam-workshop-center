@@ -20,6 +20,8 @@ export type ScheduledEvent = {
 
 const BEATS_PER_MEASURE = 4;
 const PLAYBACK_READOUT_INTERVAL_MS = 100;
+const CLOCK_SNAP_SECONDS = 0.05;
+const CLOCK_DRIFT_GAIN = 0.05;
 
 export function playableAudioContext(current: AudioContext | null, create: () => AudioContext): AudioContext {
   return current && current.state !== 'closed' ? current : create();
@@ -39,6 +41,12 @@ export function shouldRefreshPlaybackReadout(previous: number, current: number):
 
 export function measuredFrameRate(frameCount: number, elapsedMilliseconds: number): number {
   return elapsedMilliseconds > 0 ? Math.round(frameCount * 1_000 / elapsedMilliseconds) : 0;
+}
+
+export function smoothedClockOffset(previous: number | null, measured: number): number {
+  return previous === null || Math.abs(measured - previous) > CLOCK_SNAP_SECONDS
+    ? measured
+    : previous + (measured - previous) * CLOCK_DRIFT_GAIN;
 }
 
 export function positionToSeconds(

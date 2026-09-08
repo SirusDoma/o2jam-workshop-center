@@ -7,6 +7,7 @@ import {
   positionAfterTransportCommand,
   positionToSeconds,
   secondsToPosition,
+  smoothedClockOffset,
   type PlaybackEvent,
   type TempoChange,
 } from './playback';
@@ -226,14 +227,18 @@ export function useChartPlayback({
     setPlaying(true);
     emitPosition(startPosition, true);
 
-    const update = () => {
+    // The audio clock only advances per device callback (~10 ms); pace frames on the rAF clock and let it correct drift.
+    let clockOffset: number | null = null;
+    let elapsed = 0;
+    const update = (frameTime: number) => {
       const outputTimestamp = audioContext.getOutputTimestamp();
       const renderedTime = outputTimestamp.contextTime ?? 0;
-      const outputTime = renderedTime > 0
+      const audioTime = renderedTime > 0
         ? renderedTime
         : audioContext.currentTime - audioContext.baseLatency - audioContext.outputLatency;
 
-      const elapsed = Math.max(0, outputTime - startedAt.current);
+      clockOffset = smoothedClockOffset(clockOffset, audioTime - frameTime / 1000);
+      elapsed = Math.max(elapsed, frameTime / 1000 + clockOffset - startedAt.current);
       const next = secondsToPosition(startedFromSeconds.current + elapsed, baseBpm, bpmChanges, measureFractions);
 
       if (next >= endPosition) {
