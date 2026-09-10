@@ -5,7 +5,7 @@ import { EncodingSelect } from '../EncodingSelect';
 import { normalizeDecimalInput } from '../../features/note-tool/dom';
 import { formatOjnVersion, parseOjnVersionInput } from '../../features/note-tool/chart';
 import { BpmInput } from './BpmInput';
-import { CollapsibleSection } from './CollapsibleSection';
+import { CollapsibleSection } from '../CollapsibleSection';
 import { ImagePicker } from './ImagePicker';
 import type { OjmEncryption, OjmFormat } from '../../features/note-tool/model';
 import type { ChartMetadata, ChartTab, Difficulty, PreviewImage } from '../../features/note-tool/types';

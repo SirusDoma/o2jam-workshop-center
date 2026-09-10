@@ -1366,12 +1366,6 @@ select.secinput {
 }
 .nt-panel-resizer:hover::after,
 .nt-panel-resizer:focus-visible::after { width: 2px; background: var(--accent); }
-.nt-section { flex: 0 0 auto; border-bottom: 1px solid var(--border); }
-.nt-section > summary { display: flex; cursor: pointer; list-style: none; }
-.nt-section > summary::-webkit-details-marker { display: none; }
-.nt-section > summary svg { margin-left: auto; transition: transform 0.15s ease; }
-.nt-section:not([open]) > summary svg { transform: rotate(-90deg); }
-.nt-section > summary:hover { color: var(--accent); }
 .nt-panel-tabs {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1548,22 +1542,9 @@ select.secinput {
 .nt-lane-reset { width: 28px; height: 28px; min-height: 28px; padding: 0; }
 .nt-lane-reset svg { width: 12px; height: 12px; }
 .nt-settings-note-layout { display: grid; gap: 12px; }
-.nt-settings-control-group { display: grid; overflow: visible; border: 1px solid var(--border); background: var(--surface-2); }
-.nt-settings-control-group h3 {
-  margin: 0;
-  padding: 9px 12px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-  background: var(--surface-3);
-  border-bottom: 1px solid var(--border);
-}
 .nt-appearance-reset { align-self: end; width: 28px; height: 32px; min-height: 32px; padding: 0; }
 .nt-appearance-reset svg { width: 11px; height: 11px; }
 .nt-settings-fields { display: grid; gap: 12px; align-items: end; }
-.nt-settings-control-group .nt-settings-fields { padding: 12px; }
 .nt-settings-fields .selctl,
 .nt-settings-fields .secinput { width: 100%; }
 .nt-settings-fields.nt-note-settings { grid-template-columns: 84px 84px 88px minmax(0, 1fr) 28px; }

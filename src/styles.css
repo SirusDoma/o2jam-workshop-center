@@ -484,6 +484,14 @@ html.theming .stackhead {
   color: var(--ink-2);
   text-transform: uppercase;
 }
+.collapsible-section { flex: 0 0 auto; border-bottom: 1px solid var(--border); }
+.collapsible-section > summary { display: flex; cursor: pointer; list-style: none; user-select: none; }
+.collapsible-section > summary::-webkit-details-marker { display: none; }
+.collapsible-section > summary svg { margin-left: auto; transition: transform 0.15s ease; }
+.collapsible-section:not([open]) > summary svg { transform: rotate(-90deg); }
+.collapsible-section > summary:hover { color: var(--accent); }
+.collapsible-section > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
 .stackhead > span:first-child { grid-area: title; }
 .stackhead .tally {
   grid-area: tally;
@@ -1944,6 +1952,27 @@ html.theming .stackhead {
 .checkline.disabled { cursor: default; opacity: 0.5; }
 .checkline input { accent-color: var(--accent); }
 .netlines { display: flex; gap: 22px; padding: 2px 0; flex-wrap: wrap; }
+
+.control-group { display: grid; overflow: visible; border: 1px solid var(--border); background: var(--surface-2); }
+.control-group h3 {
+  margin: 0;
+  padding: 9px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  background: var(--surface-3);
+  border-bottom: 1px solid var(--border);
+}
+.control-group-fields { padding: 12px; }
+
+.form-fields { display: flex; flex-direction: column; gap: 16px; }
+.form-fields > .field,
+.form-fields > .field:has(+ .field.checkfield),
+.form-fields > .field.checkfield,
+.form-fields > .inline-form > .field { margin-bottom: 0; }
+
 
 
 .optlist {

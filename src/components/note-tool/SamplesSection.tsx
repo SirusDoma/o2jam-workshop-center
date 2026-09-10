@@ -225,7 +225,7 @@ export function SamplesSection({
   const accept = settings.acceptedTypes.map((sampleType) => `audio/${sampleType},.${sampleType}`).join(',');
 
   return (
-    <section className={`nt-section nt-samples-section${open ? ' open' : ''}`}>
+    <section className={`collapsible-section nt-samples-section${open ? ' open' : ''}`}>
       <button className="stackhead nt-section-toggle" type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
         <span>Samples</span>
         <ChevronDown size={13} aria-hidden="true" />

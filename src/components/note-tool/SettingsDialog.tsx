@@ -322,9 +322,9 @@ export function SettingsDialog({
             </div>
           </div>
           <div className="nt-settings-note-layout">
-            <div className="nt-settings-control-group">
+            <div className="control-group">
               <h3>Note</h3>
-              <div className="nt-settings-fields nt-note-settings">
+              <div className="control-group-fields nt-settings-fields nt-note-settings">
               <label className="nt-field">
                 <span>Border width</span>
                 <div className="nt-settings-number">
@@ -415,9 +415,9 @@ export function SettingsDialog({
               </button>
               </div>
             </div>
-            <div className="nt-settings-control-group">
+            <div className="control-group">
               <h3>Playback line</h3>
-              <div className="nt-settings-fields nt-playback-settings">
+              <div className="control-group-fields nt-settings-fields nt-playback-settings">
                 <label className="nt-field nt-playhead-position-field">
                   <span>Position</span>
                   <div className="nt-playhead-position-control">
