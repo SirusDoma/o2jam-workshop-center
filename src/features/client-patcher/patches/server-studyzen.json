@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "server-studyzen",
+  "title": "Studyzen URL",
+  "description": "Change the URL used by studyzen.",
+  "category": "Network",
+  "group": "Web services",
+  "order": 51,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Studyzen",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "2.33"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 587974,
+              "offset": 13,
+              "signature": "FF D7 85 F6 74 ?? 6A 01 6A 00 6A 00 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 00 FF 15 ?? ?? ?? ?? 5F 5E 5D 33 C0 5B C2 10 00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

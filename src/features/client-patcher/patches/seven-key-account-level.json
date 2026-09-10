@@ -1,0 +1,449 @@
+{
+  "schemaVersion": 1,
+  "id": "seven-key-account-level",
+  "title": "Minimum account level for 7K rooms",
+  "description": "Set the minimum account level for creating and joining 7K rooms. Use 0 to remove the level requirement.",
+  "category": "Gameplay",
+  "order": 20,
+  "inputs": [
+    {
+      "id": "level",
+      "label": "Minimum account level for 7K rooms",
+      "control": "number",
+      "default": 4,
+      "min": 0,
+      "max": 127
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "6.65"
+      },
+      "operations": [
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "signature": "8B 0D ?? ?? ?? ?? 89 8D ?? ?? ?? ?? 83 BD ?? ?? ?? ?? 04 0F 8D ?? ?? ?? ?? C6 85 ?? ?? ?? ?? 00 68 03 01 00 00 6A 00 8D 95 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 83 C4 0C",
+            "offset": 18
+          },
+          "original": "04",
+          "readCurrent": true,
+          "value": {
+            "input": "level"
+          },
+          "encoding": "u8",
+          "size": 1
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "signature": "0F B6 88 8D 00 00 00 83 F9 02 75 ?? 8B 15 ?? ?? ?? ?? 89 95 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? 04 7D ??",
+            "offset": 30
+          },
+          "original": "04",
+          "readCurrent": true,
+          "value": {
+            "input": "level"
+          },
+          "encoding": "u8",
+          "size": 1
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "signature": "69 C0 B4 01 00 00 8B 0D ?? ?? ?? ?? 8B 94 01 5C 01 00 00 83 E2 07 0F 84 ?? ?? ?? ?? A1 ?? ?? ?? ?? 89 85 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? 04 7D ?? 83 3D ?? ?? ?? ?? 00",
+            "offset": 45
+          },
+          "original": "04",
+          "readCurrent": true,
+          "value": {
+            "input": "level"
+          },
+          "encoding": "u8",
+          "size": 1
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "signature": "8B 0D ?? ?? ?? ?? 89 8D ?? ?? ?? ?? 83 BD ?? ?? ?? ?? 0A 0F 8C ?? ?? ?? ?? 8B 15 ?? ?? ?? ?? 89 95 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? 04 7D ?? 83 3D ?? ?? ?? ?? 00",
+            "offset": 43
+          },
+          "original": "04",
+          "readCurrent": true,
+          "value": {
+            "input": "level"
+          },
+          "encoding": "u8",
+          "size": 1
+        },
+        {
+          "type": "hook",
+          "at": {
+            "section": ".text",
+            "signature": "8B 0D ?? ?? ?? ?? 89 8D ?? ?? ?? ?? 83 BD ?? ?? ?? ?? ?? 0F 8D ?? ?? ?? ?? C6 85 ?? ?? ?? ?? 00 68 03 01 00 00 6A 00 8D 95 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 83 C4 0C 68 ?? ?? ?? ?? 8D 85 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 83 C4 08",
+            "offset": 54
+          },
+          "original": "68 ?? ?? ?? ?? 8D 85 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 83 C4 08",
+          "code": "68 00 00 00 00 E8 00 00 00 00 58 05 00 00 00 00 50 8D 85 00 00 00 00 50 E8 00 00 00 00 83 C4 0C E9 00 00 00 00 37 4B 20 72 6F 6F 6D 73 20 72 65 71 75 69 72 65 20 61 63 63 6F 75 6E 74 20 6C 65 76 65 6C 20 25 64 20 6F 72 20 68 69 67 68 65 72 2E 00",
+          "fixups": [
+            {
+              "offset": 1,
+              "encoding": "u32le",
+              "value": {
+                "input": "level"
+              }
+            },
+            {
+              "offset": 12,
+              "encoding": "rel32",
+              "relativeTo": 10,
+              "value": {
+                "codeOffset": 37
+              }
+            },
+            {
+              "offset": 19,
+              "encoding": "u32le",
+              "value": {
+                "originalOffset": 7,
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 25,
+              "encoding": "rel32",
+              "value": {
+                "originalOffset": 13,
+                "read": "rel32"
+              }
+            },
+            {
+              "offset": 33,
+              "encoding": "rel32",
+              "value": {
+                "continuation": true
+              }
+            }
+          ],
+          "when": {
+            "not": {
+              "input": "level",
+              "equals": 4
+            }
+          }
+        },
+        {
+          "type": "hook",
+          "at": {
+            "section": ".text",
+            "signature": "0F B6 88 8D 00 00 00 83 F9 02 75 ?? 8B 15 ?? ?? ?? ?? 89 95 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? ?? 7D ?? 68 ?? ?? ?? ?? 8D 85 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 83 C4 08",
+            "offset": 33
+          },
+          "original": "68 ?? ?? ?? ?? 8D 85 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 83 C4 08",
+          "code": "68 00 00 00 00 E8 00 00 00 00 58 05 00 00 00 00 50 8D 85 00 00 00 00 50 E8 00 00 00 00 83 C4 0C E9 00 00 00 00 37 4B 20 72 6F 6F 6D 73 20 72 65 71 75 69 72 65 20 61 63 63 6F 75 6E 74 20 6C 65 76 65 6C 20 25 64 20 6F 72 20 68 69 67 68 65 72 2E 00",
+          "fixups": [
+            {
+              "offset": 1,
+              "encoding": "u32le",
+              "value": {
+                "input": "level"
+              }
+            },
+            {
+              "offset": 12,
+              "encoding": "rel32",
+              "relativeTo": 10,
+              "value": {
+                "codeOffset": 37
+              }
+            },
+            {
+              "offset": 19,
+              "encoding": "u32le",
+              "value": {
+                "originalOffset": 7,
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 25,
+              "encoding": "rel32",
+              "value": {
+                "originalOffset": 13,
+                "read": "rel32"
+              }
+            },
+            {
+              "offset": 33,
+              "encoding": "rel32",
+              "value": {
+                "continuation": true
+              }
+            }
+          ],
+          "when": {
+            "not": {
+              "input": "level",
+              "equals": 4
+            }
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "signature": "A1 ?? ?? ?? ?? 89 85 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? 04 0F 8D ?? ?? ?? ?? C6 85 ?? ?? ?? ?? 00 68 03 01 00 00 6A 00 8D 8D ?? ?? ?? ?? 51 E8 ?? ?? ?? ?? 83 C4 0C",
+            "offset": 17
+          },
+          "original": "04",
+          "readCurrent": true,
+          "value": {
+            "input": "level"
+          },
+          "encoding": "u8",
+          "size": 1
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "signature": "0F B6 91 0D 02 00 00 83 FA 02 0F 85 ?? ?? ?? ?? A1 ?? ?? ?? ?? 89 85 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? 04 7D ?? C6 85 ?? ?? ?? ?? 00 68 03 01 00 00 6A 00 8D 8D ?? ?? ?? ?? 51 E8 ?? ?? ?? ?? 83 C4 0C",
+            "offset": 33
+          },
+          "original": "04",
+          "readCurrent": true,
+          "value": {
+            "input": "level"
+          },
+          "encoding": "u8",
+          "size": 1
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "signature": "0F B6 91 8D 00 00 00 83 FA 02 75 ?? A1 ?? ?? ?? ?? 89 85 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? 04 7D ??",
+            "offset": 29
+          },
+          "original": "04",
+          "readCurrent": true,
+          "value": {
+            "input": "level"
+          },
+          "encoding": "u8",
+          "size": 1
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "signature": "69 C0 B4 01 00 00 8B 0D ?? ?? ?? ?? 8B 94 01 5C 01 00 00 83 E2 07 0F 84 ?? ?? ?? ?? A1 ?? ?? ?? ?? 89 85 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? 04 7D ?? 83 3D ?? ?? ?? ?? 00",
+            "offset": 45
+          },
+          "original": "04",
+          "readCurrent": true,
+          "value": {
+            "input": "level"
+          },
+          "encoding": "u8",
+          "size": 1
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "signature": "8B 0D ?? ?? ?? ?? 89 8D ?? ?? ?? ?? 83 BD ?? ?? ?? ?? 0A 0F 8C ?? ?? ?? ?? 8B 15 ?? ?? ?? ?? 89 95 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? 04 7D ?? 83 3D ?? ?? ?? ?? 00",
+            "offset": 43
+          },
+          "original": "04",
+          "readCurrent": true,
+          "value": {
+            "input": "level"
+          },
+          "encoding": "u8",
+          "size": 1
+        },
+        {
+          "type": "hook",
+          "at": {
+            "section": ".text",
+            "signature": "A1 ?? ?? ?? ?? 89 85 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? ?? 0F 8D ?? ?? ?? ?? C6 85 ?? ?? ?? ?? 00 68 03 01 00 00 6A 00 8D 8D ?? ?? ?? ?? 51 E8 ?? ?? ?? ?? 83 C4 0C 68 ?? ?? ?? ?? 8D 95 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 83 C4 08",
+            "offset": 53
+          },
+          "original": "68 ?? ?? ?? ?? 8D 95 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 83 C4 08",
+          "code": "68 00 00 00 00 E8 00 00 00 00 58 05 00 00 00 00 50 8D 95 00 00 00 00 52 E8 00 00 00 00 83 C4 0C E9 00 00 00 00 37 4B 20 72 6F 6F 6D 73 20 72 65 71 75 69 72 65 20 61 63 63 6F 75 6E 74 20 6C 65 76 65 6C 20 25 64 20 6F 72 20 68 69 67 68 65 72 2E 00",
+          "fixups": [
+            {
+              "offset": 1,
+              "encoding": "u32le",
+              "value": {
+                "input": "level"
+              }
+            },
+            {
+              "offset": 12,
+              "encoding": "rel32",
+              "relativeTo": 10,
+              "value": {
+                "codeOffset": 37
+              }
+            },
+            {
+              "offset": 19,
+              "encoding": "u32le",
+              "value": {
+                "originalOffset": 7,
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 25,
+              "encoding": "rel32",
+              "value": {
+                "originalOffset": 13,
+                "read": "rel32"
+              }
+            },
+            {
+              "offset": 33,
+              "encoding": "rel32",
+              "value": {
+                "continuation": true
+              }
+            }
+          ],
+          "when": {
+            "not": {
+              "input": "level",
+              "equals": 4
+            }
+          }
+        },
+        {
+          "type": "hook",
+          "at": {
+            "section": ".text",
+            "signature": "0F B6 91 0D 02 00 00 83 FA 02 0F 85 ?? ?? ?? ?? A1 ?? ?? ?? ?? 89 85 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? ?? 7D ?? C6 85 ?? ?? ?? ?? 00 68 03 01 00 00 6A 00 8D 8D ?? ?? ?? ?? 51 E8 ?? ?? ?? ?? 83 C4 0C 68 ?? ?? ?? ?? 8D 95 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 83 C4 08",
+            "offset": 65
+          },
+          "original": "68 ?? ?? ?? ?? 8D 95 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 83 C4 08",
+          "code": "68 00 00 00 00 E8 00 00 00 00 58 05 00 00 00 00 50 8D 95 00 00 00 00 52 E8 00 00 00 00 83 C4 0C E9 00 00 00 00 37 4B 20 72 6F 6F 6D 73 20 72 65 71 75 69 72 65 20 61 63 63 6F 75 6E 74 20 6C 65 76 65 6C 20 25 64 20 6F 72 20 68 69 67 68 65 72 2E 00",
+          "fixups": [
+            {
+              "offset": 1,
+              "encoding": "u32le",
+              "value": {
+                "input": "level"
+              }
+            },
+            {
+              "offset": 12,
+              "encoding": "rel32",
+              "relativeTo": 10,
+              "value": {
+                "codeOffset": 37
+              }
+            },
+            {
+              "offset": 19,
+              "encoding": "u32le",
+              "value": {
+                "originalOffset": 7,
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 25,
+              "encoding": "rel32",
+              "value": {
+                "originalOffset": 13,
+                "read": "rel32"
+              }
+            },
+            {
+              "offset": 33,
+              "encoding": "rel32",
+              "value": {
+                "continuation": true
+              }
+            }
+          ],
+          "when": {
+            "not": {
+              "input": "level",
+              "equals": 4
+            }
+          }
+        },
+        {
+          "type": "hook",
+          "at": {
+            "section": ".text",
+            "signature": "0F B6 91 8D 00 00 00 83 FA 02 75 ?? A1 ?? ?? ?? ?? 89 85 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? ?? 7D ?? 68 ?? ?? ?? ?? 8D 8D ?? ?? ?? ?? 51 E8 ?? ?? ?? ?? 83 C4 08",
+            "offset": 32
+          },
+          "original": "68 ?? ?? ?? ?? 8D 8D ?? ?? ?? ?? 51 E8 ?? ?? ?? ?? 83 C4 08",
+          "code": "68 00 00 00 00 E8 00 00 00 00 58 05 00 00 00 00 50 8D 8D 00 00 00 00 51 E8 00 00 00 00 83 C4 0C E9 00 00 00 00 37 4B 20 72 6F 6F 6D 73 20 72 65 71 75 69 72 65 20 61 63 63 6F 75 6E 74 20 6C 65 76 65 6C 20 25 64 20 6F 72 20 68 69 67 68 65 72 2E 00",
+          "fixups": [
+            {
+              "offset": 1,
+              "encoding": "u32le",
+              "value": {
+                "input": "level"
+              }
+            },
+            {
+              "offset": 12,
+              "encoding": "rel32",
+              "relativeTo": 10,
+              "value": {
+                "codeOffset": 37
+              }
+            },
+            {
+              "offset": 19,
+              "encoding": "u32le",
+              "value": {
+                "originalOffset": 7,
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 25,
+              "encoding": "rel32",
+              "value": {
+                "originalOffset": 13,
+                "read": "rel32"
+              }
+            },
+            {
+              "offset": 33,
+              "encoding": "rel32",
+              "value": {
+                "continuation": true
+              }
+            }
+          ],
+          "when": {
+            "not": {
+              "input": "level",
+              "equals": 4
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

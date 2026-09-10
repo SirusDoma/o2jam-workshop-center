@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "server-video-6",
+  "title": "Video 6 URL",
+  "description": "Change the URL used by video 6.",
+  "category": "Network",
+  "group": "Web services",
+  "order": 51,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Video 6",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "2.33"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 162718,
+              "offset": 37,
+              "signature": "64 89 25 ?? ?? ?? ?? 83 EC 20 8B 0D ?? ?? ?? ?? 56 C7 44 24 08 ?? ?? ?? ?? C7 44 24 0C ?? ?? ?? ?? C7 44 24 10 ?? ?? ?? ?? E8 ?? ?? ?? ?? 85 C0 0F 84 ?? ?? ?? ?? 57 68 93 00 00 00 68 B7 02 00 00 6A 0F 8D 44 24 24 68 E3 01 00 00 50 FF 15 ?? ?? ?? ?? E8 ?? ?? ?? ?? 99 B9 03 00 00 00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

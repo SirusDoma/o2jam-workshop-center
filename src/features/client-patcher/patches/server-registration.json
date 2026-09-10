@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "server-registration",
+  "title": "Registration URL",
+  "description": "Change the URL used by registration.",
+  "category": "Network",
+  "group": "Web services",
+  "order": 51,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Registration",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "2.93"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 129814,
+              "offset": 17,
+              "signature": "C2 10 00 83 7C 24 0C 01 75 ?? 6A 01 6A 00 6A 00 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 00 FF 15 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 6A 0C E8 ?? ?? ?? ?? C2 10 00 83 7C 24 0C 01 75 ?? 8B 0D ?? ?? ?? ?? 6A 0C E8 ?? ?? ?? ?? C2 10 00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

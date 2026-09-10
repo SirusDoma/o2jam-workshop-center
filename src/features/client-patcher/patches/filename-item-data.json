@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "id": "filename-item-data",
+  "title": "ItemData",
+  "category": "Assets",
+  "group": "Metadata",
+  "order": 75,
+  "inputs": [
+    {
+      "id": "filename",
+      "label": "ItemData",
+      "control": "text",
+      "format": "filename",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename"
+          },
+          "references": [
+            {
+              "signature": "E8 ?? ?? ?? ?? 68 98 00 00 00 8D 8D 44 FE FF FF 51 8D 8D E4 FE FF FF E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 95 48 FE FF FF 52 E8 ?? ?? ?? ?? 83 C4 08 85 C0 74 ?? 8D 8D E4 FE FF FF E8 ?? ?? ?? ?? C6 85 7E FC FF FF 00 C7 45 FC FF FF FF FF 8D 8D E4 FE FF FF E8 ?? ?? ?? ?? 8A 85 7E FC FF FF E9 ?? ?? ?? ??",
+              "rva": 1233017,
+              "offset": 29
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "3.82"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename"
+          },
+          "references": [
+            {
+              "signature": "8D 8C 24 DC 02 00 00 68 98 00 00 00 51 8D 4C 24 34 E8 ?? ?? ?? ?? 8D 94 24 E0 02 00 00 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 83 C4 08 85 C0 74 ?? 8D 4C 24 2C E8 ?? ?? ?? ?? 8D 4C 24 2C C7 84 24 7C 03 00 00 FF FF FF FF E8 ?? ?? ?? ?? 32 C0 E9 ?? ?? ?? ?? 8B 84 24 60 03 00 00 6A 00",
+              "rva": 421337,
+              "offset": 30
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "5.89"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename"
+          },
+          "references": [
+            {
+              "signature": "E8 ?? ?? ?? ?? 68 98 00 00 00 8D 8D 44 FE FF FF 51 8D 8D E4 FE FF FF E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 95 48 FE FF FF 52 E8 ?? ?? ?? ?? 83 C4 08 85 C0 74 ?? 8D 8D E4 FE FF FF E8 ?? ?? ?? ?? C6 85 86 FC FF FF 00 C7 45 FC FF FF FF FF 8D 8D E4 FE FF FF E8 ?? ?? ?? ?? 8A 85 86 FC FF FF E9 ?? ?? ?? ??",
+              "rva": 973081,
+              "offset": 29
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "6.65"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename"
+          },
+          "references": [
+            {
+              "signature": "E8 ?? ?? ?? ?? 68 98 00 00 00 8D 8D 44 FE FF FF 51 8D 8D E4 FE FF FF E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 95 48 FE FF FF 52 E8 ?? ?? ?? ?? 83 C4 08 85 C0 74 ?? 8D 8D E4 FE FF FF E8 ?? ?? ?? ?? C6 85 86 FC FF FF 00 C7 45 FC FF FF FF FF 8D 8D E4 FE FF FF E8 ?? ?? ?? ?? 8A 85 86 FC FF FF E9 ?? ?? ?? ??",
+              "rva": 1007017,
+              "offset": 29
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "2.33"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename"
+          },
+          "references": [
+            {
+              "signature": "8D 8C 24 DC 02 00 00 68 98 00 00 00 51 8D 4C 24 34 E8 ?? ?? ?? ?? 8D 94 24 E0 02 00 00 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 83 C4 08 85 C0 74 ?? 8D 4C 24 2C E8 ?? ?? ?? ?? 8D 4C 24 2C C7 84 24 7C 03 00 00 FF FF FF FF E8 ?? ?? ?? ?? 32 C0 E9 ?? ?? ?? ?? 8B 84 24 60 03 00 00 6A 00",
+              "rva": 429689,
+              "offset": 30
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

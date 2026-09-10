@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "server-song-packages",
+  "title": "Song packages URL",
+  "description": "Change the URL used by song packages.",
+  "category": "Network",
+  "group": "Billing",
+  "order": 52,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Song packages",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "3.82"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 277209,
+              "offset": 15,
+              "signature": "5D 75 ?? B8 ?? ?? ?? ?? 53 50 8D 44 24 ?? 68 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 83 C4 10 A3 ?? ?? ?? ?? 85 C0 75 ?? 85 DB 74 ?? 8B 13 6A 01 8B CB FF 52 0C 6A 01 8D 4C 24 ??"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

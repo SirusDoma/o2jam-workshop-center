@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "server-avatar-upload",
+  "title": "Avatar upload URL",
+  "description": "Change the URL used by avatar upload.",
+  "category": "Network",
+  "group": "Downloads",
+  "order": 60,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Avatar upload",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "5.89"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 567818,
+              "offset": 19,
+              "signature": "51 8B 4D EC E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 00 6A 03 68 ?? ?? ?? ?? 8B 4D EC E8 ?? ?? ?? ?? 85 C0 74 ?? 8B 4D EC E8 ?? ?? ?? ?? 89 45 E8 8B 55 E8 52 E8 ?? ?? ?? ?? 83 C4 04 83 F8 03 73 ?? 8B 45 E8"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "id": "server-game-notices",
+  "title": "Game notices URL",
+  "description": "Hostname used to fetch Patch/b.txt for lightboard notices.",
+  "category": "Network",
+  "group": "Web services",
+  "order": 51,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Game notices URL",
+      "control": "text",
+      "format": "hostname",
+      "maxLength": 63
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "3.82"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 374408,
+              "offset": 20,
+              "signature": "E8 ?? ?? ?? ?? 83 EC 10 8D 44 24 42 8B CC 89 64 24 74 50 68 ?? ?? ?? ?? C6 84 24 E4 0A 00 00 01 E8 ?? ?? ?? ?? 8D 8C 24 14 01 00 00 89 9C 24 DC 0A 00 00 E8 ?? ?? ?? ?? 8D 8C 24 E4 00 00 00 C7 84 24 AC 0A 00 00 02 00 00 00 E8 ?? ?? ?? ?? 85 C0 0F 84 ?? ?? ?? ?? 8D 8C 24 9C 01 00 00 51 68 04 01 00 00 FF 15 ?? ?? ?? ??"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "2.33"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 382888,
+              "offset": 20,
+              "signature": "E8 ?? ?? ?? ?? 83 EC 10 8D 44 24 42 8B CC 89 64 24 74 50 68 ?? ?? ?? ?? C6 84 24 E4 0A 00 00 01 E8 ?? ?? ?? ?? 8D 8C 24 14 01 00 00 89 9C 24 DC 0A 00 00 E8 ?? ?? ?? ?? 8D 8C 24 E4 00 00 00 C7 84 24 AC 0A 00 00 02 00 00 00 E8 ?? ?? ?? ?? 85 C0 0F 84 ?? ?? ?? ?? 8D 8C 24 9C 01 00 00 51 68 04 01 00 00 FF 15 ?? ?? ?? ??"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "5.89"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 884884,
+              "offset": 28,
+              "signature": "8B 8D D4 F3 FF FF 89 8D D0 F3 FF FF C6 45 FC 01 83 EC 1C 8B CC 89 A5 04 F5 FF FF 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 89 85 CC F3 FF FF C7 45 FC FF FF FF FF 8D 4D 94 E8 ?? ?? ?? ?? 89 85 C8 F3 FF FF C7 45 FC 02 00 00 00 8D 4D 94 E8 ?? ?? ?? ?? 85 C0 0F 84 ?? ?? ?? ?? 8D 95 D4 F9 FF FF 52 68 04 01 00 00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "6.65"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 916660,
+              "offset": 28,
+              "signature": "8B 8D D4 F3 FF FF 89 8D D0 F3 FF FF C6 45 FC 01 83 EC 1C 8B CC 89 A5 04 F5 FF FF 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 89 85 CC F3 FF FF C7 45 FC FF FF FF FF 8D 4D 94 E8 ?? ?? ?? ?? 89 85 C8 F3 FF FF C7 45 FC 02 00 00 00 8D 4D 94 E8 ?? ?? ?? ?? 85 C0 0F 84 ?? ?? ?? ?? 8D 95 D4 F9 FF FF 52 68 04 01 00 00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1067716,
+              "offset": 28,
+              "signature": "8B 8D D4 F3 FF FF 89 8D D0 F3 FF FF C6 45 FC 01 83 EC 1C 8B CC 89 A5 04 F5 FF FF 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 89 85 CC F3 FF FF C7 45 FC FF FF FF FF 8D 4D 94 E8 ?? ?? ?? ?? 89 85 C8 F3 FF FF C7 45 FC 02 00 00 00 8D 4D 94 E8 ?? ?? ?? ?? 85 C0 0F 84 ?? ?? ?? ?? 8D 95 D4 F9 FF FF 52 68 04 01 00 00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

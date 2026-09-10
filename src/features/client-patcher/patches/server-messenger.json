@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "id": "server-messenger",
+  "title": "Messenger server",
+  "description": "Host for messenger connections.",
+  "category": "Network",
+  "group": "Network services",
+  "order": 49,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Messenger server",
+      "control": "text",
+      "format": "hostname",
+      "maxLength": 63,
+      "group": "Messenger"
+    },
+    {
+      "id": "port",
+      "label": "Messenger port",
+      "control": "number",
+      "default": 7788,
+      "min": 1,
+      "max": 65535,
+      "group": "Messenger",
+      "format": "port"
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1652427,
+              "offset": 23,
+              "signature": "68 03 01 00 00 6A 00 8D 95 9D DD FF FF 52 E8 ?? ?? ?? ?? 83 C4 0C 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 85 6C DD FF FF 8B 85 6C DD FF FF 50 68 ?? ?? ?? ?? 8D 8D A8 DE FF FF E8 ?? ?? ?? ?? C7 85 98 DD FF FF ?? ?? ?? ?? 8B 8D 98 DD FF FF 51 83 EC 1C 8B D4 89 A5 94 DD FF FF"
+            },
+            {
+              "section": ".text",
+              "rva": 1652449,
+              "offset": 27,
+              "signature": "68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 85 6C DD FF FF 8B 85 6C DD FF FF 50 68 ?? ?? ?? ?? 8D 8D A8 DE FF FF E8 ?? ?? ?? ?? C7 85 98 DD FF FF ?? ?? ?? ?? 8B 8D 98 DD FF FF 51 83 EC 1C 8B D4 89 A5 94 DD FF FF 89 95 4C DD FF FF 6A 00 6A 00 8B 8D 4C DD FF FF E8 ?? ?? ?? ?? A1 ?? ?? ?? ??"
+            }
+          ]
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 1652491,
+            "offset": 6,
+            "signature": "C7 85 98 DD FF FF ?? ?? ?? ?? 8B 8D 98 DD FF FF 51 83 EC 1C 8B D4 89 A5 94 DD FF FF 89 95 4C DD FF FF 6A 00 6A 00"
+          },
+          "original": "6C 1E 00 00",
+          "value": {
+            "input": "port"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        }
+      ]
+    }
+  ]
+}

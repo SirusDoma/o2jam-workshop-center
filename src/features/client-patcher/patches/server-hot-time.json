@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "server-hot-time",
+  "title": "Hot Time event URL",
+  "description": "Change the URL used by hot time event.",
+  "category": "Network",
+  "group": "Web services",
+  "order": 50,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Hot Time event",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 794928,
+              "offset": 40,
+              "signature": "8B 8D F4 FC FF FF 8B 91 80 00 00 00 89 95 F8 FC FF FF 8B 85 F8 FC FF FF C7 80 E8 01 00 00 00 00 00 00 E9 ?? ?? ?? ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 85 F0 FC FF FF 8B 8D F0 FC FF FF 51 68 ?? ?? ?? ?? 8D 8D C4 FE FF FF E8 ?? ?? ?? ?? 6A 10 6A 00 8D 95 A4 FD FF FF 52 E8 ?? ?? ?? ?? 83 C4 0C"
+            },
+            {
+              "section": ".text",
+              "rva": 794967,
+              "offset": 27,
+              "signature": "68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 85 F0 FC FF FF 8B 8D F0 FC FF FF 51 68 ?? ?? ?? ?? 8D 8D C4 FE FF FF E8 ?? ?? ?? ?? 6A 10 6A 00 8D 95 A4 FD FF FF 52 E8 ?? ?? ?? ?? 83 C4 0C 83 BD DC FE FF FF 10 72 ?? 8B 85 C8 FE FF FF 89 85 B0 FC FF FF EB ?? 8D 8D C8 FE FF FF"
+            },
+            {
+              "section": ".text",
+              "rva": 1005643,
+              "offset": 39,
+              "signature": "C7 85 48 FE FF FF 00 00 00 00 8B 95 48 FE FF FF 89 95 B8 FE FF FF C6 45 FC 00 8B 85 B8 FE FF FF 89 85 BC FE FF FF 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 85 80 FE FF FF 8B 8D 80 FE FF FF 51 68 ?? ?? ?? ?? 8D 8D C0 FE FF FF E8 ?? ?? ?? ?? 6A 10 6A 00 8D 55 E4 52 E8 ?? ?? ?? ?? 83 C4 0C"
+            },
+            {
+              "section": ".text",
+              "rva": 1005681,
+              "offset": 27,
+              "signature": "68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 85 80 FE FF FF 8B 8D 80 FE FF FF 51 68 ?? ?? ?? ?? 8D 8D C0 FE FF FF E8 ?? ?? ?? ?? 6A 10 6A 00 8D 55 E4 52 E8 ?? ?? ?? ?? 83 C4 0C 83 BD D8 FE FF FF 10 72 ?? 8B 85 C4 FE FF FF 89 85 44 FE FF FF EB ?? 8D 8D C4 FE FF FF"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

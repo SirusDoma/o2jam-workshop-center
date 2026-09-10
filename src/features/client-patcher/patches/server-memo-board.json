@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "server-memo-board",
+  "title": "Memo board URL",
+  "description": "Change the URL used by memo board.",
+  "category": "Network",
+  "group": "Community",
+  "order": 60,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Memo board",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "3.82"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 197192,
+              "offset": 31,
+              "signature": "68 ?? ?? ?? ?? 50 B8 1C 10 00 00 64 89 25 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 84 24 2C 10 00 00 B9 ?? ?? ?? ?? 83 F8 05 89 4C 24 10 77 ?? FF 24 85 ?? ?? ?? ?? 89 4C 24 10 EB ?? C7 44 24 10 ?? ?? ?? ?? EB ?? C7 44 24 10 ?? ?? ?? ?? EB ?? C7 44 24 10 ?? ?? ?? ?? EB ?? C7 44 24 10 ?? ?? ?? ?? EB ??"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

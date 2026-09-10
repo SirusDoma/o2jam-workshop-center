@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "id": "server-game-finder",
+  "title": "Game finder URL",
+  "description": "Change the URL used by game finder.",
+  "category": "Network",
+  "group": "Web services",
+  "order": 50,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Game finder",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "3.82"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 274167,
+              "offset": 22,
+              "signature": "8D 7C 24 39 88 5C 24 38 68 ?? ?? ?? ?? F3 AB 66 AB 8D 4C 24 3C 68 ?? ?? ?? ?? 51 AA E8 ?? ?? ?? ?? 8A 54 24 1F 83 C4 0C 8D 4C 24 14 88 54 24 14 53 E8 ?? ?? ?? ?? 8D 7C 24 38 83 C9 FF 33 C0 6A 01 F2 AE"
+            },
+            {
+              "section": ".text",
+              "rva": 541807,
+              "offset": 19,
+              "signature": "88 5C 24 10 68 ?? ?? ?? ?? F3 AB 66 AB AA 8D 44 24 14 68 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 8D 7C 24 1C 83 C9 FF 33 C0 F2 AE F7 D1 49 51 8D 4C 24 20 55 51 E8 ?? ?? ?? ?? 83 C4 18"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "5.89"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 667854,
+              "offset": 23,
+              "signature": "68 1C 03 00 00 6A 3F 68 72 02 00 00 8D 4D E4 51 FF 15 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 4D C4 E8 ?? ?? ?? ?? C7 45 FC 00 00 00 00 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 45 88 8B 55 88 52 68 ?? ?? ?? ?? 8D 4D C4 E8 ?? ?? ?? ?? 68 28 10 00 00 E8 ?? ?? ?? ??"
+            },
+            {
+              "section": ".text",
+              "rva": 1272196,
+              "offset": 21,
+              "signature": "83 C2 1C 52 E8 ?? ?? ?? ?? 83 C4 0C 85 C0 0F 85 ?? ?? ?? ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 50 8B 45 FC 05 1C 08 00 00 50 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 0C 85 C0 75 ?? 8B 4D FC 83 B9 1C 10 00 00 00 74 ??"
+            },
+            {
+              "section": ".text",
+              "rva": 1272221,
+              "offset": 19,
+              "signature": "E8 ?? ?? ?? ?? 83 C4 04 50 8B 45 FC 05 1C 08 00 00 50 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 0C 85 C0 75 ?? 8B 4D FC 83 B9 1C 10 00 00 00 74 ?? 8B 55 FC C7 82 1C 10 00 00 00 00 00 00 8B 45 FC C7 80 20 10 00 00 00 00 00 00 8B 4D FC E8 ?? ?? ?? ?? 8B 4D FC"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "6.65"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 699592,
+              "offset": 23,
+              "signature": "68 1C 03 00 00 6A 3F 68 72 02 00 00 8D 55 C4 52 FF 15 ?? ?? ?? ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 45 9C 8B 45 9C 50 68 ?? ?? ?? ?? 8D 4D D4 E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 45 8C 8B 4D 8C 51"
+            },
+            {
+              "section": ".text",
+              "rva": 699614,
+              "offset": 21,
+              "signature": "68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 45 9C 8B 45 9C 50 68 ?? ?? ?? ?? 8D 4D D4 E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 45 8C 8B 4D 8C 51 68 ?? ?? ?? ?? 8D 4D D4 E8 ?? ?? ?? ?? 68 28 10 00 00 E8 ?? ?? ?? ?? 83 C4 04"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 612256,
+              "offset": 31,
+              "signature": "8B 85 B8 FE FF FF 83 E8 07 89 85 B8 FE FF FF 8B 8D C0 FE FF FF 83 C1 07 89 8D C0 FE FF FF 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 85 90 FE FF FF 8B 95 90 FE FF FF 52 68 ?? ?? ?? ?? 8D 8D C8 FE FF FF E8 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 75 ?? C7 85 4C FE FF FF 00 00 00 00 EB ?? A1 ?? ?? ?? ?? 2B 05 ?? ?? ?? ??"
+            },
+            {
+              "section": ".text",
+              "rva": 612286,
+              "offset": 27,
+              "signature": "68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 85 90 FE FF FF 8B 95 90 FE FF FF 52 68 ?? ?? ?? ?? 8D 8D C8 FE FF FF E8 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 75 ?? C7 85 4C FE FF FF 00 00 00 00 EB ?? A1 ?? ?? ?? ?? 2B 05 ?? ?? ?? ?? 99 B9 24 00 00 00 F7 F9 89 85 4C FE FF FF 83 BD 4C FE FF FF 00 74 ??"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

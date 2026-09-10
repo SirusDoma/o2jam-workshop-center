@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "id": "filename-abuse-nickname-data",
+  "title": "AbuseData (nicknames)",
+  "category": "Assets",
+  "group": "Metadata",
+  "order": 78,
+  "inputs": [
+    {
+      "id": "filename",
+      "label": "AbuseData (nicknames)",
+      "control": "text",
+      "format": "filename",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "5.89",
+        "imageBase": 4194304,
+        "entryPoint": 1503240,
+        "anchors": [
+          {
+            "rva": 1323536,
+            "bytes": "55 8B EC 83 EC 40 C7 45 F0 00 00 00 00 C7 45 F4"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename"
+          },
+          "references": [
+            {
+              "signature": "8D 45 F4 64 A3 ?? ?? ?? ?? 89 8D 90 FD FF FF 8D 8D E4 FE FF FF E8 ?? ?? ?? ?? C7 45 FC 00 00 00 00 C7 85 3C FE FF FF ?? ?? ?? ?? 66 A1 ?? ?? ?? ?? 66 89 85 40 FE FF FF C7 45 F0 00 00 00 00 C7 85 DC FE FF FF 00 00 00 00 6A 01 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 8D 8D 44 FE FF FF 51 8B 95 3C FE FF FF 52 6A 01 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ??",
+              "rva": 5906,
+              "offset": 39
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "6.65",
+        "imageBase": 4194304,
+        "entryPoint": 1587544,
+        "anchors": [
+          {
+            "rva": 1404336,
+            "bytes": "55 8B EC 83 EC 7C C7 45 E0 00 00 00 00 C7 45 E4"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename"
+          },
+          "references": [
+            {
+              "signature": "8D 45 F4 64 A3 ?? ?? ?? ?? 89 8D 90 FD FF FF 8D 8D E4 FE FF FF E8 ?? ?? ?? ?? C7 45 FC 00 00 00 00 C7 85 3C FE FF FF ?? ?? ?? ?? 66 A1 ?? ?? ?? ?? 66 89 85 40 FE FF FF C7 45 F0 00 00 00 00 C7 85 DC FE FF FF 00 00 00 00 6A 01 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 8D 8D 44 FE FF FF 51 8B 95 3C FE FF FF 52 6A 01 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ??",
+              "rva": 5922,
+              "offset": 39
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02",
+        "imageBase": 4194304,
+        "entryPoint": 2077624,
+        "anchors": [
+          {
+            "rva": 1758032,
+            "bytes": "55 8B EC 83 EC 78 C7 45 E4 00 00 00 00 C7 45 E8"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename"
+          },
+          "references": [
+            {
+              "signature": "8D 45 F4 64 A3 ?? ?? ?? ?? 89 8D 90 FD FF FF 8D 8D E4 FE FF FF E8 ?? ?? ?? ?? C7 45 FC 00 00 00 00 C7 85 3C FE FF FF ?? ?? ?? ?? 66 A1 ?? ?? ?? ?? 66 89 85 40 FE FF FF C7 45 F0 00 00 00 00 C7 85 DC FE FF FF 00 00 00 00 6A 01 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 8D 8D 44 FE FF FF 51 8B 95 3C FE FF FF 52 6A 01 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ??",
+              "rva": 11266,
+              "offset": 39
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

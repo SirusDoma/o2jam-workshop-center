@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "server-download-2",
+  "title": "Download server 2",
+  "description": "Alternate server for client downloads.",
+  "category": "Network",
+  "group": "Downloads",
+  "order": 55,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Download server 2",
+      "control": "text",
+      "format": "hostname",
+      "maxLength": 63
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1013581,
+              "offset": 25,
+              "signature": "E8 ?? ?? ?? ?? C7 45 FC FF FF FF FF 6A 00 6A 01 8D 4D D8 E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 4D BC E8 ?? ?? ?? ?? C7 45 FC 01 00 00 00 8D 4D BC 51 8B 8D B0 FE FF FF 81 C1 DC 00 00 00 E8 ?? ?? ?? ?? C7 45 FC FF FF FF FF 6A 00 6A 01 8D 4D BC E8 ?? ?? ?? ?? 8B 8D B0 FE FF FF"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "6.65"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 862909,
+              "offset": 25,
+              "signature": "E8 ?? ?? ?? ?? C7 45 FC FF FF FF FF 6A 00 6A 01 8D 4D D8 E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 4D BC E8 ?? ?? ?? ?? C7 45 FC 01 00 00 00 8D 4D BC 51 8B 8D B0 FE FF FF 81 C1 DC 00 00 00 E8 ?? ?? ?? ?? C7 45 FC FF FF FF FF 6A 00 6A 01 8D 4D BC E8 ?? ?? ?? ?? 8B 8D B0 FE FF FF"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "5.89"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 830637,
+              "offset": 25,
+              "signature": "E8 ?? ?? ?? ?? C7 45 FC FF FF FF FF 6A 00 6A 01 8D 4D D8 E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 4D BC E8 ?? ?? ?? ?? C7 45 FC 01 00 00 00 8D 4D BC 51 8B 8D 6C FE FF FF 81 C1 DC 00 00 00 E8 ?? ?? ?? ?? C7 45 FC FF FF FF FF 6A 00 6A 01 8D 4D BC E8 ?? ?? ?? ?? 68 ?? ?? ?? ??"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

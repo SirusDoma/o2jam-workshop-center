@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "id": "server-gateway-fallback",
+  "title": "Gateway fallback",
+  "description": "Default gateway when no override is supplied.",
+  "category": "Network",
+  "group": "Network services",
+  "order": 49,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Gateway fallback",
+      "control": "text",
+      "format": "hostname",
+      "maxLength": 63,
+      "group": "Gateway fallback"
+    },
+    {
+      "id": "port",
+      "label": "Gateway fallback port",
+      "control": "number",
+      "default": 15010,
+      "min": 1,
+      "max": 65535,
+      "group": "Gateway fallback",
+      "format": "port"
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "5.89"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1318414,
+              "offset": 23,
+              "signature": "89 95 68 FB FF FF 8B 85 68 FB FF FF 50 6A 40 8D 8D 7C FC FF FF 51 68 ?? ?? ?? ?? 8D 95 78 FC FF FF 52 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 83 BD E8 FD FF FF 10 72 ?? 8B 85 D4 FD FF FF 89 85 64 FB FF FF EB ?? 8D 8D D4 FD FF FF 89 8D 64 FB FF FF 8B 95 64 FB FF FF 52 6A 0C"
+            },
+            {
+              "section": ".text",
+              "rva": 1319455,
+              "offset": 27,
+              "signature": "68 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 81 C1 14 05 00 00 51 E8 ?? ?? ?? ?? 83 C4 08 68 ?? ?? ?? ?? 8D 8D B0 FC FF FF E8 ?? ?? ?? ?? C6 45 FC 01 8D 95 B0 FC FF FF 52 8B 0D ?? ?? ?? ?? 83 C1 50 E8 ?? ?? ?? ?? C6 45 FC 00 6A 00 6A 01 8D 8D B0 FC FF FF E8 ?? ?? ?? ?? C7 85 AC FC FF FF ?? ?? ?? ??"
+            },
+            {
+              "section": ".text",
+              "rva": 1319826,
+              "offset": 35,
+              "signature": "C7 85 4C FC FF FF ?? ?? ?? ?? 8D 85 4C FC FF FF 50 8B 0D ?? ?? ?? ?? 81 C1 E0 00 00 00 E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 8D 30 FC FF FF E8 ?? ?? ?? ?? C6 45 FC 05 8D 8D 30 FC FF FF 51 8B 0D ?? ?? ?? ?? 81 C1 90 00 00 00 E8 ?? ?? ?? ?? C6 45 FC 00 6A 00 6A 01 8D 8D 30 FC FF FF E8 ?? ?? ?? ?? C7 85 2C FC FF FF ?? ?? ?? ??"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "port"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1318494,
+              "signature": "8B 95 64 FB FF FF 52 6A 0C 8D 85 BC FC FF FF 50 68 ?? ?? ?? ?? 8D 8D 70 FC FF FF 51 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 8D 95 7C FC FF FF 52",
+              "offset": 17
+            }
+          ]
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 1319541,
+            "offset": 6,
+            "signature": "C7 85 AC FC FF FF ?? ?? ?? ?? 8D 85 AC FC FF FF 50 8B 0D ?? ?? ?? ?? 81 C1 B0 00 00 00 E8 ?? ?? ?? ??"
+          },
+          "original": "A2 3A 00 00",
+          "value": {
+            "input": "port"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 1319923,
+            "offset": 6,
+            "signature": "C7 85 2C FC FF FF ?? ?? ?? ?? 8D 95 2C FC FF FF 52 8B 0D ?? ?? ?? ?? 81 C1 F0 00 00 00 E8 ?? ?? ?? ??"
+          },
+          "original": "A2 3A 00 00",
+          "value": {
+            "input": "port"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "6.65"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1397177,
+              "offset": 23,
+              "signature": "89 85 44 F9 FF FF 8B 8D 44 F9 FF FF 51 6A 40 8D 95 74 FA FF FF 52 68 ?? ?? ?? ?? 8D 85 70 FA FF FF 50 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 83 BD E8 FB FF FF 10 72 ?? 8B 8D D4 FB FF FF 89 8D 40 F9 FF FF EB ?? 8D 95 D4 FB FF FF 89 95 40 F9 FF FF 8B 85 40 F9 FF FF 50 6A 0C"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "port"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1397257,
+              "signature": "8B 85 40 F9 FF FF 50 6A 0C 8D 8D B8 FA FF FF 51 68 ?? ?? ?? ?? 8D 95 68 FA FF FF 52 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 8D 85 74 FA FF FF 50",
+              "offset": 17
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1750729,
+              "offset": 23,
+              "signature": "89 85 68 F9 FF FF 8B 8D 68 F9 FF FF 51 6A 40 8D 95 74 FA FF FF 52 68 ?? ?? ?? ?? 8D 85 70 FA FF FF 50 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 83 BD E8 FB FF FF 10 72 ?? 8B 8D D4 FB FF FF 89 8D 64 F9 FF FF EB ?? 8D 95 D4 FB FF FF 89 95 64 F9 FF FF 8B 85 64 F9 FF FF 50 6A 0C"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "port"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1750809,
+              "signature": "8B 85 64 F9 FF FF 50 6A 0C 8D 8D B8 FA FF FF 51 68 ?? ?? ?? ?? 8D 95 68 FA FF FF 52 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 8D 85 74 FA FF FF 50",
+              "offset": 17
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

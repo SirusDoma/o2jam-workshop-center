@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "id": "server-download-fallback",
+  "title": "Download server fallback",
+  "description": "Fallback host for client downloads.",
+  "category": "Network",
+  "group": "Downloads",
+  "order": 55,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Download server fallback",
+      "control": "text",
+      "format": "hostname",
+      "maxLength": 63
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "3.10"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 394556,
+              "offset": 38,
+              "signature": "C7 80 E4 08 00 00 15 00 00 00 8B 0D ?? ?? ?? ?? 8D BC 24 88 01 00 00 8D 91 E4 04 00 00 EB ?? 8B 0D ?? ?? ?? ?? BF ?? ?? ?? ?? 33 C0 8D 91 E4 00 00 00 83 C9 FF F2 AE F7 D1 2B F9 8B C1 8B F7 8B FA C1 E9 02 F3 A5 8B C8 83 E1 03 F3 A4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "3.82"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 569903,
+              "offset": 38,
+              "signature": "C7 80 2C 11 00 00 15 00 00 00 8B 0D ?? ?? ?? ?? 8D BC 24 88 01 00 00 8D 91 1C 05 00 00 EB ?? 8B 0D ?? ?? ?? ?? BF ?? ?? ?? ?? 33 C0 8D 91 1C 01 00 00 83 C9 FF F2 AE F7 D1 2B F9 8B C1 8B F7 8B FA C1 E9 02 F3 A5 8B C8 83 E1 03 F3 A4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "5.89"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1318681,
+              "offset": 24,
+              "signature": "83 C4 08 8D 95 EC FD FF FF 52 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 08 68 ?? ?? ?? ?? A1 ?? ?? ?? ?? 05 14 01 00 00 50 E8 ?? ?? ?? ?? 83 C4 08 68 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 81 C1 14 05 00 00 51 E8 ?? ?? ?? ?? 83 C4 08 C7 45 FC FF FF FF FF 6A 00 6A 01"
+            },
+            {
+              "section": ".text",
+              "rva": 1319408,
+              "offset": 24,
+              "signature": "83 C4 08 8D 95 EC FD FF FF 52 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 08 68 ?? ?? ?? ?? A1 ?? ?? ?? ?? 05 14 01 00 00 50 E8 ?? ?? ?? ?? 83 C4 08 68 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 81 C1 14 05 00 00 51 E8 ?? ?? ?? ?? 83 C4 08 68 ?? ?? ?? ?? 8D 8D B0 FC FF FF E8 ?? ?? ?? ??"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "6.65"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1397773,
+              "offset": 24,
+              "signature": "83 C4 08 8D 95 EC FB FF FF 52 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 08 68 ?? ?? ?? ?? A1 ?? ?? ?? ?? 05 14 01 00 00 50 E8 ?? ?? ?? ?? 83 C4 08 68 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 81 C1 14 05 00 00 51 E8 ?? ?? ?? ?? 83 C4 08 C7 45 FC FF FF FF FF 6A 00 6A 01"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1751400,
+              "offset": 24,
+              "signature": "83 C4 08 8D 8D EC FB FF FF 51 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 08 68 ?? ?? ?? ?? 8B 15 ?? ?? ?? ?? 81 C2 F4 00 00 00 52 E8 ?? ?? ?? ?? 83 C4 08 68 ?? ?? ?? ?? A1 ?? ?? ?? ?? 05 F4 04 00 00 50 E8 ?? ?? ?? ?? 83 C4 08 C7 45 FC FF FF FF FF 6A 00 6A 01"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

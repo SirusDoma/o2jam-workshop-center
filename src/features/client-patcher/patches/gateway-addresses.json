@@ -1,0 +1,339 @@
+{
+  "schemaVersion": 1,
+  "id": "gateway-addresses",
+  "title": "Gateway servers",
+  "category": "Network",
+  "group": "Gateway servers",
+  "order": 53,
+  "inputs": [
+    {
+      "id": "host-1",
+      "label": "Gateway 1 IP",
+      "control": "text",
+      "format": "ipv4",
+      "maxLength": 15,
+      "group": "Gateway 1"
+    },
+    {
+      "id": "port-1",
+      "label": "Gateway 1 port",
+      "control": "number",
+      "default": 15010,
+      "min": 1,
+      "max": 65535,
+      "group": "Gateway 1",
+      "format": "port"
+    },
+    {
+      "id": "host-2",
+      "label": "Gateway 2 IP",
+      "control": "text",
+      "format": "ipv4",
+      "maxLength": 15,
+      "group": "Gateway 2"
+    },
+    {
+      "id": "port-2",
+      "label": "Gateway 2 port",
+      "control": "number",
+      "default": 15011,
+      "min": 1,
+      "max": 65535,
+      "group": "Gateway 2",
+      "format": "port"
+    },
+    {
+      "id": "host-3",
+      "label": "Gateway 3 IP",
+      "control": "text",
+      "format": "ipv4",
+      "maxLength": 15,
+      "group": "Gateway 3"
+    },
+    {
+      "id": "port-3",
+      "label": "Gateway 3 port",
+      "control": "number",
+      "default": 15012,
+      "min": 1,
+      "max": 65535,
+      "group": "Gateway 3",
+      "format": "port"
+    },
+    {
+      "id": "host-4",
+      "label": "Gateway 4 IP",
+      "control": "text",
+      "format": "ipv4",
+      "maxLength": 15,
+      "group": "Gateway 4"
+    },
+    {
+      "id": "port-4",
+      "label": "Gateway 4 port",
+      "control": "number",
+      "default": 15013,
+      "min": 1,
+      "max": 65535,
+      "group": "Gateway 4",
+      "format": "port"
+    },
+    {
+      "id": "host-5",
+      "label": "Gateway 5 IP",
+      "control": "text",
+      "format": "ipv4",
+      "maxLength": 15,
+      "group": "Gateway 5"
+    },
+    {
+      "id": "port-5",
+      "label": "Gateway 5 port",
+      "control": "number",
+      "default": 15014,
+      "min": 1,
+      "max": 65535,
+      "group": "Gateway 5",
+      "format": "port"
+    },
+    {
+      "id": "host-6",
+      "label": "Gateway 6 IP",
+      "control": "text",
+      "format": "ipv4",
+      "maxLength": 15,
+      "group": "Gateway 6"
+    },
+    {
+      "id": "port-6",
+      "label": "Gateway 6 port",
+      "control": "number",
+      "default": 15015,
+      "min": 1,
+      "max": 65535,
+      "group": "Gateway 6",
+      "format": "port"
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "2.33",
+        "imageBase": 4194304,
+        "entryPoint": 772352,
+        "anchors": [
+          {
+            "rva": 587536,
+            "bytes": "53 8B 5C 24 08 55 56 33 F6 57 56 53 68 A0 F6 48"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "host-1"
+          },
+          "references": [
+            {
+              "signature": "8A 44 24 3E 83 C4 2C 8D 4C 24 18 88 44 24 18 53 E8 ?? ?? ?? ?? BF ?? ?? ?? ?? 8B CD 33 C0 F2 AE F7 D1 49 51 68 ?? ?? ?? ?? 8D 4C 24 20 E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 8D 54 24 18 83 C1 40 52 89 9C 24 A4 05 00 00",
+              "rva": 585329,
+              "offset": 22
+            },
+            {
+              "signature": "8B CD 33 C0 F2 AE F7 D1 49 51 68 ?? ?? ?? ?? 8D 4C 24 20 E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 8D 54 24 18 83 C1 40 52 89 9C 24 A4 05 00 00 8B 41 08 50 E8 ?? ?? ?? ?? 6A 01 8D 4C 24 1C 89 AC 24 A4 05 00 00 E8 ?? ?? ?? ??",
+              "rva": 585355,
+              "offset": 11
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "host-2"
+          },
+          "references": [
+            {
+              "signature": "E8 ?? ?? ?? ?? 8A 44 24 12 53 8D 4C 24 1C 88 44 24 1C E8 ?? ?? ?? ?? BF ?? ?? ?? ?? 8B CD 33 C0 F2 AE F7 D1 49 51 68 ?? ?? ?? ?? 8D 4C 24 20 E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? C7 84 24 A0 05 00 00 01 00 00 00 8B 41 58 83 C1 50 8D 54 24 18",
+              "rva": 585457,
+              "offset": 24
+            },
+            {
+              "signature": "8B CD 33 C0 F2 AE F7 D1 49 51 68 ?? ?? ?? ?? 8D 4C 24 20 E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? C7 84 24 A0 05 00 00 01 00 00 00 8B 41 58 83 C1 50 8D 54 24 18 52 6A 01 50 E8 ?? ?? ?? ?? 6A 01 8D 4C 24 1C 89 AC 24 A4 05 00 00",
+              "rva": 585485,
+              "offset": 11
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "host-3"
+          },
+          "references": [
+            {
+              "signature": "E8 ?? ?? ?? ?? 8A 44 24 12 53 8D 4C 24 1C 88 44 24 1C E8 ?? ?? ?? ?? BF ?? ?? ?? ?? 8B CD 33 C0 6A 01 F2 AE F7 D1 49 8B E9 8D 4C 24 1C 55 E8 ?? ?? ?? ?? 84 C0 74 ?? 8B 7C 24 1C 8B CD",
+              "rva": 585593,
+              "offset": 24
+            },
+            {
+              "signature": "E8 ?? ?? ?? ?? 84 C0 74 ?? 8B 7C 24 1C 8B CD 8B D1 BE ?? ?? ?? ?? C1 E9 02 F3 A5 8B CA 55 83 E1 03 F3 A4 8D 4C 24 1C E8 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8D 54 24 18 52 6A 01 8D 48 60 C7 84 24 A8 05 00 00 02 00 00 00",
+              "rva": 585639,
+              "offset": 18
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "host-4"
+          },
+          "references": [
+            {
+              "signature": "E8 ?? ?? ?? ?? 8A 44 24 12 53 8D 4C 24 1C 88 44 24 1C E8 ?? ?? ?? ?? BF ?? ?? ?? ?? 83 C9 FF 33 C0 6A 01 F2 AE F7 D1 49 8B E9 8D 4C 24 1C 55 E8 ?? ?? ?? ?? 84 C0 74 ?? 8B 7C 24 1C 8B CD",
+              "rva": 585770,
+              "offset": 24
+            },
+            {
+              "signature": "E8 ?? ?? ?? ?? 84 C0 74 ?? 8B 7C 24 1C 8B CD 8B D1 BE ?? ?? ?? ?? C1 E9 02 F3 A5 8B CA 55 83 E1 03 F3 A4 8D 4C 24 1C E8 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8D 54 24 18 52 6A 01 8D 48 70 C7 84 24 A8 05 00 00 03 00 00 00",
+              "rva": 585817,
+              "offset": 18
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "host-5"
+          },
+          "references": [
+            {
+              "signature": "E8 ?? ?? ?? ?? 8A 44 24 12 53 8D 4C 24 1C 88 44 24 1C E8 ?? ?? ?? ?? BF ?? ?? ?? ?? 83 C9 FF 33 C0 6A 01 F2 AE F7 D1 49 8B E9 8D 4C 24 1C 55 E8 ?? ?? ?? ?? 84 C0 74 ?? 8B 7C 24 1C 8B CD",
+              "rva": 585948,
+              "offset": 24
+            },
+            {
+              "signature": "E8 ?? ?? ?? ?? 84 C0 74 ?? 8B 7C 24 1C 8B CD 8B D1 BE ?? ?? ?? ?? C1 E9 02 F3 A5 8B CA 55 83 E1 03 F3 A4 8D 4C 24 1C E8 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8D 54 24 18 52 6A 01 8D 88 80 00 00 00 C7 84 24 A8 05 00 00 04 00 00 00",
+              "rva": 585995,
+              "offset": 18
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "host-6"
+          },
+          "references": [
+            {
+              "signature": "E8 ?? ?? ?? ?? 8A 44 24 12 53 8D 4C 24 1C 88 44 24 1C E8 ?? ?? ?? ?? BF ?? ?? ?? ?? 83 C9 FF 33 C0 6A 01 F2 AE F7 D1 49 8B E9 8D 4C 24 1C 55 E8 ?? ?? ?? ?? 84 C0 74 ?? 8B 7C 24 1C 8B CD",
+              "rva": 586129,
+              "offset": 24
+            },
+            {
+              "signature": "E8 ?? ?? ?? ?? 84 C0 74 ?? 8B 7C 24 1C 8B CD 8B D1 BE ?? ?? ?? ?? C1 E9 02 F3 A5 8B CA 55 83 E1 03 F3 A4 8D 4C 24 1C E8 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8D 54 24 18 52 6A 01 8D 88 90 00 00 00 C7 84 24 A8 05 00 00 05 00 00 00",
+              "rva": 586176,
+              "offset": 18
+            }
+          ]
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 585409,
+            "offset": 31,
+            "signature": "6A 01 8D 4C 24 1C 89 AC 24 A4 05 00 00 E8 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8D 54 24 14 C7 44 24 14 ?? ?? ?? ?? 52 8D 88 A0 00 00 00 6A 01 8B 41 08 50 E8 ?? ?? ?? ?? 8A 44 24 12 53 8D 4C 24 1C 88 44 24 1C E8 ?? ?? ?? ?? BF ?? ?? ?? ?? 8B CD 33 C0"
+          },
+          "original": "A2 3A 00 00",
+          "value": {
+            "input": "port-1"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 585545,
+            "offset": 31,
+            "signature": "6A 01 8D 4C 24 1C 89 AC 24 A4 05 00 00 E8 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8D 54 24 14 C7 44 24 14 ?? ?? ?? ?? 52 8D 88 B0 00 00 00 6A 01 8B 41 08 50 E8 ?? ?? ?? ?? 8A 44 24 12 53 8D 4C 24 1C 88 44 24 1C E8 ?? ?? ?? ?? BF ?? ?? ?? ?? 8B CD 33 C0"
+          },
+          "original": "A3 3A 00 00",
+          "value": {
+            "input": "port-2"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 585718,
+            "offset": 35,
+            "signature": "6A 01 8D 4C 24 1C C7 84 24 A4 05 00 00 FF FF FF FF E8 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8D 54 24 14 C7 44 24 14 ?? ?? ?? ?? 52 8D 88 C0 00 00 00 6A 01 8B 41 08 50 E8 ?? ?? ?? ?? 8A 44 24 12 53 8D 4C 24 1C 88 44 24 1C E8 ?? ?? ?? ?? BF ?? ?? ?? ?? 83 C9 FF 33 C0"
+          },
+          "original": "A4 3A 00 00",
+          "value": {
+            "input": "port-3"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 585896,
+            "offset": 35,
+            "signature": "6A 01 8D 4C 24 1C C7 84 24 A4 05 00 00 FF FF FF FF E8 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8D 54 24 14 C7 44 24 14 ?? ?? ?? ?? 52 8D 88 D0 00 00 00 6A 01 8B 41 08 50 E8 ?? ?? ?? ?? 8A 44 24 12 53 8D 4C 24 1C 88 44 24 1C E8 ?? ?? ?? ?? BF ?? ?? ?? ?? 83 C9 FF 33 C0"
+          },
+          "original": "A5 3A 00 00",
+          "value": {
+            "input": "port-4"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 586077,
+            "offset": 35,
+            "signature": "6A 01 8D 4C 24 1C C7 84 24 A4 05 00 00 FF FF FF FF E8 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8D 54 24 14 C7 44 24 14 ?? ?? ?? ?? 52 8D 88 E0 00 00 00 6A 01 8B 41 08 50 E8 ?? ?? ?? ?? 8A 44 24 12 53 8D 4C 24 1C 88 44 24 1C E8 ?? ?? ?? ?? BF ?? ?? ?? ?? 83 C9 FF 33 C0"
+          },
+          "original": "A6 3A 00 00",
+          "value": {
+            "input": "port-5"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 586258,
+            "offset": 35,
+            "signature": "6A 01 8D 4C 24 1C C7 84 24 A4 05 00 00 FF FF FF FF E8 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8D 54 24 14 C7 44 24 14 ?? ?? ?? ?? 52 8D 88 F0 00 00 00 6A 01 8B 41 08 50 E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 01 68 01 00 1F 00 FF 15 ?? ?? ?? ?? 3B C3 75 ?? 53 68 ?? ?? ?? ??"
+          },
+          "original": "A7 3A 00 00",
+          "value": {
+            "input": "port-6"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        }
+      ]
+    }
+  ]
+}

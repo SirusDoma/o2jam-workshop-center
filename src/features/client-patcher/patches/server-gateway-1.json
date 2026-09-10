@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "server-gateway-1",
+  "title": "Gateway 1",
+  "description": "Gateway server for planet 1.",
+  "category": "Network",
+  "group": "Network services",
+  "order": 49,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Gateway 1",
+      "control": "text",
+      "format": "hostname",
+      "maxLength": 63,
+      "group": "Gateway 1"
+    },
+    {
+      "id": "port",
+      "label": "Gateway 1 port",
+      "control": "number",
+      "default": 15011,
+      "min": 1,
+      "max": 65535,
+      "group": "Gateway 1",
+      "format": "port"
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "5.89"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1319635,
+              "offset": 35,
+              "signature": "C7 85 8C FC FF FF ?? ?? ?? ?? 8D 95 8C FC FF FF 52 8B 0D ?? ?? ?? ?? 81 C1 C0 00 00 00 E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 8D 70 FC FF FF E8 ?? ?? ?? ?? C6 45 FC 03 8D 85 70 FC FF FF 50 8B 0D ?? ?? ?? ?? 83 C1 70 E8 ?? ?? ?? ?? C6 45 FC 00 6A 00 6A 01 8D 8D 70 FC FF FF E8 ?? ?? ?? ?? C7 85 6C FC FF FF ?? ?? ?? ??"
+            }
+          ]
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 1319729,
+            "offset": 6,
+            "signature": "C7 85 6C FC FF FF ?? ?? ?? ?? 8D 8D 6C FC FF FF 51 8B 0D ?? ?? ?? ?? 81 C1 D0 00 00 00 E8 ?? ?? ?? ??"
+          },
+          "original": "A3 3A 00 00",
+          "value": {
+            "input": "port"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        }
+      ]
+    }
+  ]
+}

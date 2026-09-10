@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "id": "multiple-instances",
+  "title": "Multiple instances",
+  "description": "Run more than one client at a time by disabling the mutex check.",
+  "category": "Startup",
+  "order": 10,
+  "inputs": [
+    {
+      "id": "enabled",
+      "label": "Allow multiple instances",
+      "control": "checkbox",
+      "default": false
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "2.93",
+        "imageBase": 4194304,
+        "entryPoint": 367482,
+        "anchors": [
+          {
+            "rva": 340736,
+            "bytes": "81 EC 00 01 00 00 55 56 57 33 F6 68 28 4F 47 00"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 340768,
+            "section": ".text",
+            "signature": "3D B7 00 00 00 ?? ?? B9 3F 00 00 00 33 C0 8D 7C 24 0D C6",
+            "offset": 5
+          },
+          "original": "75 47",
+          "replacement": "EB 47",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "3.00",
+        "imageBase": 4194304,
+        "entryPoint": 703884,
+        "anchors": [
+          {
+            "rva": 519376,
+            "bytes": "81 EC 00 01 00 00 53 55 56 57 33 DB 68 28 58 4D"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 519411,
+            "section": ".text",
+            "signature": "3D B7 00 00 00 ?? ?? B9 3F 00 00 00 33 C0 8D 7C 24 11 88",
+            "offset": 5
+          },
+          "original": "75 47",
+          "replacement": "EB 47",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "3.10",
+        "imageBase": 4194304,
+        "entryPoint": 421258,
+        "anchors": [
+          {
+            "rva": 395296,
+            "bytes": "53 56 33 F6 68 18 85 48 00 56 56 FF 15 BC 91 47"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 395321,
+            "section": ".text",
+            "signature": "3D B7 00 00 00 ?? ?? 56 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 56",
+            "offset": 5
+          },
+          "original": "75 19",
+          "replacement": "EB 19",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "3.82",
+        "imageBase": 4194304,
+        "entryPoint": 754940,
+        "anchors": [
+          {
+            "rva": 570656,
+            "bytes": "53 56 33 F6 68 44 40 4E 00 56 56 FF 15 44 D1 4C"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 570681,
+            "section": ".text",
+            "signature": "3D B7 00 00 00 ?? ?? 56 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 56",
+            "offset": 5
+          },
+          "original": "75 19",
+          "replacement": "EB 19",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "2.33",
+        "imageBase": 4194304,
+        "entryPoint": 772352,
+        "anchors": [
+          {
+            "rva": 587536,
+            "bytes": "53 8B 5C 24 08 55 56 33 F6 57 56 53 68 A0 F6 48"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 587586,
+            "section": ".text",
+            "signature": "3D B7 00 00 00 ?? ?? 56 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 56",
+            "offset": 5
+          },
+          "original": "75 1B",
+          "replacement": "EB 1B",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "5.89",
+        "imageBase": 4194304,
+        "entryPoint": 1503240,
+        "anchors": [
+          {
+            "rva": 1323536,
+            "bytes": "55 8B EC 83 EC 40 C7 45 F0 00 00 00 00 C7 45 F4"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 1323623,
+            "section": ".text",
+            "signature": "3D B7 00 00 00 ?? ?? 6A 00 68 ?? ?? ?? ?? 68 ?? ?? ?? ??",
+            "offset": 5
+          },
+          "original": "75 1B",
+          "replacement": "EB 1B",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "6.65",
+        "imageBase": 4194304,
+        "entryPoint": 1587544,
+        "anchors": [
+          {
+            "rva": 1404336,
+            "bytes": "55 8B EC 83 EC 7C C7 45 E0 00 00 00 00 C7 45 E4"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 1404450,
+            "section": ".text",
+            "signature": "3D B7 00 00 00 ?? ?? 6A 00 68 ?? ?? ?? ?? 68 ?? ?? ?? ??",
+            "offset": 5
+          },
+          "original": "75 1B",
+          "replacement": "EB 1B",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02",
+        "imageBase": 4194304,
+        "entryPoint": 2077624,
+        "anchors": [
+          {
+            "rva": 1758032,
+            "bytes": "55 8B EC 83 EC 78 C7 45 E4 00 00 00 00 C7 45 E8"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 1758124,
+            "section": ".text",
+            "signature": "3D B7 00 00 00 ?? ?? 6A 00 68 ?? ?? ?? ?? 68 ?? ?? ?? ??",
+            "offset": 5
+          },
+          "original": "75 1B",
+          "replacement": "EB 1B",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    }
+  ]
+}

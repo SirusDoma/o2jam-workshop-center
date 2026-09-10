@@ -1,0 +1,221 @@
+{
+  "schemaVersion": 1,
+  "id": "relay-addresses",
+  "title": "P2P UDP relay servers",
+  "description": "Relay IP addresses and ports used for Live Mode via P2P UDP punching hole.",
+  "category": "Network",
+  "group": "P2P UDP relay servers",
+  "order": 48,
+  "inputs": [
+    {
+      "id": "host-1",
+      "label": "Relay 1 IP",
+      "control": "text",
+      "format": "ipv4",
+      "maxLength": 15,
+      "group": "Relay 1"
+    },
+    {
+      "id": "port-1",
+      "label": "Relay 1 port",
+      "control": "number",
+      "min": 1,
+      "max": 65535,
+      "group": "Relay 1",
+      "default": 39311,
+      "format": "port"
+    },
+    {
+      "id": "host-2",
+      "label": "Relay 2 & 3 IP",
+      "control": "text",
+      "format": "ipv4",
+      "maxLength": 15,
+      "group": "Relay 2 & 3"
+    },
+    {
+      "id": "port-2",
+      "label": "Relay 2 port",
+      "control": "number",
+      "min": 1,
+      "max": 65535,
+      "group": "Relay 2 & 3",
+      "default": 39312,
+      "format": "port"
+    },
+    {
+      "id": "port-3",
+      "label": "Relay 3 port",
+      "control": "number",
+      "min": 1,
+      "max": 65535,
+      "group": "Relay 2 & 3",
+      "default": 39311,
+      "format": "port"
+    },
+    {
+      "id": "host-3",
+      "label": "Relay 4 & 5 IP",
+      "control": "text",
+      "format": "ipv4",
+      "maxLength": 15,
+      "group": "Relay 4 & 5"
+    },
+    {
+      "id": "port-4",
+      "label": "Relay 4 port",
+      "control": "number",
+      "min": 1,
+      "max": 65535,
+      "group": "Relay 4 & 5",
+      "default": 39312,
+      "format": "port"
+    },
+    {
+      "id": "port-5",
+      "label": "Relay 5 port",
+      "control": "number",
+      "min": 1,
+      "max": 65535,
+      "group": "Relay 4 & 5",
+      "default": 39311,
+      "format": "port"
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "8.02",
+        "imageBase": 4194304,
+        "entryPoint": 2077624,
+        "anchors": [
+          {
+            "rva": 1758032,
+            "bytes": "55 8B EC 83 EC 78 C7 45 E4 00 00 00 00 C7 45 E8"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "host-1"
+          },
+          "references": [
+            {
+              "signature": "55 8B EC 83 EC 30 89 4D D4 C7 45 F4 00 00 00 00 C7 45 F0 00 00 00 00 C7 45 E4 ?? ?? ?? ?? C7 45 E8 ?? ?? ?? ?? C7 45 EC ?? ?? ?? ?? 8B 45 08 89 45 D0 81 7D D0 11 10 20 8C 77 ?? 81 7D D0 11 10 20 8C 74 ?? 8B 4D D0 81 E9 02 10 20 19 89 4D D0 83 7D D0 04 77 ?? 8B 55 D0",
+              "rva": 1623744,
+              "offset": 26
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "host-2"
+          },
+          "references": [
+            {
+              "signature": "8B EC 83 EC 30 89 4D D4 C7 45 F4 00 00 00 00 C7 45 F0 00 00 00 00 C7 45 E4 ?? ?? ?? ?? C7 45 E8 ?? ?? ?? ?? C7 45 EC ?? ?? ?? ?? 8B 45 08 89 45 D0 81 7D D0 11 10 20 8C 77 ?? 81 7D D0 11 10 20 8C 74 ?? 8B 4D D0 81 E9 02 10 20 19 89 4D D0 83 7D D0 04 77 ?? 8B 55 D0 FF 24 95 ?? ?? ?? ??",
+              "rva": 1623745,
+              "offset": 32
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "host-3"
+          },
+          "references": [
+            {
+              "signature": "83 EC 30 89 4D D4 C7 45 F4 00 00 00 00 C7 45 F0 00 00 00 00 C7 45 E4 ?? ?? ?? ?? C7 45 E8 ?? ?? ?? ?? C7 45 EC ?? ?? ?? ?? 8B 45 08 89 45 D0 81 7D D0 11 10 20 8C 77 ?? 81 7D D0 11 10 20 8C 74 ?? 8B 4D D0 81 E9 02 10 20 19 89 4D D0 83 7D D0 04 77 ?? 8B 55 D0 FF 24 95 ?? ?? ?? ?? 8B 45 D0",
+              "rva": 1623747,
+              "offset": 37
+            }
+          ]
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 1623867,
+            "offset": 3,
+            "signature": "C7 45 F0 ?? ?? ?? ?? C7 45 F4 00 00 00 00 EB 3E C7 45 F0 ?? ?? ?? ?? C7 45 F4 01 00 00 00 EB 2E C7 45 F0 ?? ?? ?? ?? C7 45 F4 01 00 00 00 EB 1E C7 45 F0 ?? ?? ?? ?? C7 45 F4 02 00 00 00 EB 0E C7 45 F0 ?? ?? ?? ?? C7 45 F4 02 00 00 00 66 8B 55 F0 52 8B 45 F4 8B 4C 85"
+          },
+          "original": "8F 99 00 00",
+          "value": {
+            "input": "port-1"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 1623867,
+            "offset": 19,
+            "signature": "C7 45 F0 ?? ?? ?? ?? C7 45 F4 00 00 00 00 EB 3E C7 45 F0 ?? ?? ?? ?? C7 45 F4 01 00 00 00 EB 2E C7 45 F0 ?? ?? ?? ?? C7 45 F4 01 00 00 00 EB 1E C7 45 F0 ?? ?? ?? ?? C7 45 F4 02 00 00 00 EB 0E C7 45 F0 ?? ?? ?? ?? C7 45 F4 02 00 00 00 66 8B 55 F0 52 8B 45 F4 8B 4C 85"
+          },
+          "original": "90 99 00 00",
+          "value": {
+            "input": "port-2"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 1623867,
+            "offset": 35,
+            "signature": "C7 45 F0 ?? ?? ?? ?? C7 45 F4 00 00 00 00 EB 3E C7 45 F0 ?? ?? ?? ?? C7 45 F4 01 00 00 00 EB 2E C7 45 F0 ?? ?? ?? ?? C7 45 F4 01 00 00 00 EB 1E C7 45 F0 ?? ?? ?? ?? C7 45 F4 02 00 00 00 EB 0E C7 45 F0 ?? ?? ?? ?? C7 45 F4 02 00 00 00 66 8B 55 F0 52 8B 45 F4 8B 4C 85"
+          },
+          "original": "8F 99 00 00",
+          "value": {
+            "input": "port-3"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 1623867,
+            "offset": 51,
+            "signature": "C7 45 F0 ?? ?? ?? ?? C7 45 F4 00 00 00 00 EB 3E C7 45 F0 ?? ?? ?? ?? C7 45 F4 01 00 00 00 EB 2E C7 45 F0 ?? ?? ?? ?? C7 45 F4 01 00 00 00 EB 1E C7 45 F0 ?? ?? ?? ?? C7 45 F4 02 00 00 00 EB 0E C7 45 F0 ?? ?? ?? ?? C7 45 F4 02 00 00 00 66 8B 55 F0 52 8B 45 F4 8B 4C 85"
+          },
+          "original": "90 99 00 00",
+          "value": {
+            "input": "port-4"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "rva": 1623867,
+            "offset": 67,
+            "signature": "C7 45 F0 ?? ?? ?? ?? C7 45 F4 00 00 00 00 EB 3E C7 45 F0 ?? ?? ?? ?? C7 45 F4 01 00 00 00 EB 2E C7 45 F0 ?? ?? ?? ?? C7 45 F4 01 00 00 00 EB 1E C7 45 F0 ?? ?? ?? ?? C7 45 F4 02 00 00 00 EB 0E C7 45 F0 ?? ?? ?? ?? C7 45 F4 02 00 00 00 66 8B 55 F0 52 8B 45 F4 8B 4C 85"
+          },
+          "original": "8F 99 00 00",
+          "value": {
+            "input": "port-5"
+          },
+          "encoding": "u32le",
+          "size": 4,
+          "readCurrent": true
+        }
+      ]
+    }
+  ]
+}

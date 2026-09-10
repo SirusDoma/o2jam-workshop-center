@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "server-song-ranking",
+  "title": "Song rankings URL",
+  "description": "Change the URL used by song rankings.",
+  "category": "Network",
+  "group": "Community",
+  "order": 60,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Song rankings",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "3.82"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 197259,
+              "offset": 34,
+              "signature": "C7 44 24 10 ?? ?? ?? ?? EB ?? C7 44 24 10 ?? ?? ?? ?? EB ?? C7 44 24 10 ?? ?? ?? ?? EB ?? C7 44 24 10 ?? ?? ?? ?? 8A 44 24 17 55 56 57 6A 00 8D 4C 24 10 88 44 24 10 E8 ?? ?? ?? ?? BF ?? ?? ?? ?? 83 C9 FF 33 C0 6A 01 F2 AE F7 D1"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

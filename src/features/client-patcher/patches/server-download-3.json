@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "server-download-3",
+  "title": "Download server 3",
+  "description": "Additional server for client downloads.",
+  "category": "Network",
+  "group": "Downloads",
+  "order": 55,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Download server 3",
+      "control": "text",
+      "format": "hostname",
+      "maxLength": 63
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "5.89"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 830697,
+              "offset": 25,
+              "signature": "E8 ?? ?? ?? ?? C7 45 FC FF FF FF FF 6A 00 6A 01 8D 4D BC E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 4D A0 E8 ?? ?? ?? ?? C7 45 FC 02 00 00 00 8D 55 A0 52 8B 8D 6C FE FF FF 81 C1 DC 00 00 00 E8 ?? ?? ?? ?? C7 45 FC FF FF FF FF 6A 00 6A 01 8D 4D A0 E8 ?? ?? ?? ?? 8B 8D 6C FE FF FF"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

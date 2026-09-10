@@ -1,0 +1,348 @@
+{
+  "schemaVersion": 1,
+  "id": "keep-gameplay-focus",
+  "title": "Unfocus",
+  "description": "Prevent returning to the room when switching back to the game.",
+  "category": "Gameplay",
+  "order": 20,
+  "inputs": [
+    {
+      "id": "enabled",
+      "label": "Stay in the game when unfocused",
+      "control": "checkbox",
+      "default": false
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "3.00",
+        "imageBase": 4194304,
+        "entryPoint": 703884,
+        "anchors": [
+          {
+            "rva": 519376,
+            "bytes": "81 EC 00 01 00 00 53 55 56 57 33 DB 68 28 58 4D"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 510889,
+            "section": ".text",
+            "signature": "83 F8 0B ?? ?? 8D 54 24 1C 8D 44 24 1E 89 7C 24 08",
+            "offset": 3
+          },
+          "original": "75 76",
+          "replacement": "EB 76",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "3.10",
+        "imageBase": 4194304,
+        "entryPoint": 421258,
+        "anchors": [
+          {
+            "rva": 395296,
+            "bytes": "53 56 33 F6 68 18 85 48 00 56 56 FF 15 BC 91 47"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 176106,
+            "section": ".text",
+            "signature": "8B 48 14 85 C9 ?? ?? B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 84 C0",
+            "offset": 5
+          },
+          "original": "75 29",
+          "replacement": "EB 29",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "3.82",
+        "imageBase": 4194304,
+        "entryPoint": 754940,
+        "anchors": [
+          {
+            "rva": 570656,
+            "bytes": "53 56 33 F6 68 44 40 4E 00 56 56 FF 15 44 D1 4C"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 560779,
+            "section": ".text",
+            "signature": "83 F8 0B ?? ?? ?? ?? ?? ?? 8B 8E 4C 11 00 00 E8 ?? ?? ?? ?? 83",
+            "offset": 3
+          },
+          "original": "0F 84 A9 00 00 00",
+          "replacement": "90 90 90 90 90 90",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        },
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 560799,
+            "section": ".text",
+            "signature": "83 F8 0F ?? ?? ?? ?? ?? ?? 8B 8E 4C 11 00 00 E8 ?? ?? ?? ?? 83",
+            "offset": 3
+          },
+          "original": "0F 84 95 00 00 00",
+          "replacement": "90 90 90 90 90 90",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        },
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 560819,
+            "section": ".text",
+            "signature": "83 F8 0C ?? ?? ?? ?? ?? ?? 8B 8E 4C 11 00 00 E8 ?? ?? ?? ?? 83",
+            "offset": 3
+          },
+          "original": "0F 84 81 00 00 00",
+          "replacement": "90 90 90 90 90 90",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        },
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 560839,
+            "section": ".text",
+            "signature": "83 F8 12 ?? ?? 8B 46 04 85 C0 0F 84 B1 01 00 00 8B",
+            "offset": 3
+          },
+          "original": "74 71",
+          "replacement": "90 90",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "2.33",
+        "imageBase": 4194304,
+        "entryPoint": 772352,
+        "anchors": [
+          {
+            "rva": 587536,
+            "bytes": "53 8B 5C 24 08 55 56 33 F6 57 56 53 68 A0 F6 48"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 575803,
+            "section": ".text",
+            "signature": "83 F8 0A ?? ?? ?? ?? ?? ?? 8B 8E 20 09 00 00 E8 ?? ?? ?? ?? 83",
+            "offset": 3
+          },
+          "original": "0F 84 8B 00 00 00",
+          "replacement": "90 90 90 90 90 90",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        },
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 575823,
+            "section": ".text",
+            "signature": "83 F8 0F ?? ?? 8B 8E 20 09 00 00 E8 ?? ?? ?? ?? 83",
+            "offset": 3
+          },
+          "original": "74 7B",
+          "replacement": "90 90",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        },
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 575839,
+            "section": ".text",
+            "signature": "83 F8 0B ?? ?? 8B 46 04 85 C0 0F 84 A7 01 00 00 8B",
+            "offset": 3
+          },
+          "original": "74 6B",
+          "replacement": "90 90",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "5.89",
+        "imageBase": 4194304,
+        "entryPoint": 1503240,
+        "anchors": [
+          {
+            "rva": 1323536,
+            "bytes": "55 8B EC 83 EC 40 C7 45 F0 00 00 00 00 C7 45 F4"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 1301010,
+            "section": ".text",
+            "signature": "83 F8 0B ?? ?? 8B 4D A8 8B 89 34 09 00 00 E8 ?? ??",
+            "offset": 3
+          },
+          "original": "74 3D",
+          "replacement": "90 90",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        },
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 1301029,
+            "section": ".text",
+            "signature": "83 F8 10 ?? ?? 8B 55 A8 8B 8A 34 09 00 00 E8 ?? ??",
+            "offset": 3
+          },
+          "original": "74 2A",
+          "replacement": "90 90",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        },
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 1301048,
+            "section": ".text",
+            "signature": "83 F8 0C ?? ?? 8B 45 A8 8B 88 34 09 00 00 E8 ?? ??",
+            "offset": 3
+          },
+          "original": "74 17",
+          "replacement": "90 90",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        },
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 1301067,
+            "section": ".text",
+            "signature": "83 F8 11 ?? ?? ?? ?? ?? ?? 8B 4D A8 8B 89 34 09 00 00 E8 ?? ??",
+            "offset": 3
+          },
+          "original": "0F 85 A8 01 00 00",
+          "replacement": "E9 A9 01 00 00 90",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "6.65",
+        "imageBase": 4194304,
+        "entryPoint": 1587544,
+        "anchors": [
+          {
+            "rva": 1404336,
+            "bytes": "55 8B EC 83 EC 7C C7 45 E0 00 00 00 00 C7 45 E4"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 1370812,
+            "section": ".text",
+            "signature": "83 F8 0A ?? ?? ?? ?? ?? ?? 8B 85 3C FF FF FF 8B 48 1C 89 4D E8",
+            "offset": 3
+          },
+          "original": "0F 85 AA 01 00 00",
+          "replacement": "E9 AB 01 00 00 90",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02",
+        "imageBase": 4194304,
+        "entryPoint": 2077624,
+        "anchors": [
+          {
+            "rva": 1758032,
+            "bytes": "55 8B EC 83 EC 78 C7 45 E4 00 00 00 00 C7 45 E8"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "bytes",
+          "at": {
+            "rva": 1723712,
+            "section": ".text",
+            "signature": "83 F8 0A ?? ?? ?? ?? ?? ?? 8B 8D 3C FF FF FF 8B 51 1C 89 55 E8",
+            "offset": 3
+          },
+          "original": "0F 85 B0 01 00 00",
+          "replacement": "E9 B1 01 00 00 90",
+          "when": {
+            "input": "enabled",
+            "equals": true
+          }
+        }
+      ]
+    }
+  ]
+}

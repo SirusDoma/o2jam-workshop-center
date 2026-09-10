@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "id": "server-billing-buttons",
+  "title": "Billing URL",
+  "description": "Change the URL used by billing.",
+  "category": "Network",
+  "group": "Billing",
+  "order": 52,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Billing buttons",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "5.89"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1271680,
+              "offset": 8,
+              "signature": "55 8B EC 51 89 4D ?? 68 ?? ?? ?? ?? 8B 45 08 50 E8 ?? ?? ?? ?? 83 C4 08 85 C0 74 ?? 8B 4D ?? C7 81 20 10 00 00 01 00 00 00 8B E5 5D C2 04 00"
+            },
+            {
+              "section": ".text",
+              "rva": 1271764,
+              "offset": 17,
+              "signature": "83 C2 1C 52 E8 ?? ?? ?? ?? 83 C4 0C 85 C0 75 ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 50 8B 45 ?? 05 1C 08 00 00 50 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 0C 85 C0 75 ?? 8B 4D ?? C7 81 1C 10 00 00 00 00 00 00 8B 55 ??"
+            },
+            {
+              "section": ".text",
+              "rva": 1271785,
+              "offset": 19,
+              "signature": "E8 ?? ?? ?? ?? 83 C4 04 50 8B 45 ?? 05 1C 08 00 00 50 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 0C 85 C0 75 ?? 8B 4D ?? C7 81 1C 10 00 00 00 00 00 00 8B 55 ?? C7 82 20 10 00 00 00 00 00 00 6A 00 8B 45 ?? 05 1C 08 00 00 50 68 BD 1B 00 00 6A 11"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "6.65"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1338560,
+              "offset": 8,
+              "signature": "55 8B EC 51 89 4D ?? 68 ?? ?? ?? ?? 8B 45 08 50 E8 ?? ?? ?? ?? 83 C4 08 85 C0 74 ?? 8B 4D ?? C7 81 20 10 00 00 01 00 00 00 8B E5 5D C2 04 00"
+            },
+            {
+              "section": ".text",
+              "rva": 1338644,
+              "offset": 17,
+              "signature": "83 C2 1C 52 E8 ?? ?? ?? ?? 83 C4 0C 85 C0 75 ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 50 8B 45 ?? 05 1C 08 00 00 50 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 0C 85 C0 75 ?? 8B 4D ?? C7 81 1C 10 00 00 00 00 00 00 8B 55 ??"
+            },
+            {
+              "section": ".text",
+              "rva": 1338665,
+              "offset": 19,
+              "signature": "E8 ?? ?? ?? ?? 83 C4 04 50 8B 45 ?? 05 1C 08 00 00 50 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 0C 85 C0 75 ?? 8B 4D ?? C7 81 1C 10 00 00 00 00 00 00 8B 55 ?? C7 82 20 10 00 00 00 00 00 00 6A 00 8B 45 ?? 05 1C 08 00 00 50 68 BD 1B 00 00 6A 12"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1570016,
+              "offset": 8,
+              "signature": "55 8B EC 51 89 4D ?? 68 ?? ?? ?? ?? 8B 45 08 50 E8 ?? ?? ?? ?? 83 C4 08 85 C0 74 ?? 8B 4D ?? C7 81 20 10 00 00 01 00 00 00 8B E5 5D C2 04 00"
+            },
+            {
+              "section": ".text",
+              "rva": 1570100,
+              "offset": 17,
+              "signature": "83 C2 1C 52 E8 ?? ?? ?? ?? 83 C4 0C 85 C0 75 ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 50 8B 45 ?? 05 1C 08 00 00 50 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 0C 85 C0 75 ?? 8B 4D ?? C7 81 1C 10 00 00 00 00 00 00 8B 55 ??"
+            },
+            {
+              "section": ".text",
+              "rva": 1570121,
+              "offset": 19,
+              "signature": "E8 ?? ?? ?? ?? 83 C4 04 50 8B 45 ?? 05 1C 08 00 00 50 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 0C 85 C0 75 ?? 8B 4D ?? C7 81 1C 10 00 00 00 00 00 00 8B 55 ?? C7 82 20 10 00 00 00 00 00 00 6A 00 8B 45 ?? 05 1C 08 00 00 50 68 BD 1B 00 00 6A 12"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

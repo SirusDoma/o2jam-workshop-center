@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "server-support",
+  "title": "Support URL",
+  "description": "Change the URL used by support.",
+  "category": "Network",
+  "group": "Web services",
+  "order": 51,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Support",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "6.65"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 199692,
+              "offset": 21,
+              "signature": "8D 45 C8 89 85 28 FF FF FF 8B 4D C0 51 8B 95 28 FF FF FF 52 68 ?? ?? ?? ?? 8D 45 E4 50 E8 ?? ?? ?? ?? 83 C4 10 A3 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 75 ?? 8B 4D C0 89 4D 90 8B 55 90 89 55 94 83 7D 94 00 74 ?? 6A 01"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 389948,
+              "offset": 21,
+              "signature": "8D 45 C8 89 85 28 FF FF FF 8B 4D C0 51 8B 95 28 FF FF FF 52 68 ?? ?? ?? ?? 8D 45 E4 50 E8 ?? ?? ?? ?? 83 C4 10 A3 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 75 ?? 8B 4D C0 89 4D 90 8B 55 90 89 55 94 83 7D 94 00 74 ?? 6A 01"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

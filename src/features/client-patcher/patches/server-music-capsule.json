@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "server-music-capsule",
+  "title": "Music Capsule URL",
+  "description": "Change the URL used by music capsule.",
+  "category": "Network",
+  "group": "Web services",
+  "order": 50,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Music Capsule",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "5.89"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 566847,
+              "offset": 24,
+              "signature": "83 C0 04 89 85 10 FE FF FF 8B 8D E4 FE FF FF 51 8B 95 10 FE FF FF 52 68 ?? ?? ?? ?? 8D 85 00 FF FF FF 50 E8 ?? ?? ?? ?? 83 C4 10 A3 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 8B 8D E4 FE FF FF 89 8D B8 FE FF FF 8B 95 B8 FE FF FF 89 95 BC FE FF FF 83 BD BC FE FF FF 00 74 ?? 6A 01"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

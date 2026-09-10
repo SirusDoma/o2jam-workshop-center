@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "server-music-preview",
+  "title": "Music preview URL",
+  "description": "Change the URL used for music previews.",
+  "category": "Network",
+  "group": "Downloads",
+  "order": 55,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Music preview URL",
+      "control": "text",
+      "format": "url",
+      "maxLength": 63,
+      "description": "Keep %d where the client inserts the song ID."
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "6.65"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 324581,
+              "offset": 23,
+              "signature": "03 F0 B9 8E 00 00 00 8D BD C0 FD FF FF F3 A5 8B 95 C0 FD FF FF 52 68 ?? ?? ?? ?? 8D 85 B8 FC FF FF 50 E8 ?? ?? ?? ?? 83 C4 0C C7 45 FC 00 00 00 00 68 ?? ?? ?? ?? 8B 8D A8 FC FF FF 8B 91 A8 01 00 00 52 FF 15 ?? ?? ?? ?? 89 45 FC 8D 85 B8 FC FF FF 50 FF 55 FC"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 320613,
+              "offset": 23,
+              "signature": "03 F0 B9 8E 00 00 00 8D BD C0 FD FF FF F3 A5 8B 95 C0 FD FF FF 52 68 ?? ?? ?? ?? 8D 85 B8 FC FF FF 50 E8 ?? ?? ?? ?? 83 C4 0C C7 45 FC 00 00 00 00 68 ?? ?? ?? ?? 8B 8D A8 FC FF FF 8B 91 A8 01 00 00 52 FF 15 ?? ?? ?? ?? 89 45 FC 8D 85 B8 FC FF FF 50 FF 55 FC"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

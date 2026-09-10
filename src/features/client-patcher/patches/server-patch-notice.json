@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "id": "server-patch-notice",
+  "title": "Patch notices URL",
+  "description": "Change the URL used by patch notices.",
+  "category": "Network",
+  "group": "Web services",
+  "order": 50,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Patch notices",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "3.82"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 241333,
+              "offset": 14,
+              "signature": "8B F8 EB ?? 33 FF 57 6A 00 8D 44 24 14 68 ?? ?? ?? ?? 50 C7 44 24 44 FF FF FF FF E8 ?? ?? ?? ?? 83 C4 10 A3 ?? ?? ?? ?? 85 C0 75 ?? 85 FF 0F 84 ?? ?? ?? ?? 8B 17 6A 01 8B CF FF 52 0C 5F"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "5.89"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 605766,
+              "offset": 37,
+              "signature": "8B 8D A0 FE FF FF 89 8D C4 FE FF FF C7 45 FC FF FF FF FF 8B 95 C4 FE FF FF 89 95 C8 FE FF FF 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 85 E4 FE FF FF 50 E8 ?? ?? ?? ?? 83 C4 10 8B 8D C8 FE FF FF 51 6A 00 8D 95 E4 FE FF FF 52 8D 85 CC FE FF FF 50 E8 ?? ?? ?? ?? 83 C4 10"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "6.65"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 632953,
+              "offset": 39,
+              "signature": "C7 85 1C FE FF FF 00 00 00 00 8B 8D 1C FE FF FF 89 8D A8 FE FF FF C6 45 FC 00 8B 95 A8 FE FF FF 89 95 AC FE FF FF 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 85 78 FE FF FF 8B 85 78 FE FF FF 50 68 ?? ?? ?? ?? 8D 8D C4 FE FF FF E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 85 68 FE FF FF 8B 8D 68 FE FF FF 51"
+            },
+            {
+              "section": ".text",
+              "rva": 632991,
+              "offset": 27,
+              "signature": "68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 85 78 FE FF FF 8B 85 78 FE FF FF 50 68 ?? ?? ?? ?? 8D 8D C4 FE FF FF E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 89 85 68 FE FF FF 8B 8D 68 FE FF FF 51 68 ?? ?? ?? ?? 8D 8D C4 FE FF FF E8 ?? ?? ?? ?? 83 BD DC FE FF FF 10 72 ?? 8B 95 C8 FE FF FF"
+            },
+            {
+              "section": ".text",
+              "rva": 634493,
+              "offset": 37,
+              "signature": "8B 85 AC FE FF FF 89 85 D4 FE FF FF C7 45 FC FF FF FF FF 8B 8D D4 FE FF FF 89 8D D8 FE FF FF 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 95 EC FE FF FF 52 E8 ?? ?? ?? ?? 83 C4 14 8B 85 D8 FE FF FF 50 6A 00 8D 8D EC FE FF FF 51 8D 95 DC FE FF FF 52 E8 ?? ?? ?? ??"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

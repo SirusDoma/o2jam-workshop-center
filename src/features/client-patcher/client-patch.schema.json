@@ -1,0 +1,979 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "O2WC client patch",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "title",
+    "category",
+    "inputs",
+    "variants"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,79}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "category": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "group": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "order": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "inputs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": {
+        "$ref": "#/$defs/input"
+      }
+    },
+    "variants": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": {
+        "$ref": "#/$defs/variant"
+      }
+    },
+    "requires": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]{0,79}$"
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]{0,79}$"
+      }
+    }
+  },
+  "$defs": {
+    "condition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "input",
+            "equals"
+          ],
+          "properties": {
+            "input": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,79}$"
+            },
+            "equals": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "all"
+          ],
+          "properties": {
+            "all": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 32,
+              "items": {
+                "$ref": "#/$defs/condition"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "any"
+          ],
+          "properties": {
+            "any": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 32,
+              "items": {
+                "$ref": "#/$defs/condition"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "not"
+          ],
+          "properties": {
+            "not": {
+              "$ref": "#/$defs/condition"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "input",
+            "empty"
+          ],
+          "properties": {
+            "input": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,79}$"
+            },
+            "empty": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "locator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signature"
+      ],
+      "properties": {
+        "signature": {
+          "type": "string",
+          "pattern": "^\\s*(?:[0-9a-fA-F]{2}|\\?\\?)(?:\\s+(?:[0-9a-fA-F]{2}|\\?\\?))*\\s*$"
+        },
+        "section": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8
+        },
+        "rva": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1048576
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input"
+      ],
+      "properties": {
+        "input": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "part": {
+          "const": "origin"
+        },
+        "prefix": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "suffix": {
+          "type": "string",
+          "maxLength": 4096
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "part"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "prefix"
+                  ]
+                },
+                {
+                  "required": [
+                    "suffix"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "client": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version"
+      ],
+      "properties": {
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "imageBase": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "entryPoint": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "anchors": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "rva",
+              "bytes"
+            ],
+            "properties": {
+              "rva": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967295
+              },
+              "bytes": {
+                "type": "string",
+                "pattern": "^\\s*[0-9a-fA-F]{2}(?:\\s+[0-9a-fA-F]{2})*\\s*$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "control"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "control": {
+          "enum": [
+            "checkbox",
+            "toggle",
+            "radio",
+            "select",
+            "text",
+            "number",
+            "rows"
+          ]
+        },
+        "default": {
+          "oneOf": [
+            {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            },
+            {
+              "type": "array",
+              "maxItems": 128,
+              "items": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "value"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "value": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean"
+                ]
+              }
+            }
+          }
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "maxLength": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "format": {
+          "enum": [
+            "filename",
+            "ipv4",
+            "hostname",
+            "url",
+            "url-origin",
+            "port"
+          ]
+        },
+        "visibleWhen": {
+          "$ref": "#/$defs/condition"
+        },
+        "group": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "description": "Inputs with the same group share a row in array order. Place the IP before its ports."
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/input"
+              },
+              {
+                "not": {
+                  "properties": {
+                    "control": {
+                      "const": "rows"
+                    }
+                  }
+                },
+                "required": [
+                  "default"
+                ]
+              }
+            ]
+          }
+        },
+        "maxRows": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 128
+        },
+        "uniqueBy": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "addLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "minFrom": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "maxFrom": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "control": {
+                "enum": [
+                  "radio",
+                  "select"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "options"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "control": {
+                "const": "rows"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "fields",
+              "maxRows",
+              "default"
+            ],
+            "properties": {
+              "default": {
+                "type": "array"
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "fields"
+                  ]
+                },
+                {
+                  "required": [
+                    "maxRows"
+                  ]
+                },
+                {
+                  "required": [
+                    "uniqueBy"
+                  ]
+                },
+                {
+                  "required": [
+                    "addLabel"
+                  ]
+                }
+              ]
+            },
+            "properties": {
+              "default": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "format": {
+                "const": "port"
+              }
+            },
+            "required": [
+              "format"
+            ]
+          },
+          "then": {
+            "properties": {
+              "control": {
+                "const": "number"
+              },
+              "default": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              }
+            }
+          }
+        }
+      ]
+    },
+    "bytes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "at",
+        "original",
+        "replacement"
+      ],
+      "properties": {
+        "type": {
+          "const": "bytes"
+        },
+        "at": {
+          "$ref": "#/$defs/locator"
+        },
+        "original": {
+          "type": "string",
+          "pattern": "^\\s*(?:[0-9a-fA-F]{2}|\\?\\?)(?:\\s+(?:[0-9a-fA-F]{2}|\\?\\?))*\\s*$"
+        },
+        "replacement": {
+          "type": "string",
+          "pattern": "^\\s*(?:[0-9a-fA-F]{2}|\\?\\?)(?:\\s+(?:[0-9a-fA-F]{2}|\\?\\?))*\\s*$"
+        },
+        "when": {
+          "$ref": "#/$defs/condition"
+        }
+      }
+    },
+    "string": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "value",
+        "references"
+      ],
+      "properties": {
+        "type": {
+          "const": "string"
+        },
+        "original": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "sourceRva": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "value": {
+          "$ref": "#/$defs/source"
+        },
+        "references": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 512,
+          "items": {
+            "$ref": "#/$defs/locator"
+          }
+        },
+        "encoding": {
+          "enum": [
+            "ascii",
+            "utf16le",
+            "euc-kr"
+          ]
+        },
+        "referenceScope": {
+          "enum": [
+            "all",
+            "listed"
+          ],
+          "default": "all"
+        },
+        "when": {
+          "$ref": "#/$defs/condition"
+        }
+      }
+    },
+    "value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "at",
+        "original",
+        "value",
+        "encoding",
+        "size"
+      ],
+      "properties": {
+        "type": {
+          "const": "value"
+        },
+        "at": {
+          "$ref": "#/$defs/locator"
+        },
+        "original": {
+          "type": "string",
+          "pattern": "^\\s*[0-9a-fA-F]{2}(?:\\s+[0-9a-fA-F]{2})*\\s*$"
+        },
+        "value": {
+          "$ref": "#/$defs/source"
+        },
+        "encoding": {
+          "enum": [
+            "u8",
+            "u16le",
+            "u32le",
+            "f32le",
+            "ascii",
+            "utf16le",
+            "hex",
+            "length8",
+            "length16le",
+            "length32le"
+          ]
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "when": {
+          "$ref": "#/$defs/condition"
+        },
+        "readCurrent": {
+          "type": "boolean",
+          "default": false,
+          "description": "Read a numeric operand from the matched callsite; original records reference bytes."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "readCurrent": {
+                "const": true
+              }
+            },
+            "required": [
+              "readCurrent"
+            ]
+          },
+          "then": {
+            "properties": {
+              "encoding": {
+                "enum": [
+                  "u8",
+                  "u16le",
+                  "u32le",
+                  "f32le"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "client",
+        "operations"
+      ],
+      "properties": {
+        "client": {
+          "$ref": "#/$defs/client"
+        },
+        "defaults": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,79}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/input/properties/default"
+          }
+        },
+        "operations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2048,
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/bytes"
+              },
+              {
+                "$ref": "#/$defs/string"
+              },
+              {
+                "$ref": "#/$defs/value"
+              },
+              {
+                "$ref": "#/$defs/hook"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "hookFixup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "encoding": {
+          "enum": [
+            "u8",
+            "u32le",
+            "rel32",
+            "rows-u32le"
+          ]
+        },
+        "relativeTo": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "value": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "input": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]{0,79}$"
+                }
+              },
+              "required": [
+                "input"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "$ref": "#/$defs/locator"
+                },
+                "read": {
+                  "enum": [
+                    "u32le",
+                    "rel32"
+                  ]
+                }
+              },
+              "required": [
+                "at"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "originalOffset": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4096
+                },
+                "read": {
+                  "enum": [
+                    "u32le",
+                    "rel32"
+                  ]
+                }
+              },
+              "required": [
+                "originalOffset",
+                "read"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "continuation": {
+                  "const": true
+                }
+              },
+              "required": [
+                "continuation"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "codeOffset": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4096
+                }
+              },
+              "required": [
+                "codeOffset"
+              ]
+            }
+          ]
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,79}$"
+          }
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 128
+        }
+      },
+      "required": [
+        "offset",
+        "encoding",
+        "value"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "encoding": {
+                "const": "rows-u32le"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "fields",
+              "capacity"
+            ],
+            "properties": {
+              "value": {
+                "required": [
+                  "input"
+                ]
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "fields"
+                  ]
+                },
+                {
+                  "required": [
+                    "capacity"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "hook": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "hook"
+        },
+        "at": {
+          "$ref": "#/$defs/locator"
+        },
+        "original": {
+          "type": "string",
+          "pattern": "^\\s*(?:[0-9a-fA-F]{2}|\\?\\?)(?:\\s+(?:[0-9a-fA-F]{2}|\\?\\?))*\\s*$"
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^\\s*[0-9a-fA-F]{2}(?:\\s+[0-9a-fA-F]{2})*\\s*$",
+          "maxLength": 12288
+        },
+        "writable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow runtime writes to the added hook section, for state stored inside the payload."
+        },
+        "fixups": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 512,
+          "items": {
+            "$ref": "#/$defs/hookFixup"
+          }
+        },
+        "when": {
+          "$ref": "#/$defs/condition"
+        }
+      },
+      "required": [
+        "type",
+        "at",
+        "original",
+        "code"
+      ]
+    }
+  }
+}

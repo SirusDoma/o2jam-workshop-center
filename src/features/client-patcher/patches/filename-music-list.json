@@ -1,0 +1,365 @@
+{
+  "schemaVersion": 1,
+  "id": "filename-music-list",
+  "title": "OJNList",
+  "category": "Assets",
+  "group": "Client assets",
+  "order": 73,
+  "inputs": [
+    {
+      "id": "filename",
+      "label": "OJNList",
+      "control": "text",
+      "format": "filename",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "2.93",
+        "imageBase": 4194304,
+        "entryPoint": 367482,
+        "anchors": [
+          {
+            "rva": 340736,
+            "bytes": "81 EC 00 01 00 00 55 56 57 33 F6 68 28 4F 47 00"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename",
+            "prefix": ""
+          },
+          "references": [
+            {
+              "signature": "89 4C 24 0C 56 57 8D 4C 24 18 E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 84 24 60 02 00 00 33 ED 6A 02 50 89 AC 24 A4 04 00 00 89 6C 24 1C E8 ?? ?? ?? ?? 8B F0 8D 44 24 18 8B D6 8D 4C 24 1C 2B D0 BF 00 01 00 00 8A 04 0A",
+              "rva": 118685,
+              "offset": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "3.00",
+        "imageBase": 4194304,
+        "entryPoint": 703884,
+        "anchors": [
+          {
+            "rva": 519376,
+            "bytes": "81 EC 00 01 00 00 53 55 56 57 33 DB 68 28 58 4D"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename",
+            "prefix": "%s\\Image\\"
+          },
+          "references": [
+            {
+              "signature": "50 68 04 01 00 00 FF 15 ?? ?? ?? ?? 8D 8C 24 40 01 00 00 8D 94 24 44 02 00 00 51 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 83 C4 0C 8D 84 24 44 02 00 00 8D 4C 24 38 50 E8 ?? ?? ?? ?? 85 C0 75 ?? 8B 0D ?? ?? ?? ?? 53 68 ?? ?? ?? ?? 68 FF 0F 00 00 6A 01",
+              "rva": 150546,
+              "offset": 28
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "filename",
+            "prefix": ""
+          },
+          "references": [
+            {
+              "signature": "8D 4C 24 30 50 68 ?? ?? ?? ?? 51 E8 ?? ?? ?? ?? 83 C4 10 BE ?? ?? ?? ?? 8D 84 24 30 01 00 00 8A 10 8A CA 3A 16 75 ?? 84 C9 74 ?? 8A 50 01 8A CA 3A 56 01 75 ?? 83 C0 02 83 C6 02 84 C9",
+              "rva": 517523,
+              "offset": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "3.10",
+        "imageBase": 4194304,
+        "entryPoint": 421258,
+        "anchors": [
+          {
+            "rva": 395296,
+            "bytes": "53 56 33 F6 68 18 85 48 00 56 56 FF 15 BC 91 47"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename",
+            "prefix": ""
+          },
+          "references": [
+            {
+              "signature": "56 8B F1 57 8D 4C 24 3C 89 74 24 38 E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 84 24 A4 02 00 00 33 ED 6A 02 50 8B CE 89 AC 24 E8 04 00 00 89 6C 24 1C E8 ?? ?? ?? ?? 8B F0 8D 54 24 3C 8D 4C 24 40 2B F2 BF 00 01 00 00 8A 14 0E",
+              "rva": 128557,
+              "offset": 18
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "3.82",
+        "imageBase": 4194304,
+        "entryPoint": 754940,
+        "anchors": [
+          {
+            "rva": 570656,
+            "bytes": "53 56 33 F6 68 44 40 4E 00 56 56 FF 15 44 D1 4C"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename",
+            "prefix": "%s\\Image\\"
+          },
+          "references": [
+            {
+              "signature": "50 68 04 01 00 00 FF 15 ?? ?? ?? ?? 8D 8C 24 40 01 00 00 8D 94 24 44 02 00 00 51 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 83 C4 0C 8D 84 24 44 02 00 00 8D 4C 24 38 50 E8 ?? ?? ?? ?? 85 C0 75 ?? 8B 0D ?? ?? ?? ?? 53 68 ?? ?? ?? ?? 68 FF 0F 00 00 6A 01",
+              "rva": 176098,
+              "offset": 28
+            },
+            {
+              "signature": "51 68 04 01 00 00 FF 15 ?? ?? ?? ?? 8D 54 24 08 8D 84 24 0C 01 00 00 52 68 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 83 C4 0C 8D 8C 24 0C 01 00 00 51 FF 15 ?? ?? ?? ?? 6A 13 EB ?? 39 1D ?? ?? ?? ?? 74 ?? 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? B9 ?? ?? ?? ?? E8 ?? ?? ?? ??",
+              "rva": 194790,
+              "offset": 25
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "filename",
+            "prefix": ""
+          },
+          "references": [
+            {
+              "signature": "8D 4C 24 30 50 68 ?? ?? ?? ?? 51 E8 ?? ?? ?? ?? 83 C4 10 BE ?? ?? ?? ?? 8D 84 24 30 01 00 00 8A 10 8A CA 3A 16 75 ?? 84 C9 74 ?? 8A 50 01 8A CA 3A 56 01 75 ?? 83 C0 02 83 C6 02 84 C9",
+              "rva": 567840,
+              "offset": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "2.33",
+        "imageBase": 4194304,
+        "entryPoint": 772352,
+        "anchors": [
+          {
+            "rva": 587536,
+            "bytes": "53 8B 5C 24 08 55 56 33 F6 57 56 53 68 A0 F6 48"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename",
+            "prefix": "%s\\Image\\"
+          },
+          "references": [
+            {
+              "signature": "89 AC 24 30 06 00 00 89 6C 24 14 FF 15 ?? ?? ?? ?? 8D 8C 24 F0 03 00 00 8D 94 24 EC 02 00 00 51 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 83 C4 0C 8D 84 24 EC 02 00 00 8D 4C 24 68 50 E8 ?? ?? ?? ?? 85 C0 75 ?? 8B 0D ?? ?? ?? ?? 55 68 ?? ?? ?? ?? 68 FE 0F 00 00 6A 01",
+              "rva": 173327,
+              "offset": 33
+            },
+            {
+              "signature": "52 68 04 01 00 00 FF 15 ?? ?? ?? ?? 8D 44 24 08 8D 8C 24 0C 01 00 00 50 68 ?? ?? ?? ?? 51 E8 ?? ?? ?? ?? 83 C4 0C 8D 94 24 0C 01 00 00 52 FF 15 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 6A 13 E8 ?? ?? ?? ?? 5F 5E 81 C4 08 02 00 00 C2 10 00 A1 ?? ?? ?? ??",
+              "rva": 193413,
+              "offset": 25
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "filename",
+            "prefix": ""
+          },
+          "references": [
+            {
+              "signature": "50 68 ?? ?? ?? ?? 51 E8 ?? ?? ?? ?? 83 C4 10 8D 94 24 30 01 00 00 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 83 C4 08 85 C0 75 ?? 8D 44 24 2C 50 FF D3 A8 01 74 ?? 83 F0 01 8D 4C 24 2C 50 51",
+              "rva": 582932,
+              "offset": 23
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "5.89",
+        "imageBase": 4194304,
+        "entryPoint": 1503240,
+        "anchors": [
+          {
+            "rva": 1323536,
+            "bytes": "55 8B EC 83 EC 40 C7 45 F0 00 00 00 00 C7 45 F4"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename",
+            "prefix": "%s\\Image\\"
+          },
+          "references": [
+            {
+              "signature": "8D 95 DC FE FF FF 52 68 04 01 00 00 FF 15 ?? ?? ?? ?? 8D 85 DC FE FF FF 50 68 ?? ?? ?? ?? 8D 8D 74 F9 FF FF 51 E8 ?? ?? ?? ?? 83 C4 0C 8D 95 74 F9 FF FF 52 8D 8D BC FD FF FF E8 ?? ?? ?? ?? 85 C0 75 ?? 6A 00 68 ?? ?? ?? ?? 68 FE 0F 00 00 6A 01",
+              "rva": 417649,
+              "offset": 26
+            },
+            {
+              "signature": "8D 95 DC FE FF FF 52 68 04 01 00 00 FF 15 ?? ?? ?? ?? 8D 85 DC FE FF FF 50 68 ?? ?? ?? ?? 8D 8D 6C F9 FF FF 51 E8 ?? ?? ?? ?? 83 C4 0C 8D 95 6C F9 FF FF 52 8D 8D B4 FD FF FF E8 ?? ?? ?? ?? 85 C0 75 ?? 6A 00 68 ?? ?? ?? ?? 68 FE 0F 00 00 6A 01",
+              "rva": 421761,
+              "offset": 26
+            },
+            {
+              "signature": "8D 85 F0 FE FF FF 50 68 04 01 00 00 FF 15 ?? ?? ?? ?? 8D 8D F0 FE FF FF 51 68 ?? ?? ?? ?? 8D 95 E8 FD FF FF 52 E8 ?? ?? ?? ?? 83 C4 0C 8D 85 E8 FD FF FF 50 FF 15 ?? ?? ?? ?? 6A 13 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 74 ?? 8B 0D ?? ?? ?? ??",
+              "rva": 476893,
+              "offset": 26
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "filename",
+            "prefix": ""
+          },
+          "references": [
+            {
+              "signature": "51 68 ?? ?? ?? ?? 8D 95 BC FC FF FF 52 E8 ?? ?? ?? ?? 83 C4 10 68 ?? ?? ?? ?? 8D 85 AC FB FF FF 50 E8 ?? ?? ?? ?? 83 C4 08 85 C0 75 ?? 8D 8D BC FC FF FF 51 FF 15 ?? ?? ?? ?? 89 85 B4 FC FF FF 8B 95 B4 FC FF FF 83 E2 01 74 ?? 8B 85 B4 FC FF FF",
+              "rva": 1313690,
+              "offset": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "6.65",
+        "imageBase": 4194304,
+        "entryPoint": 1587544,
+        "anchors": [
+          {
+            "rva": 1404336,
+            "bytes": "55 8B EC 83 EC 7C C7 45 E0 00 00 00 00 C7 45 E4"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename",
+            "prefix": "%s\\Image\\"
+          },
+          "references": [
+            {
+              "signature": "8D 95 DC FE FF FF 52 68 04 01 00 00 FF 15 ?? ?? ?? ?? 8D 85 DC FE FF FF 50 68 ?? ?? ?? ?? 8D 8D 3C F9 FF FF 51 E8 ?? ?? ?? ?? 83 C4 0C 8D 95 3C F9 FF FF 52 8D 8D BC FD FF FF E8 ?? ?? ?? ?? 85 C0 75 ?? 6A 00 68 ?? ?? ?? ?? 68 FE 0F 00 00 6A 01",
+              "rva": 436609,
+              "offset": 26
+            },
+            {
+              "signature": "8D 85 F0 FE FF FF 50 68 04 01 00 00 FF 15 ?? ?? ?? ?? 8D 8D F0 FE FF FF 51 68 ?? ?? ?? ?? 8D 95 E8 FD FF FF 52 E8 ?? ?? ?? ?? 83 C4 0C 8D 85 E8 FD FF FF 50 FF 15 ?? ?? ?? ?? 6A 10 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 74 ?? 8B 0D ?? ?? ?? ??",
+              "rva": 509101,
+              "offset": 26
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "filename",
+            "prefix": ""
+          },
+          "references": [
+            {
+              "signature": "51 68 ?? ?? ?? ?? 8D 95 BC FC FF FF 52 E8 ?? ?? ?? ?? 83 C4 10 68 ?? ?? ?? ?? 8D 85 AC FB FF FF 50 E8 ?? ?? ?? ?? 83 C4 08 85 C0 75 ?? 8D 8D BC FC FF FF 51 FF 15 ?? ?? ?? ?? 89 85 B4 FC FF FF 8B 95 B4 FC FF FF 83 E2 01 74 ?? 8B 85 B4 FC FF FF",
+              "rva": 1384938,
+              "offset": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02",
+        "imageBase": 4194304,
+        "entryPoint": 2077624,
+        "anchors": [
+          {
+            "rva": 1758032,
+            "bytes": "55 8B EC 83 EC 78 C7 45 E4 00 00 00 00 C7 45 E8"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "filename",
+            "prefix": "%s\\Image\\"
+          },
+          "references": [
+            {
+              "signature": "8D 95 DC FE FF FF 52 68 04 01 00 00 FF 15 ?? ?? ?? ?? 8D 85 DC FE FF FF 50 68 ?? ?? ?? ?? 8D 8D 3C F9 FF FF 51 E8 ?? ?? ?? ?? 83 C4 0C 8D 95 3C F9 FF FF 52 8D 8D BC FD FF FF E8 ?? ?? ?? ?? 85 C0 75 ?? 6A 00 68 ?? ?? ?? ?? 68 FE 0F 00 00 6A 01",
+              "rva": 499745,
+              "offset": 26
+            },
+            {
+              "signature": "8D 85 F0 FE FF FF 50 68 04 01 00 00 FF 15 ?? ?? ?? ?? 8D 8D F0 FE FF FF 51 68 ?? ?? ?? ?? 8D 95 E8 FD FF FF 52 E8 ?? ?? ?? ?? 83 C4 0C 8D 85 E8 FD FF FF 50 FF 15 ?? ?? ?? ?? 6A 10 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 74 ?? 8B 0D ?? ?? ?? ??",
+              "rva": 574541,
+              "offset": 26
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "filename",
+            "prefix": ""
+          },
+          "references": [
+            {
+              "signature": "51 68 ?? ?? ?? ?? 8D 95 BC FC FF FF 52 E8 ?? ?? ?? ?? 83 C4 10 68 ?? ?? ?? ?? 8D 85 AC FB FF FF 50 E8 ?? ?? ?? ?? 83 C4 08 85 C0 75 ?? 8D 8D BC FC FF FF 51 FF 15 ?? ?? ?? ?? 89 85 B4 FC FF FF 8B 95 B4 FC FF FF 83 E2 01 74 ?? 8B 85 B4 FC FF FF",
+              "rva": 1738314,
+              "offset": 22
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

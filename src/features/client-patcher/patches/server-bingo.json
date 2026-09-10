@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "server-bingo",
+  "title": "Bingo event URL",
+  "description": "Change the URL used by bingo event.",
+  "category": "Network",
+  "group": "Web services",
+  "order": 50,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Bingo event",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "6.65"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 210951,
+              "offset": 21,
+              "signature": "8D 55 C8 89 95 4C FF FF FF 8B 45 C0 50 8B 8D 4C FF FF FF 51 68 ?? ?? ?? ?? 8D 55 E4 52 E8 ?? ?? ?? ?? 83 C4 10 A3 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 75 ?? 8B 45 C0 89 45 B0 8B 4D B0 89 4D B4 83 7D B4 00 74 ?? 6A 01"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 387975,
+              "offset": 21,
+              "signature": "8D 55 C8 89 95 4C FF FF FF 8B 45 C0 50 8B 8D 4C FF FF FF 51 68 ?? ?? ?? ?? 8D 55 E4 52 E8 ?? ?? ?? ?? 83 C4 10 A3 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 75 ?? 8B 45 C0 89 45 B0 8B 4D B0 89 4D B4 83 7D B4 00 74 ?? 6A 01"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

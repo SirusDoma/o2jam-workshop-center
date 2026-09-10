@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "server-download-status",
+  "title": "Download status URL",
+  "description": "Change the URL used by download status.",
+  "category": "Network",
+  "group": "Downloads",
+  "order": 60,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Download status",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "2.33"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 243569,
+              "offset": 18,
+              "signature": "52 8B CE E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 00 6A 03 68 ?? ?? ?? ?? 8B CE E8 ?? ?? ?? ?? 85 C0 74 ?? 8B CE E8 ?? ?? ?? ?? 8B D0 83 C9 FF 8B FA 33 C0 F2 AE F7 D1 49 83 F9 03"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "id": "window-title",
+  "title": "Window title",
+  "description": "Change the text shown in the window title.",
+  "category": "Display",
+  "order": 0,
+  "inputs": [
+    {
+      "id": "title",
+      "label": "Window title",
+      "control": "text",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "3.82"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "encoding": "euc-kr",
+          "referenceScope": "listed",
+          "value": {
+            "input": "title"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 73788,
+              "offset": 11,
+              "signature": "53 51 52 53 53 68 00 00 00 90 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 08 ?? ?? ?? ?? ?? ?? 3B C3 89 46 04 75 ?? 5F 5E 33 C0 5B 83 C4 48 C2 14 00 8B 46 10 8B 4E 0C"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "encoding": "euc-kr",
+          "referenceScope": "listed",
+          "value": {
+            "input": "title"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 203806,
+              "offset": 17,
+              "signature": "8B 55 9C 8B 42 0C 50 6A 00 6A 00 68 00 00 C0 00 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 00 ?? ?? ?? ?? ?? ?? 8B 4D 9C 89 41 04 EB ?? 6A 00 8B 55 0C 52 6A 00 6A 00 8B 45 9C 8B 48 10 51"
+            },
+            {
+              "section": ".text",
+              "rva": 203865,
+              "offset": 17,
+              "signature": "8B 55 9C 8B 42 0C 50 6A 00 6A 00 68 00 00 00 90 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 08 ?? ?? ?? ?? ?? ?? 8B 4D 9C 89 41 04 8B 55 9C 83 7A 04 00 75 ?? 33 C0 E9 ?? ?? ?? ?? 6A 00 FF 15 ?? ?? ?? ?? 89 45 C0 6A 01"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "2.93"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "encoding": "euc-kr",
+          "referenceScope": "listed",
+          "value": {
+            "input": "title"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 55504,
+              "offset": 14,
+              "signature": "6A 00 51 52 6A 00 6A 00 68 00 00 00 80 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 00 ?? ?? ?? ?? ?? ?? 85 C0 89 46 04 75 ?? 5F 5E 83 C4 48 C2 14 00 8B 46 10 8B 4E 0C 50 51"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "3.00"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "encoding": "euc-kr",
+          "referenceScope": "listed",
+          "value": {
+            "input": "title"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 70940,
+              "offset": 11,
+              "signature": "53 51 52 53 53 68 00 00 00 90 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 08 ?? ?? ?? ?? ?? ?? 3B C3 89 46 04 75 ?? 5F 5E 33 C0 5B 83 C4 48 C2 14 00 8B 46 10 8B 4E 0C"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "3.10"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "encoding": "euc-kr",
+          "referenceScope": "listed",
+          "value": {
+            "input": "title"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 62699,
+              "offset": 11,
+              "signature": "53 51 52 53 53 68 00 00 00 90 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 08 ?? ?? ?? ?? ?? ?? 3B C3 89 46 04 75 ?? 5F 5E 33 C0 5B 83 C4 48 C2 14 00 8B 46 10 8B 4E 0C"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "2.33"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "encoding": "euc-kr",
+          "referenceScope": "listed",
+          "value": {
+            "input": "title"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 73484,
+              "offset": 11,
+              "signature": "53 51 52 53 53 68 00 00 00 90 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 08 ?? ?? ?? ?? ?? ?? 3B C3 89 46 04 75 ?? 5F 5E 33 C0 5B 83 C4 48 C2 14 00 8B 46 10 8B 4E 0C"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "5.89"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "encoding": "euc-kr",
+          "referenceScope": "listed",
+          "value": {
+            "input": "title"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 185892,
+              "offset": 17,
+              "signature": "8B 4D A4 8B 51 0C 52 6A 00 6A 00 68 00 00 00 90 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 08 ?? ?? ?? ?? ?? ?? 8B 4D A4 89 41 04 8B 55 A4 83 7A 04 00 75 ?? 33 C0 E9 ?? ?? ?? ?? 6A 00 FF 15 ?? ?? ?? ?? 89 45 C0 6A 01"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "6.65"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "encoding": "euc-kr",
+          "referenceScope": "listed",
+          "value": {
+            "input": "title"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 188590,
+              "offset": 17,
+              "signature": "8B 55 9C 8B 42 0C 50 6A 00 6A 00 68 00 00 C0 00 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 00 ?? ?? ?? ?? ?? ?? 8B 4D 9C 89 41 04 EB ?? 6A 00 8B 55 0C 52 6A 00 6A 00 8B 45 9C 8B 48 10 51"
+            },
+            {
+              "section": ".text",
+              "rva": 188649,
+              "offset": 17,
+              "signature": "8B 55 9C 8B 42 0C 50 6A 00 6A 00 68 00 00 00 90 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 08 ?? ?? ?? ?? ?? ?? 8B 4D 9C 89 41 04 8B 55 9C 83 7A 04 00 75 ?? 33 C0 E9 ?? ?? ?? ?? 6A 00 FF 15 ?? ?? ?? ?? 89 45 C0 6A 01"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

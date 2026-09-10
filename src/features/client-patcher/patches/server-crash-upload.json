@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "server-crash-upload",
+  "title": "Crash report FTP server",
+  "description": "FTP host for crash reports.",
+  "category": "Network",
+  "group": "Network services",
+  "order": 49,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Crash report FTP server",
+      "control": "text",
+      "format": "hostname",
+      "maxLength": 63
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "5.89"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1321625,
+              "offset": 22,
+              "signature": "6A 00 68 00 00 00 08 6A 01 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 00 68 ?? ?? ?? ?? 8B 85 60 F5 FF FF 50 FF 15 ?? ?? ?? ?? 89 85 58 F5 FF FF 83 BD 58 F5 FF FF 00 75 ?? 8B 8D 60 F5 FF FF 51 FF 15 ?? ?? ?? ?? C7 85 04 F2 FF FF 00 00 00 00 C6 45 FC 00 6A 00 6A 01 8D 8D 3C F5 FF FF"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "6.65"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1402036,
+              "offset": 22,
+              "signature": "6A 00 68 00 00 00 08 6A 01 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 00 68 ?? ?? ?? ?? 8B 85 50 F3 FF FF 50 FF 15 ?? ?? ?? ?? 89 85 3C F2 FF FF 83 BD 3C F2 FF FF 00 75 ?? 8B 8D 50 F3 FF FF 51 FF 15 ?? ?? ?? ?? C7 85 FC F0 FF FF 00 00 00 00 C6 45 FC 00 6A 00 6A 01 8D 8D 20 F2 FF FF"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "8.02"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 1755732,
+              "offset": 22,
+              "signature": "6A 00 68 00 00 00 08 6A 01 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 00 68 ?? ?? ?? ?? 8B 85 50 F3 FF FF 50 FF 15 ?? ?? ?? ?? 89 85 3C F2 FF FF 83 BD 3C F2 FF FF 00 75 ?? 8B 8D 50 F3 FF FF 51 FF 15 ?? ?? ?? ?? C7 85 FC F0 FF FF 00 00 00 00 C6 45 FC 00 6A 00 6A 01 8D 8D 20 F2 FF FF"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

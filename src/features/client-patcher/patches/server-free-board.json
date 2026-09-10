@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "server-free-board",
+  "title": "Free board URL",
+  "description": "Change the URL used by free board.",
+  "category": "Network",
+  "group": "Community",
+  "order": 60,
+  "inputs": [
+    {
+      "id": "server",
+      "label": "Free board",
+      "control": "text",
+      "format": "url",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "3.82"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "server"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "rva": 197243,
+              "offset": 30,
+              "signature": "89 4C 24 10 EB ?? C7 44 24 10 ?? ?? ?? ?? EB ?? C7 44 24 10 ?? ?? ?? ?? EB ?? C7 44 24 10 ?? ?? ?? ?? EB ?? C7 44 24 10 ?? ?? ?? ?? EB ?? C7 44 24 10 ?? ?? ?? ?? 8A 44 24 17 55 56 57 6A 00 8D 4C 24 10 88 44 24 10 E8 ?? ?? ?? ?? BF ?? ?? ?? ?? 83 C9 FF"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
