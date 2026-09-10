@@ -601,9 +601,6 @@
 .tilecard .tc-title { font-size: 14px; font-weight: 700; }
 .tilecard .tc-sub { font-size: 12px; line-height: 1.6; color: var(--ink-3); }
 .tilecard .tc-head svg { color: var(--accent); flex-shrink: 0; }
-.tilecard.soon { border: 1px dashed var(--border-strong); border-top-width: 1px; opacity: 0.6; cursor: default; }
-.tilecard.soon:hover { background: none; }
-.tilecard.soon .tc-head svg { color: var(--ink-3); }
 
 .cmpwrap { overflow-x: auto; }
 

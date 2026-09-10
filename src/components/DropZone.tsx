@@ -21,7 +21,7 @@ export function DropZone({
   onOpened?: (files: WorkspaceFile[]) => void;
   onRejected?: (files: File[], kept: number) => void;
   onError?: (error: unknown) => void;
-  onFiles?: (files: File[]) => void;
+  onFiles?: (files: File[]) => void | Promise<void>;
   children?: ReactNode;
   after?: ReactNode;
 }) {
@@ -63,7 +63,7 @@ export function DropZone({
       setBusy(true);
       try {
         if (onFiles) {
-          onFiles(wanted);
+          await onFiles(wanted);
         } else {
           const opened = await add(wanted);
           onOpened?.(opened);
@@ -87,6 +87,7 @@ export function DropZone({
   return (
     <div
       className={`opener${over ? ' over' : ''}`}
+      aria-busy={busy}
       onDragOver={(e) => {
         e.preventDefault();
         setOver(true);
@@ -116,8 +117,8 @@ export function DropZone({
         hidden
         onChange={(e) => void take(Array.from(e.target.files ?? []))}
       />
-      {busy ? <span className="spin" /> : <Upload size={18} />}
-      <div className="dz-text">
+      {busy ? <span className="spin" aria-hidden="true" /> : <Upload size={18} />}
+      <div className="dz-text" role="status">
         {reading ? (
           <>
             <span className="dz-label">

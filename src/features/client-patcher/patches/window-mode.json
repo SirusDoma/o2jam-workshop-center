@@ -35,7 +35,7 @@
       "label": "Maintain aspect ratio",
       "description": "Keep the image proportions with black bars. Turn off to stretch to fill.",
       "control": "checkbox",
-      "default": true,
+      "default": false,
       "visibleWhen": {
         "input": "mode",
         "equals": 0

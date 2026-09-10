@@ -1,7 +1,7 @@
-import { ListMusic, MonitorPlay, Music2, Package, Terminal, UserRound, type LucideIcon } from 'lucide-react';
+import { ListMusic, MonitorPlay, Music2, Package, PencilRuler, Terminal, UserRound, type LucideIcon } from 'lucide-react';
 
 export interface ToolCatalogEntry {
-  id: 'music-list' | 'packages' | 'scene' | 'avatar' | 'arguments-builder' | 'note-tool';
+  id: 'music-list' | 'packages' | 'scene' | 'avatar' | 'arguments-builder' | 'note-tool' | 'client-patcher';
   path: string;
   label: string;
   description: string;
@@ -15,4 +15,5 @@ export const TOOL_CATALOG: ToolCatalogEntry[] = [
   { id: 'scene', path: '/tools/scene', label: 'Scene Composer', description: 'Customize the scene graph of the interface.', icon: MonitorPlay },
   { id: 'avatar', path: '/tools/avatar', label: 'Avatars', description: 'Build, modify and preview avatar items.', icon: UserRound },
   { id: 'arguments-builder', path: '/tools/arguments-builder', label: 'Arguments Builder', description: "Generate a client's launch command.", icon: Terminal },
+  { id: 'client-patcher', path: '/tools/client-patcher', label: 'Client Patcher', description: 'Patch game client executable.', icon: PencilRuler },
 ];
