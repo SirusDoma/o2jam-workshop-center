@@ -24,7 +24,7 @@ const VERSION_589_GRAMMAR: ArgumentsGrammar = {
   template: 'OTwo.exe <mode> 1 <user_id> <password> O2Jam <gender> <rank> <ftp_host>:<ftp_port> <ftp_path> <gateway_count> <addr1> <port1> …',
   example: 'OTwo.exe INET 1 my_token _ O2Jam 1 0 my-ftp-server:1234 O2Jam/Music 3 192.168.10.1 15010 …',
 };
-const VERSION_665_AND_802_GRAMMAR: ArgumentsGrammar = {
+const VERSION_665_AND_755_GRAMMAR: ArgumentsGrammar = {
   template: 'OTwo.exe <encrypted_parameters> |test|??|<addr1>|<port1>|test|??|<addr2>|<port2>…',
   example: 'OTwo.exe 00C70200E85000DF8E00E… |test|??|192.168.10.1|15010|test|??|192.168.10.2|15011',
 };
@@ -165,7 +165,7 @@ const VERSION_310_AND_382_DEFAULTS: PresetDefaults = {
   gateways: defaultGateways,
 };
 
-const VERSION_665_AND_802_DEFAULTS: PresetDefaults = { fields: {}, gateways: defaultGateways };
+const VERSION_665_AND_755_DEFAULTS: PresetDefaults = { fields: {}, gateways: defaultGateways };
 
 const ENCORE_BLOB: Partial<Record<AuthParamKey, BlobFieldOverride>> = {
   username: {
@@ -279,8 +279,8 @@ export const ARGUMENTS_PRESETS: readonly ArgumentsPreset[] = [
     tokenEncoding: 'plain',
     cipher: IDENTITY_P2_CIPHER_OPTIONS,
     blob: { username: { required: true }, gameVersion: { default: '6.65' } },
-    grammar: VERSION_665_AND_802_GRAMMAR,
-    defaults: VERSION_665_AND_802_DEFAULTS,
+    grammar: VERSION_665_AND_755_GRAMMAR,
+    defaults: VERSION_665_AND_755_DEFAULTS,
   },
   {
     id: '6.65-identity-p2-encore',
@@ -291,32 +291,32 @@ export const ARGUMENTS_PRESETS: readonly ArgumentsPreset[] = [
     tokenEncoding: 'plain',
     cipher: IDENTITY_P2_CIPHER_OPTIONS,
     blob: { ...ENCORE_BLOB, gameVersion: { default: '6.65' } },
-    grammar: VERSION_665_AND_802_GRAMMAR,
-    defaults: VERSION_665_AND_802_DEFAULTS,
+    grammar: VERSION_665_AND_755_GRAMMAR,
+    defaults: VERSION_665_AND_755_DEFAULTS,
   },
   {
-    id: '8.02-default',
+    id: '7.55-default',
     name: 'Default',
     description: 'NOWCOM default launch string.',
-    clientVersionId: '8.02',
+    clientVersionId: '7.55',
     fields: [],
     tokenEncoding: 'plain',
     cipher: MEMORYER_CIPHER_OPTIONS,
-    blob: { username: { required: true }, gameVersion: { default: '8.02' } },
-    grammar: VERSION_665_AND_802_GRAMMAR,
-    defaults: VERSION_665_AND_802_DEFAULTS,
+    blob: { username: { required: true }, gameVersion: { default: '7.55' } },
+    grammar: VERSION_665_AND_755_GRAMMAR,
+    defaults: VERSION_665_AND_755_DEFAULTS,
   },
   {
-    id: '8.02-memoryer-encore',
+    id: '7.55-memoryer-encore',
     name: 'Memoryer.Encore',
     description: 'Auth token authentication scheme.',
-    clientVersionId: '8.02',
+    clientVersionId: '7.55',
     fields: [],
     tokenEncoding: 'plain',
     cipher: MEMORYER_CIPHER_OPTIONS,
-    blob: { ...ENCORE_BLOB, gameVersion: { default: '8.02' } },
-    grammar: VERSION_665_AND_802_GRAMMAR,
-    defaults: VERSION_665_AND_802_DEFAULTS,
+    blob: { ...ENCORE_BLOB, gameVersion: { default: '7.55' } },
+    grammar: VERSION_665_AND_755_GRAMMAR,
+    defaults: VERSION_665_AND_755_DEFAULTS,
   },
 ];
 

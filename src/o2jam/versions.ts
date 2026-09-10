@@ -3,7 +3,7 @@ import { FormatError } from './binary';
 import type { MusicListVersionId } from './ojnlist';
 import type { ItemDataVersionId } from './itemdata';
 
-export type ClientVersionId = '3.10' | '3.82' | '2.33' | '6.65' | '5.89' | '8.02';
+export type ClientVersionId = '3.10' | '3.82' | '2.33' | '6.65' | '5.89' | '7.55';
 
 export interface ClientVersion {
   id: ClientVersionId;
@@ -62,13 +62,13 @@ export const CLIENT_VERSIONS: readonly ClientVersion[] = [
     itemDataId: '6.65',
   },
   {
-    id: '8.02',
+    id: '7.55',
     label: 'O2Jam Classic',
-    clientVersion: '8.02',
+    clientVersion: '7.55',
     distribution: 'NOWCOM',
-    musicListId: '8.02',
+    musicListId: '7.55',
     musicListFilename: 'OJNList.dat',
-    itemDataId: '8.02',
+    itemDataId: '7.55',
   },
 ];
 

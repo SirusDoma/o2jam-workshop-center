@@ -4,7 +4,7 @@ import type { BinarySource, LabelledId } from './binary';
 import { DEFAULT_ENCODING, detectEncoding, encodeText } from './text';
 import type { O2Encoding } from './text';
 
-export type ItemDataVersionId = '2.93' | '3.00' | '3.10' | '3.82' | '2.33' | '6.65' | '5.89' | '8.02';
+export type ItemDataVersionId = '2.93' | '3.00' | '3.10' | '3.82' | '2.33' | '6.65' | '5.89' | '7.55';
 
 export function isItemDataFilename(name: string): boolean {
   return /^itemdata.*\.dat$/i.test(name.trim());
@@ -164,7 +164,7 @@ const ITEM_TYPES_BASE: readonly LabelledId[] = [
   { id: 24, label: 'Attributive' },
 ];
 
-const ITEM_TYPES_802: readonly LabelledId[] = [
+const ITEM_TYPES_755: readonly LabelledId[] = [
   ...ITEM_TYPES_BASE,
   { id: 25, label: 'Name Changer' },
   { id: 26, label: 'Penalty Reset' },
@@ -184,7 +184,7 @@ const PAYMENT_382: readonly LabelledId[] = [
   { id: 2, label: 'ePoint / O2Cash / Gash / MCash' },
 ];
 
-const PAYMENT_802: readonly LabelledId[] = [...PAYMENT_382, { id: 3, label: 'Any' }];
+const PAYMENT_755: readonly LabelledId[] = [...PAYMENT_382, { id: 3, label: 'Any' }];
 
 
 export interface ItemPrefixLayout {
@@ -261,7 +261,7 @@ const LAYOUT_293: ItemDataLayout = {
   spriteEncoding: 'presence-mask',
 };
 
-const LAYOUT_802: ItemDataLayout = {
+const LAYOUT_755: ItemDataLayout = {
   ...LAYOUT_382,
   specialItemFlagMale: 22,
   specialItemFlagFemale: 26,
@@ -343,12 +343,12 @@ export const ITEM_DATA_VERSIONS: readonly ItemDataVersion[] = [
     supportsSetInfo: true,
   },
   {
-    id: '8.02',
-    label: 'v8.02 — O2Jam Classic',
-    clientVersion: '8.02',
-    layout: LAYOUT_802,
-    itemTypes: ITEM_TYPES_802,
-    paymentMethods: PAYMENT_802,
+    id: '7.55',
+    label: 'v7.55 — O2Jam Classic',
+    clientVersion: '7.55',
+    layout: LAYOUT_755,
+    itemTypes: ITEM_TYPES_755,
+    paymentMethods: PAYMENT_755,
     supportsSetInfo: true,
   },
 ];

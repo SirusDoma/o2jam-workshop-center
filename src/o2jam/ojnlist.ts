@@ -6,7 +6,7 @@ import type { O2Encoding } from './text';
 import { OJN_HEADER_SIZE, parseOjnHeader, writeOjnHeader } from './ojn';
 import type { OjnHeader } from './ojn';
 
-export type MusicListVersionId = '3.10' | '3.82' | '2.33' | '6.65' | '5.89' | '8.02';
+export type MusicListVersionId = '3.10' | '3.82' | '2.33' | '6.65' | '5.89' | '7.55';
 
 export type ListFieldType = 'int32' | 'int16' | 'byte' | 'char' | 'bytes';
 
@@ -393,11 +393,11 @@ export const MUSIC_LIST_VERSIONS: readonly MusicListVersion[] = [
     sections: SECTIONS_665,
   },
   {
-    id: '8.02',
-    label: 'v8.02 — O2Jam Classic',
+    id: '7.55',
+    label: 'v7.55 — O2Jam Classic',
     client: 'O2Jam Classic',
     filename: 'OJNList.dat',
-    clientVersion: '8.02',
+    clientVersion: '7.55',
     sections: SECTIONS_665,
   },
 ];
@@ -684,7 +684,7 @@ export function buildMusicList(
 }
 
 
-const AMBIGUOUS_DEFAULTS: readonly MusicListVersionId[] = ['3.82', '8.02'];
+const AMBIGUOUS_DEFAULTS: readonly MusicListVersionId[] = ['3.82', '7.55'];
 
 export function detectMusicListVersion(source: BinarySource, filename = ''): MusicListVersionId | null {
   const reader = new ByteReader(source);

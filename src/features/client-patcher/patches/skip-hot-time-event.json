@@ -16,7 +16,7 @@
   "variants": [
     {
       "client": {
-        "version": "8.02",
+        "version": "7.55",
         "imageBase": 4194304,
         "entryPoint": 2077624,
         "anchors": [
