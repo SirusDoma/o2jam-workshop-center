@@ -1,4 +1,4 @@
-# O2WC
+# O2Jam Workshop Center
 
 [sirusdoma.github.io/o2jam-workshop-center/](https://sirusdoma.github.io/o2jam-workshop-center)  
 
