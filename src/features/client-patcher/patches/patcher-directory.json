@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "id": "patcher-directory",
+  "title": "FTP patch directory",
+  "description": "Folder under the FTP root used for patch downloads.",
+  "category": "Patcher",
+  "order": 104,
+  "inputs": [
+    {
+      "id": "directory",
+      "label": "Directory name",
+      "control": "text",
+      "maxLength": 64,
+      "format": "filename"
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "directory"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 51 8D 95 A8 FE FF FF 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ??"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 51 8D 95 ?? ?? ?? ?? 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ??"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "directory",
+            "suffix": "/PatchInfo"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 51 8D 95 2C FC FF FF 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ??"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 51 8D 95 ?? ?? ?? ?? 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ??"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "directory"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 51 8D 95 A8 FE FF FF 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ??"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 51 8D 95 ?? ?? ?? ?? 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ??"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "directory",
+            "suffix": "/PatchInfo"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 51 8D 95 2C FC FF FF 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ??"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 51 8D 95 ?? ?? ?? ?? 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ??"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "directory",
+            "suffix": "/MUSIC/"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 51 8D 95 A4 FE FF FF 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 66 8B 8E C4 02 00 00 8B 86 B8 02 00 00 83 C4 10 6A 01 51"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

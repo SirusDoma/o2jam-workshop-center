@@ -225,7 +225,7 @@ export default function ClientPatcherPage() {
                 {versions.length ? (
                   versions.map((version) => (
                     <span className="chip" key={version}>
-                      v{version}
+                      {client.name} v{version}
                     </span>
                   ))
                 ) : (

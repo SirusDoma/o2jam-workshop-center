@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "patcher-registry",
+  "title": "Installation registry key",
+  "description": "Stores the installation path and installed versions.",
+  "category": "Patcher",
+  "order": 100,
+  "inputs": [
+    {
+      "id": "key",
+      "label": "HKLM subkey",
+      "control": "text",
+      "maxLength": 240
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "key"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 8D 8E ?? ?? ?? ?? E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 40 04 8D 4C 24 ?? 8D 96 ?? ?? ?? ?? 51 8B 40 70 52 68 ?? ?? ?? ?? 50 E8 ?? ?? ?? ??"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "key"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 8D 8E ?? ?? ?? ?? E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 40 04 8D 54 24 ?? 8D 8E ?? ?? ?? ?? 52 8B 50 70 51 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ??"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

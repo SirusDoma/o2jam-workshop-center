@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "patcher-server-310",
+  "title": "Patch metadata server",
+  "description": "Server providing version info, FTP locations, and the game server list.",
+  "category": "Patcher",
+  "order": 101,
+  "inputs": [
+    {
+      "id": "host",
+      "label": "IPv4 address",
+      "control": "text",
+      "maxLength": 15,
+      "format": "ipv4",
+      "group": "Metadata server"
+    },
+    {
+      "id": "port",
+      "label": "Port",
+      "control": "number",
+      "format": "port",
+      "default": 15050,
+      "group": "Metadata server"
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "host"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 8E ?? ?? ?? ?? 8B 54 24 ?? 8B 46 1C 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 41 52 50 89 8E ?? ?? ?? ?? FF 15 ?? ?? ?? ??"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 8D 4C 24 ?? C6 84 24 ?? ?? ?? ?? 01 E8 ?? ?? ?? ?? 8B 86 ?? ?? ?? ?? 8B 54 24 ?? 40 68 ?? ?? ?? ?? 89 86 ?? ?? ?? ?? 8B 46 1C 68 ?? ?? ?? ?? 52 50 FF 15 ?? ?? ?? ??"
+            }
+          ]
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "offset": 1,
+            "signature": "68 ?? ?? ?? ?? 41 52 50 89 8E ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 83 C4 10 85 C0"
+          },
+          "original": "CA 3A 00 00",
+          "readCurrent": true,
+          "value": {
+            "input": "port"
+          },
+          "encoding": "u32le",
+          "size": 4
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "offset": 1,
+            "signature": "68 ?? ?? ?? ?? 52 50 FF 15 ?? ?? ?? ?? 83 C4 10 85 C0"
+          },
+          "original": "CA 3A 00 00",
+          "readCurrent": true,
+          "value": {
+            "input": "port"
+          },
+          "encoding": "u32le",
+          "size": 4
+        }
+      ]
+    }
+  ]
+}

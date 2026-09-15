@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "patcher-notice",
+  "title": "Patcher notice URL",
+  "description": "Webpage shown in the patcher.",
+  "category": "Patcher",
+  "order": 102,
+  "inputs": [
+    {
+      "id": "url",
+      "label": "Notice URL",
+      "control": "text",
+      "maxLength": 120,
+      "format": "url"
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "url"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 53 53 6A 01 8D 4E ?? 6A 68 51 E8 ?? ?? ?? ??"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "url"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 53 53 6A 01 8D 8E ?? ?? ?? ?? 6A 68 51 E8 ?? ?? ?? ??"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

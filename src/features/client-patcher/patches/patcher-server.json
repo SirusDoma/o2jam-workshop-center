@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "patcher-server",
+  "title": "Patch metadata server",
+  "description": "Server providing version info, FTP locations, and the game server list.",
+  "category": "Patcher",
+  "order": 101,
+  "inputs": [
+    {
+      "id": "host",
+      "label": "Host",
+      "control": "text",
+      "maxLength": 120,
+      "format": "hostname",
+      "group": "Metadata server"
+    },
+    {
+      "id": "port",
+      "label": "Port",
+      "control": "number",
+      "format": "port",
+      "default": 15050,
+      "group": "Metadata server"
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "host"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? AA E8 ?? ?? ?? ?? 3B C3 74 ?? 8B 50 0C 33 C9 8B 02 33 D2 8A 48 03 8A 50 02"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? C6 84 24 ?? ?? ?? ?? 01 AA E8 ?? ?? ?? ?? 3B C3 74 ?? 8B 50 0C 33 C9 8B 02 33 D2 8A 48 03 8A 50 02"
+            }
+          ]
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "offset": 1,
+            "signature": "68 ?? ?? ?? ?? 41 52 50 89 8E ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 83 C4 10 85 C0"
+          },
+          "original": "CA 3A 00 00",
+          "readCurrent": true,
+          "value": {
+            "input": "port"
+          },
+          "encoding": "u32le",
+          "size": 4
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "offset": 1,
+            "signature": "68 ?? ?? ?? ?? 52 50 FF 15 ?? ?? ?? ?? 83 C4 10 85 C0"
+          },
+          "original": "CA 3A 00 00",
+          "readCurrent": true,
+          "value": {
+            "input": "port"
+          },
+          "encoding": "u32le",
+          "size": 4
+        }
+      ]
+    }
+  ]
+}

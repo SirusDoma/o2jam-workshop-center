@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "id": "patcher-ftp",
+  "title": "Patch FTP credentials",
+  "description": "FTP login for patch and music downloads.",
+  "category": "Patcher",
+  "order": 103,
+  "inputs": [
+    {
+      "id": "user",
+      "label": "Username",
+      "control": "text",
+      "maxLength": 120
+    },
+    {
+      "id": "password",
+      "label": "Password",
+      "control": "text",
+      "maxLength": 120
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "user"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 6,
+              "signature": "68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 50 8D 4D ?? E8 ?? ?? ?? ?? 8B ?? 8D 95 ?? ?? ?? ?? 52 8B ??"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "password"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 50 8D 4D ?? E8 ?? ?? ?? ?? 8B ?? 8D 95 ?? ?? ?? ?? 52 8B ??"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "user"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 6,
+              "signature": "68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 8B ?? 8D 85 ?? ?? ?? ?? 50 8B ??"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "password"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 8B ?? 8D 85 ?? ?? ?? ?? 50 8B ??"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "user"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 6,
+              "signature": "68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 50 8D 4D ?? E8 ?? ?? ?? ?? 8B ?? 8D 95 ?? ?? ?? ?? 52 8B ??"
+            },
+            {
+              "section": ".text",
+              "offset": 6,
+              "signature": "68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 8B ?? 8D 85 ?? ?? ?? ?? 50 8B ??"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "password"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 50 8D 4D ?? E8 ?? ?? ?? ?? 8B ?? 8D 95 ?? ?? ?? ?? 52 8B ??"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 8B ?? 8D 85 ?? ?? ?? ?? 50 8B ??"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
