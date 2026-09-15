@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "id": "screenshot-directory",
+  "title": "Screenshot directory",
+  "description": "Change the screenshot folder name.",
+  "category": "Screenshots",
+  "order": 30,
+  "inputs": [
+    {
+      "id": "directory",
+      "label": "Folder name",
+      "control": "text",
+      "format": "filename",
+      "maxLength": 64
+    }
+  ],
+  "variants": [
+    {
+      "client": { "version": "*" },
+      "operations": [
+        {
+          "type": "string",
+          "referenceScope": "listed",
+          "value": { "input": "directory", "prefix": "%s\\" },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 9,
+              "signature": "8D 94 24 58 02 00 00 51 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 8B 2D ?? ?? ?? ?? 83 C4 0C"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B ?? ?? ?? ?? ?? 83 C4 0C 8D"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "referenceScope": "listed",
+          "value": { "input": "directory" },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 6,
+              "signature": "85 C0 75 ?? ?? 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 8D"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": { "version": "*" },
+      "operations": [
+        {
+          "type": "string",
+          "referenceScope": "listed",
+          "value": { "input": "directory", "prefix": "%s\\" },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 8,
+              "signature": "8D 8D 94 FC FF FF 51 68 ?? ?? ?? ?? 8D 95 EC FE FF FF 52 E8 ?? ?? ?? ?? 83 C4 0C"
+            },
+            {
+              "section": ".text",
+              "offset": 8,
+              "signature": "8D 85 C8 FD FF FF 50 68 ?? ?? ?? ?? 8D 8D D0 FE FF FF 51 E8 ?? ?? ?? ?? 83 C4 0C"
+            }
+          ]
+        },
+        {
+          "type": "string",
+          "referenceScope": "listed",
+          "value": { "input": "directory" },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 7,
+              "signature": "85 C0 75 1A 6A 00 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 8D 85 D0 FE FF FF 50 FF 15"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": { "version": "*" },
+      "operations": [
+        {
+          "type": "string",
+          "encoding": "euc-kr",
+          "referenceScope": "listed",
+          "value": { "input": "directory", "prefix": "%s\\" },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 8,
+              "signature": "8D 95 EC FE FF FF 52 68 ?? ?? ?? ?? 8D 85 EC FE FF FF 50 E8 ?? ?? ?? ?? 83 C4 0C"
+            },
+            {
+              "section": ".text",
+              "offset": 8,
+              "signature": "8D 8D C0 FC FF FF 51 68 ?? ?? ?? ?? 8D 95 D0 FE FF FF 52 E8 ?? ?? ?? ?? 83 C4 0C"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

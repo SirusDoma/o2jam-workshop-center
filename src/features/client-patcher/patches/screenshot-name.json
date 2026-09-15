@@ -1,0 +1,383 @@
+{
+  "schemaVersion": 1,
+  "id": "screenshot-name",
+  "title": "Screenshot name",
+  "description": "Change the full screenshot filename format. Changing the extension does not change the image encoding.",
+  "category": "Screenshots",
+  "order": 31,
+  "inputs": [
+    {
+      "id": "filename",
+      "label": "Filename format",
+      "control": "text",
+      "maxLength": 120,
+      "format": "filename",
+      "printf": { "integerArgs": 1, "maxLength": 255 }
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "referenceScope": "listed",
+          "value": {
+            "input": "filename"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 83 C4 0C 8B CF 6A 00 E8 ?? ?? ?? ?? 85 C0 7D 17"
+            }
+          ]
+        },
+        {
+          "type": "hook",
+          "at": {
+            "section": ".text",
+            "offset": 8,
+            "signature": "85 C0 0F 84 ?? 00 00 00 53 8D 4C 24 1C 57 51 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 8B ?? ?? ?? ?? ??"
+          },
+          "original": "53 8D 4C 24 1C",
+          "code": "53 57 60 FF 35 00 00 00 00 FF 35 00 00 00 00 FF 35 00 00 00 00 68 00 00 00 00 E8 00 00 00 00 58 8D 80 00 00 00 00 FF 30 E8 00 00 00 00 83 C4 14 89 44 24 04 61 E9 00 00 00 00 55 53 57 56 81 EC 60 02 00 00 8B BC 24 80 02 00 00 8B 84 24 7C 02 00 00 8B B4 24 74 02 00 00 66 C7 44 24 0E 2A 00 31 ED 8D 4C 24 4B 89 4C 24 14 8A 16 84 D2 74 1D 8D 4E 01 80 FA 25 75 0C 8A 11 80 FA 25 75 12 83 C6 02 EB 02 89 CE 45 FF 44 24 14 EB DD 31 D2 89 F1 41 84 D2 74 13 80 FA 58 74 0E 89 D3 80 C3 9F 80 FB 1A 72 04 8A 11 EB E8 31 DB 80 FA 6C 0F 94 C3 8A 4C 19 FF 89 CA 80 C2 A8 88 54 24 02 F6 C2 DF 6A 10 5E 6A 0A 5A 0F 44 D6 80 F9 6F 6A 08 5E 0F 45 F2 8D 54 24 20 8D 4C 24 0E 52 51 FF D0 89 44 24 10 83 F8 FF 0F 84 A2 01 00 00 C7 44 24 04 00 00 00 00 89 74 24 1C 8D 74 24 20 89 6C 24 08 F6 44 24 20 10 0F 85 63 01 00 00 31 C0 48 80 7C 04 4D 00 8D 40 01 75 F6 39 E8 0F 86 4E 01 00 00 8B 44 24 14 8A 50 01 40 80 FA 20 74 F7 88 54 24 03 80 C2 D5 8D 68 01 31 C9 F6 C2 FD 0F 94 C2 0F 45 E8 F6 44 24 02 DF 75 2A 80 7D 00 30 75 24 88 D1 01 C8 83 C0 02 0F B6 48 FF 89 CA 80 C2 BF 88 CE 80 C6 20 80 FA 1A 0F B6 D6 0F 43 D1 80 FA 78 0F 44 E8 31 C9 8A 45 00 84 C0 0F 84 DF 00 00 00 89 C2 80 C2 BF 0F B6 F0 04 20 80 FA 1A 0F B6 C0 0F 43 C6 0F B6 D0 04 D0 3C 09 77 05 83 C2 D0 EB 0F 89 D0 04 9F 83 C2 A9 3C 06 6A 10 58 0F 43 D0 8B 74 24 1C 39 F2 0F 83 A3 00 00 00 89 D0 F7 D0 89 D7 31 D2 F7 F6 39 C1 0F 87 91 00 00 00 45 0F AF CE 01 CF 89 FE F7 DE 80 7C 24 03 2D 0F 45 F7 89 F9 3B 74 24 04 76 8D 89 7C 24 18 56 FF B4 24 78 02 00 00 8D 84 24 68 01 00 00 50 FF 94 24 84 02 00 00 83 C4 0C 31 C0 8A 8C 04 60 01 00 00 84 C9 74 33 89 CA 80 C2 BF 0F B6 F9 80 C1 20 80 FA 1A 0F B6 C9 0F 43 CF 0F B6 54 04 4C 89 D3 80 C3 BF 88 D7 80 C7 20 80 FB 1A 0F B6 DF 0F 43 DA 38 D9 75 13 40 EB C2 80 7C 04 4C 00 8B 44 24 04 0F 44 C6 89 44 24 04 8B 4C 24 18 E9 16 FF FF FF 8B BC 24 80 02 00 00 8B 6C 24 08 8D 74 24 20 56 FF 74 24 14 FF D7 85 C0 0F 85 83 FE FF FF FF 74 24 10 FF 94 24 88 02 00 00 8B 44 24 04 EB 02 31 C0 81 C4 60 02 00 00 5E 5F 5B 5D C3",
+          "fixups": [
+            {
+              "offset": 5,
+              "encoding": "u32le",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 3,
+                  "signature": "?? FF 15 ?? ?? ?? ?? 8D ?? 24 60 01 00 00 ?? FF D5 5F 5B 8B 4C 24 14 46 56 E8 ?? ?? ?? ??"
+                },
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 11,
+              "encoding": "u32le",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 15,
+                  "signature": "57 51 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 8B ?? ?? ?? ?? ?? 8B ?? 8D 54 24 20 52 ?? FF ?? 85 C0 74 ??"
+                },
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 17,
+              "encoding": "u32le",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 9,
+                  "signature": "57 51 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 8B ?? ?? ?? ?? ?? 8B ?? 8D 54 24 20 52 ?? FF ?? 85 C0 74 ??"
+                },
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 22,
+              "encoding": "u32le",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 7,
+                  "signature": "68 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 83 C4 0C 8B CF 6A 00 E8 ?? ?? ?? ?? 85 C0 7D 17"
+                },
+                "read": "rel32"
+              }
+            },
+            {
+              "offset": 34,
+              "encoding": "rel32",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 1,
+                  "signature": "68 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 83 C4 0C 8B CF 6A 00 E8 ?? ?? ?? ?? 85 C0 7D 17"
+                }
+              },
+              "relativeTo": 31
+            },
+            {
+              "offset": 41,
+              "encoding": "rel32",
+              "value": {
+                "codeOffset": 58
+              }
+            },
+            {
+              "offset": 54,
+              "encoding": "rel32",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 7,
+                  "signature": "?? FF 15 ?? ?? ?? ?? 8D ?? 24 60 01 00 00 ?? FF D5 5F 5B 8B 4C 24 14 46 56 E8 ?? ?? ?? ??"
+                }
+              }
+            }
+          ],
+          "when": {
+            "not": {
+              "input": "filename",
+              "equals": "ScreenShot%03d.jpg"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "referenceScope": "listed",
+          "value": {
+            "input": "filename"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 51 E8 ?? ?? ?? ?? 83 C4 0C 8D 94 24 ?? ?? ?? ?? 8D 4C 24 ?? 53 52 E8 ?? ?? ?? ?? 85 C0 75 1B"
+            }
+          ]
+        },
+        {
+          "type": "hook",
+          "at": {
+            "section": ".text",
+            "offset": 8,
+            "signature": "85 C0 0F 84 ?? 00 00 00 53 8D 4C 24 1C 57 51 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 8B ?? ?? ?? ?? ??"
+          },
+          "original": "53 8D 4C 24 1C",
+          "code": "53 57 60 FF 35 00 00 00 00 FF 35 00 00 00 00 FF 35 00 00 00 00 68 00 00 00 00 E8 00 00 00 00 58 8D 80 00 00 00 00 FF 30 E8 00 00 00 00 83 C4 14 89 44 24 04 61 E9 00 00 00 00 55 53 57 56 81 EC 60 02 00 00 8B BC 24 80 02 00 00 8B 84 24 7C 02 00 00 8B B4 24 74 02 00 00 66 C7 44 24 0E 2A 00 31 ED 8D 4C 24 4B 89 4C 24 14 8A 16 84 D2 74 1D 8D 4E 01 80 FA 25 75 0C 8A 11 80 FA 25 75 12 83 C6 02 EB 02 89 CE 45 FF 44 24 14 EB DD 31 D2 89 F1 41 84 D2 74 13 80 FA 58 74 0E 89 D3 80 C3 9F 80 FB 1A 72 04 8A 11 EB E8 31 DB 80 FA 6C 0F 94 C3 8A 4C 19 FF 89 CA 80 C2 A8 88 54 24 02 F6 C2 DF 6A 10 5E 6A 0A 5A 0F 44 D6 80 F9 6F 6A 08 5E 0F 45 F2 8D 54 24 20 8D 4C 24 0E 52 51 FF D0 89 44 24 10 83 F8 FF 0F 84 A2 01 00 00 C7 44 24 04 00 00 00 00 89 74 24 1C 8D 74 24 20 89 6C 24 08 F6 44 24 20 10 0F 85 63 01 00 00 31 C0 48 80 7C 04 4D 00 8D 40 01 75 F6 39 E8 0F 86 4E 01 00 00 8B 44 24 14 8A 50 01 40 80 FA 20 74 F7 88 54 24 03 80 C2 D5 8D 68 01 31 C9 F6 C2 FD 0F 94 C2 0F 45 E8 F6 44 24 02 DF 75 2A 80 7D 00 30 75 24 88 D1 01 C8 83 C0 02 0F B6 48 FF 89 CA 80 C2 BF 88 CE 80 C6 20 80 FA 1A 0F B6 D6 0F 43 D1 80 FA 78 0F 44 E8 31 C9 8A 45 00 84 C0 0F 84 DF 00 00 00 89 C2 80 C2 BF 0F B6 F0 04 20 80 FA 1A 0F B6 C0 0F 43 C6 0F B6 D0 04 D0 3C 09 77 05 83 C2 D0 EB 0F 89 D0 04 9F 83 C2 A9 3C 06 6A 10 58 0F 43 D0 8B 74 24 1C 39 F2 0F 83 A3 00 00 00 89 D0 F7 D0 89 D7 31 D2 F7 F6 39 C1 0F 87 91 00 00 00 45 0F AF CE 01 CF 89 FE F7 DE 80 7C 24 03 2D 0F 45 F7 89 F9 3B 74 24 04 76 8D 89 7C 24 18 56 FF B4 24 78 02 00 00 8D 84 24 68 01 00 00 50 FF 94 24 84 02 00 00 83 C4 0C 31 C0 8A 8C 04 60 01 00 00 84 C9 74 33 89 CA 80 C2 BF 0F B6 F9 80 C1 20 80 FA 1A 0F B6 C9 0F 43 CF 0F B6 54 04 4C 89 D3 80 C3 BF 88 D7 80 C7 20 80 FB 1A 0F B6 DF 0F 43 DA 38 D9 75 13 40 EB C2 80 7C 04 4C 00 8B 44 24 04 0F 44 C6 89 44 24 04 8B 4C 24 18 E9 16 FF FF FF 8B BC 24 80 02 00 00 8B 6C 24 08 8D 74 24 20 56 FF 74 24 14 FF D7 85 C0 0F 85 83 FE FF FF FF 74 24 10 FF 94 24 88 02 00 00 8B 44 24 04 EB 02 31 C0 81 C4 60 02 00 00 5E 5F 5B 5D C3",
+          "fixups": [
+            {
+              "offset": 5,
+              "encoding": "u32le",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 3,
+                  "signature": "?? FF 15 ?? ?? ?? ?? 8D ?? 24 60 01 00 00 ?? FF D5 5F 5B 8B 4C 24 14 46 56 E8 ?? ?? ?? ??"
+                },
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 11,
+              "encoding": "u32le",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 15,
+                  "signature": "57 51 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 8B ?? ?? ?? ?? ?? 8B ?? 8D 54 24 20 52 ?? FF ?? 85 C0 74 ??"
+                },
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 17,
+              "encoding": "u32le",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 9,
+                  "signature": "57 51 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 8B ?? ?? ?? ?? ?? 8B ?? 8D 54 24 20 52 ?? FF ?? 85 C0 74 ??"
+                },
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 22,
+              "encoding": "u32le",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 7,
+                  "signature": "68 ?? ?? ?? ?? 51 E8 ?? ?? ?? ?? 83 C4 0C 8D 94 24 ?? ?? ?? ?? 8D 4C 24 ?? 53 52 E8 ?? ?? ?? ?? 85 C0 75 1B"
+                },
+                "read": "rel32"
+              }
+            },
+            {
+              "offset": 34,
+              "encoding": "rel32",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 1,
+                  "signature": "68 ?? ?? ?? ?? 51 E8 ?? ?? ?? ?? 83 C4 0C 8D 94 24 ?? ?? ?? ?? 8D 4C 24 ?? 53 52 E8 ?? ?? ?? ?? 85 C0 75 1B"
+                }
+              },
+              "relativeTo": 31
+            },
+            {
+              "offset": 41,
+              "encoding": "rel32",
+              "value": {
+                "codeOffset": 58
+              }
+            },
+            {
+              "offset": 54,
+              "encoding": "rel32",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 7,
+                  "signature": "?? FF 15 ?? ?? ?? ?? 8D ?? 24 60 01 00 00 ?? FF D5 5F 5B 8B 4C 24 14 46 56 E8 ?? ?? ?? ??"
+                }
+              }
+            }
+          ],
+          "when": {
+            "not": {
+              "input": "filename",
+              "equals": "ScreenShot%03d.bmp"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "referenceScope": "listed",
+          "value": {
+            "input": "filename"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 5,
+              "signature": "8B ?? 08 ?? 68 ?? ?? ?? ?? 8D ?? D0 FE FF FF ?? E8 ?? ?? ?? ?? 83 C4 0C 6A 00 8B 8D ?? ?? ?? ?? E8 ?? ?? ?? ?? 85 C0 7D 14"
+            }
+          ]
+        },
+        {
+          "type": "hook",
+          "at": {
+            "section": ".text",
+            "offset": 8,
+            "signature": "85 C0 0F 84 1B 01 00 00 8D ?? 9C FD FF FF ?? 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 89 85 E4 FE FF FF"
+          },
+          "original": "8D ?? 9C FD FF FF",
+          "code": "60 FF 35 00 00 00 00 FF 35 00 00 00 00 FF 35 00 00 00 00 68 00 00 00 00 E8 00 00 00 00 58 8D 80 00 00 00 00 FF 30 E8 00 00 00 00 83 C4 14 89 85 00 00 00 00 61 E9 00 00 00 00 55 53 57 56 81 EC 60 02 00 00 8B BC 24 80 02 00 00 8B 84 24 7C 02 00 00 8B B4 24 74 02 00 00 66 C7 44 24 0E 2A 00 31 ED 8D 4C 24 4B 89 4C 24 14 8A 16 84 D2 74 1D 8D 4E 01 80 FA 25 75 0C 8A 11 80 FA 25 75 12 83 C6 02 EB 02 89 CE 45 FF 44 24 14 EB DD 31 D2 89 F1 41 84 D2 74 13 80 FA 58 74 0E 89 D3 80 C3 9F 80 FB 1A 72 04 8A 11 EB E8 31 DB 80 FA 6C 0F 94 C3 8A 4C 19 FF 89 CA 80 C2 A8 88 54 24 02 F6 C2 DF 6A 10 5E 6A 0A 5A 0F 44 D6 80 F9 6F 6A 08 5E 0F 45 F2 8D 54 24 20 8D 4C 24 0E 52 51 FF D0 89 44 24 10 83 F8 FF 0F 84 A2 01 00 00 C7 44 24 04 00 00 00 00 89 74 24 1C 8D 74 24 20 89 6C 24 08 F6 44 24 20 10 0F 85 63 01 00 00 31 C0 48 80 7C 04 4D 00 8D 40 01 75 F6 39 E8 0F 86 4E 01 00 00 8B 44 24 14 8A 50 01 40 80 FA 20 74 F7 88 54 24 03 80 C2 D5 8D 68 01 31 C9 F6 C2 FD 0F 94 C2 0F 45 E8 F6 44 24 02 DF 75 2A 80 7D 00 30 75 24 88 D1 01 C8 83 C0 02 0F B6 48 FF 89 CA 80 C2 BF 88 CE 80 C6 20 80 FA 1A 0F B6 D6 0F 43 D1 80 FA 78 0F 44 E8 31 C9 8A 45 00 84 C0 0F 84 DF 00 00 00 89 C2 80 C2 BF 0F B6 F0 04 20 80 FA 1A 0F B6 C0 0F 43 C6 0F B6 D0 04 D0 3C 09 77 05 83 C2 D0 EB 0F 89 D0 04 9F 83 C2 A9 3C 06 6A 10 58 0F 43 D0 8B 74 24 1C 39 F2 0F 83 A3 00 00 00 89 D0 F7 D0 89 D7 31 D2 F7 F6 39 C1 0F 87 91 00 00 00 45 0F AF CE 01 CF 89 FE F7 DE 80 7C 24 03 2D 0F 45 F7 89 F9 3B 74 24 04 76 8D 89 7C 24 18 56 FF B4 24 78 02 00 00 8D 84 24 68 01 00 00 50 FF 94 24 84 02 00 00 83 C4 0C 31 C0 8A 8C 04 60 01 00 00 84 C9 74 33 89 CA 80 C2 BF 0F B6 F9 80 C1 20 80 FA 1A 0F B6 C9 0F 43 CF 0F B6 54 04 4C 89 D3 80 C3 BF 88 D7 80 C7 20 80 FB 1A 0F B6 DF 0F 43 DA 38 D9 75 13 40 EB C2 80 7C 04 4C 00 8B 44 24 04 0F 44 C6 89 44 24 04 8B 4C 24 18 E9 16 FF FF FF 8B BC 24 80 02 00 00 8B 6C 24 08 8D 74 24 20 56 FF 74 24 14 FF D7 85 C0 0F 85 83 FE FF FF FF 74 24 10 FF 94 24 88 02 00 00 8B 44 24 04 EB 02 31 C0 81 C4 60 02 00 00 5E 5F 5B 5D C3",
+          "fixups": [
+            {
+              "offset": 3,
+              "encoding": "u32le",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 9,
+                  "signature": "8B ?? E4 FE FF FF ?? FF 15 ?? ?? ?? ?? 8D ?? 94 FC FF FF ?? FF 15 ?? ?? ?? ?? 89 85 98 FD FF FF"
+                },
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 9,
+              "encoding": "u32le",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 16,
+                  "signature": "8D ?? 9C FD FF FF ?? 8B ?? E4 FE FF FF ?? FF 15 ?? ?? ?? ?? 85 C0 0F 84 B3 00 00 00"
+                },
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 15,
+              "encoding": "u32le",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 8,
+                  "signature": "?? 68 ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 89 85 E4 FE FF FF ?? 01 00 00 00 85 ?? 0F 84 D6 00 00 00"
+                },
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 20,
+              "encoding": "u32le",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 17,
+                  "signature": "8B ?? 08 ?? 68 ?? ?? ?? ?? 8D ?? D0 FE FF FF ?? E8 ?? ?? ?? ?? 83 C4 0C 6A 00 8B 8D ?? ?? ?? ?? E8 ?? ?? ?? ?? 85 C0 7D 14"
+                },
+                "read": "rel32"
+              }
+            },
+            {
+              "offset": 32,
+              "encoding": "rel32",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 5,
+                  "signature": "8B ?? 08 ?? 68 ?? ?? ?? ?? 8D ?? D0 FE FF FF ?? E8 ?? ?? ?? ?? 83 C4 0C 6A 00 8B 8D ?? ?? ?? ?? E8 ?? ?? ?? ?? 85 C0 7D 14"
+                }
+              },
+              "relativeTo": 29
+            },
+            {
+              "offset": 39,
+              "encoding": "rel32",
+              "value": {
+                "codeOffset": 58
+              }
+            },
+            {
+              "offset": 48,
+              "encoding": "u32le",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 2,
+                  "signature": "3B ?? ?? ?? ?? ?? 76 09 8B ?? F0 89 ?? ?? ?? ?? ?? EB 02 EB 05 E9 ?? ?? ?? ?? 8B ?? E4 FE FF FF"
+                },
+                "read": "u32le"
+              }
+            },
+            {
+              "offset": 54,
+              "encoding": "rel32",
+              "value": {
+                "at": {
+                  "section": ".text",
+                  "offset": 13,
+                  "signature": "8B ?? E4 FE FF FF ?? FF 15 ?? ?? ?? ?? 8D ?? 94 FC FF FF ?? FF 15 ?? ?? ?? ?? 89 85 98 FD FF FF"
+                }
+              }
+            }
+          ],
+          "when": {
+            "not": {
+              "input": "filename",
+              "equals": "ScreenShot%03d.jpg"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

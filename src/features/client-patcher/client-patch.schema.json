@@ -329,6 +329,7 @@
             "select",
             "text",
             "number",
+            "range",
             "rows"
           ]
         },
@@ -395,6 +396,11 @@
           "minimum": 1,
           "maximum": 4096
         },
+        "suffix": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
         "format": {
           "enum": [
             "filename",
@@ -407,6 +413,15 @@
         },
         "visibleWhen": {
           "$ref": "#/$defs/condition"
+        },
+        "printf": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["integerArgs", "maxLength"],
+          "properties": {
+            "integerArgs": { "type": "integer", "minimum": 0, "maximum": 128 },
+            "maxLength": { "type": "integer", "minimum": 1, "maximum": 4096 }
+          }
         },
         "group": {
           "type": "string",
@@ -462,6 +477,27 @@
         }
       },
       "allOf": [
+        {
+          "if": { "required": ["printf"] },
+          "then": { "properties": { "control": { "const": "text" } } }
+        },
+        {
+          "if": { "required": ["suffix"] },
+          "then": { "properties": { "control": { "const": "range" } } }
+        },
+        {
+          "if": {
+            "properties": { "control": { "const": "range" } }
+          },
+          "then": {
+            "required": ["min", "max"],
+            "properties": {
+              "min": { "type": "integer" },
+              "max": { "type": "integer" },
+              "default": { "type": "integer" }
+            }
+          }
+        },
         {
           "if": {
             "properties": {

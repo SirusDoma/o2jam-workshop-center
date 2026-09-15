@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "screenshot-quality",
+  "title": "Screenshot quality",
+  "description": "Set JPEG quality from 0–100. Higher values preserve more detail and produce larger files.",
+  "category": "Screenshots",
+  "order": 32,
+  "inputs": [
+    {
+      "id": "quality",
+      "label": "JPEG quality",
+      "control": "range",
+      "suffix": "%",
+      "default": 80,
+      "min": 0,
+      "max": 100
+    }
+  ],
+  "variants": [
+    {
+      "client": { "version": "*" },
+      "operations": [
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "offset": 1,
+            "signature": "6A ?? 68 58 02 00 00 68 20 03 00 00 8D 4C 24 34 56 51 E8 ?? ?? ?? ?? 83 C4 14 85 F6 5D 5B"
+          },
+          "original": "50",
+          "encoding": "u8",
+          "size": 1,
+          "readCurrent": true,
+          "value": { "input": "quality" }
+        }
+      ]
+    },
+    {
+      "client": { "version": "*" },
+      "operations": [
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "offset": 1,
+            "signature": "6A ?? 68 58 02 00 00 68 20 03 00 00 8B ?? F0 ?? 8D ?? D0 FE FF FF ?? E8 ?? ?? ?? ?? 83 C4 14 83 7D F0 00 74 1F"
+          },
+          "original": "50",
+          "encoding": "u8",
+          "size": 1,
+          "readCurrent": true,
+          "value": { "input": "quality" }
+        }
+      ]
+    }
+  ]
+}

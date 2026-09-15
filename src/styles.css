@@ -1671,6 +1671,10 @@ html.theming .stackhead {
 .field .hint, .field-hint { font-size: 11.5px; color: var(--ink-3); line-height: 1.5; }
 .field > label + .hint { margin-top: -3px; margin-bottom: 2px; }
 .field input.mono { font-family: var(--font-mono); font-size: 12.5px; }
+.field-range { display: flex; align-items: center; gap: 12px; }
+.field-range input[type='range'] { flex: 1; min-width: 0; height: 20px; margin: 0; padding: 0; border: none; accent-color: var(--accent); }
+.field-range input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.field-range output { min-width: 4ch; white-space: nowrap; text-align: right; font-size: 12.5px; color: var(--ink-2); }
 
 .withaction { display: flex; gap: 8px; align-items: stretch; }
 .withaction select,

@@ -103,8 +103,8 @@ export function ClientPatchGuide() {
         <Reference label="inputs[]" rows={[
           ['id', 'Required. Unique within this patch. Follows the same naming rules as the patch ID.'],
           ['label', 'Required. Text beside the control.'],
-          ['control', 'Required. One of "checkbox", "toggle", "radio", "select", "text", "number", or "rows".'],
-          ['default', 'Starting value. Required unless a string operation reads this input from the executable. Use a boolean for checkbox/toggle, a string for text, a number for number, or an option value for radio/select. Numeric controls can read numbers stored as strings. Row controls require an array of row objects, usually [].'],
+          ['control', 'Required. One of "checkbox", "toggle", "radio", "select", "text", "number", "range", or "rows". Range controls show an integer slider and require min and max.'],
+          ['default', 'Starting value. Required unless a string operation reads this input from the executable. Use a boolean for checkbox/toggle, a string for text, a number for number/range, or an option value for radio/select. Numeric controls can read numbers stored as strings. Row controls require an array of row objects, usually [].'],
           ['description', 'Optional. Help text below the control.'],
           ['group', 'Optional. Inputs with the same group appear on the same line in array order. Put the IP first, followed by its port inputs.'],
           ['options', 'Required for radio and select. Array of choices:', [
@@ -112,8 +112,13 @@ export function ClientPatchGuide() {
             ['value', 'Required. String, number, or boolean used when selected. Each choice must have a different value.'],
           ]],
           ['format', 'Optional. "filename", "ipv4", "hostname", "url", "url-origin", or "port". Use "port" with a number control for integers from 1 to 65535. Use "url" for a full HTTP, HTTPS, or MMS URL; "url-origin" accepts only the protocol, host, and optional port.'],
+          ['printf', 'Optional for text controls, independent of format. Accepts ASCII text with 32-bit integer placeholders (%d, %i, %u, %o, %x, %X), flags, width, precision, optional l, and literal %%. Format rules check the text with placeholders replaced by 0.', [
+            ['integerArgs', 'Required. Exact number of integer placeholders, from 0 to 128.'],
+            ['maxLength', 'Required. Maximum expanded length, from 1 to 4096 characters, excluding the null terminator.'],
+          ]],
           ['min', 'Optional. Lowest allowed number.'],
           ['max', 'Optional. Highest allowed number.'],
+          ['suffix', 'Optional. Text after a range value, such as "%". Does not change the stored number.'],
           ['minFrom', 'Optional. ID of another number input whose value sets the minimum. Inside a row, use a field ID from that row.'],
           ['maxFrom', 'Optional. ID of another number input whose value sets the maximum. Inside a row, use a field ID from that row.'],
           ['maxLength', 'Optional. Maximum text length in characters.'],

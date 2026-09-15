@@ -211,7 +211,7 @@ export function resolveVariant(pe: Executable, variant: PatchVariant, inputs: In
         }
 
         const text = target.original.slice(prefix.length, target.original.length - suffix.length);
-        const value = inputs.find((field) => field.id === input)?.control === 'number'
+        const value = ['number', 'range'].includes(inputs.find((field) => field.id === input)?.control ?? '')
           ? (text.trim() ? Number(text) : NaN)
           : text;
 

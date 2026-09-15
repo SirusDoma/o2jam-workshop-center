@@ -120,6 +120,22 @@ export function ClientPatchInputs({
       );
     }
 
+    if (input.control === 'range') {
+      return (
+        <div className="field" key={input.id}>
+          <label className="text-normal" htmlFor={id}>{label}</label>
+          {help && <span className="hint" id={hint}>{help}</span>}
+          <div className="field-range">
+            <input id={id} type="range" min={input.min} max={input.max} step={1}
+              value={Number(values[input.id])} aria-describedby={hint}
+              aria-valuetext={input.suffix ? `${values[input.id]}${input.suffix}` : undefined}
+              onChange={(event) => onChange(input.id, event.target.valueAsNumber)} />
+            <output className="mono" htmlFor={id}>{String(values[input.id])}{input.suffix}</output>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className={`field${input.control === 'number' ? ' small' : ''}`} key={input.id}>
         <label className="text-normal" htmlFor={id}>{label}</label>

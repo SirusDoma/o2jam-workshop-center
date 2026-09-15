@@ -221,7 +221,7 @@ function hook(op: Record<string, unknown>, inputs: InputDefinition[]): void {
         const fields = fixup.fields as string[];
         requireValue(input.control === 'rows' && (fixup.capacity as number) >= input.maxRows!, 'Row fixup capacity must cover its row input.');
         requireValue(fields.length === input.fields!.length && input.fields!.every((field) => fields.includes(field.id)), 'Row fixups must encode every field exactly once.');
-        requireValue(input.fields!.every((field) => field.control === 'number' || ['select', 'radio'].includes(field.control) && field.options!.every((option) => typeof option.value === 'number' && Number.isInteger(option.value) && option.value >= 0 && option.value <= 0xffffffff)), 'Row fixups require numeric fields.');
+        requireValue(input.fields!.every((field) => ['number', 'range'].includes(field.control) || ['select', 'radio'].includes(field.control) && field.options!.every((option) => typeof option.value === 'number' && Number.isInteger(option.value) && option.value >= 0 && option.value <= 0xffffffff)), 'Row fixups require numeric fields.');
       } else {
         requireValue(input.control !== 'rows', 'Row inputs require rows-u32le fixups.');
       }
@@ -275,7 +275,7 @@ export function validateValues(inputs: InputDefinition[], values: Values): void 
 
     if (input.control === 'checkbox' || input.control === 'toggle') {
       requireValue(typeof value === 'boolean', `${input.label} must be on or off.`);
-    } else if (input.control === 'number') {
+    } else if (input.control === 'number' || input.control === 'range') {
       requireValue(
         typeof value === 'number' && Number.isFinite(value),
         `${input.label} must be a number.`
@@ -284,6 +284,7 @@ export function validateValues(inputs: InputDefinition[], values: Values): void 
         value >= (input.min ?? -Infinity) && value <= (input.max ?? Infinity),
         `${input.label} is outside its allowed range.`
       );
+      if (input.control === 'range') requireValue(Number.isSafeInteger(value), `${input.label} must be an integer.`);
       if (input.format === 'port') {
         requireValue(Number.isInteger(value) && value >= 1 && value <= 65535, `${input.label} must be a port from 1 to 65535.`);
       }
@@ -303,17 +304,37 @@ export function validateValues(inputs: InputDefinition[], values: Values): void 
         `${input.label} must contain 1–${input.maxLength ?? 255} printable characters.`
       );
 
+      let formatted = value;
+      if (input.printf) {
+        const pattern = /%%|%[-+ #0]*(\d*)(?:\.(\d*))?l?[diuoxX]/g;
+        const numbers = [...value.matchAll(pattern)].filter(([token]) => token !== '%%');
+        const literal = value.replace(pattern, (token) => token === '%%' ? '%' : '');
+        requireValue(
+          numbers.length === input.printf.integerArgs && !value.replace(pattern, '').includes('%') &&
+            !/[^\x20-\x7e]/.test(value),
+          `${input.label} must contain ${input.printf.integerArgs} integer placeholder(s), such as %04d.`
+        );
+        const length = literal.length + numbers.reduce((total, [token, width, precision]) =>
+          total + Math.max(Number(width), Number(precision ?? 0) + 3, token.includes('#') && token.endsWith('o') ? 12 : 11), 0);
+        requireValue(
+          length <= input.printf.maxLength,
+          `${input.label} must produce at most ${input.printf.maxLength} characters.`
+        );
+        formatted = value.replace(pattern, (token) => token === '%%' ? '%' : '0');
+      }
+
       if (input.format === 'filename') {
         requireValue(
-          !/[<>:"/\\|?*%]/.test(value) && value !== '.' && value !== '..' && !/[. ]$/.test(value),
-          `${input.label} must be a filename without a path or format specifiers.`
+          !/[<>:"/\\|?*]/.test(formatted) && (Boolean(input.printf) || !formatted.includes('%')) &&
+            formatted !== '.' && formatted !== '..' && !/[. ]$/.test(formatted),
+          `${input.label} must be a filename without a path${input.printf ? '' : ' or format specifiers'}.`
         );
       }
 
       if (input.format === 'ipv4') {
         requireValue(
-          /^\d{1,3}(\.\d{1,3}){3}$/.test(value) &&
-            value
+          /^\d{1,3}(\.\d{1,3}){3}$/.test(formatted) &&
+            formatted
               .split('.')
               .every(
                 (part) =>
@@ -326,8 +347,8 @@ export function validateValues(inputs: InputDefinition[], values: Values): void 
 
       if (input.format === 'hostname') {
         requireValue(
-          /^(?=.{1,253}$)[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/i.test(value) &&
-            value.split('.').every((label) => label.length <= 63 && !label.startsWith('-') && !label.endsWith('-') && label.length > 0),
+          /^(?=.{1,253}$)[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/i.test(formatted) &&
+            formatted.split('.').every((label) => label.length <= 63 && !label.startsWith('-') && !label.endsWith('-') && label.length > 0),
           `${input.label} must be a hostname or IPv4 address without a port or path.`
         );
       }
@@ -337,12 +358,12 @@ export function validateValues(inputs: InputDefinition[], values: Values): void 
         requireValue(
           (fullUrl
             ? /^(?:https?|mms):\/\/[^/?#\s\\]+(?:[/?#][^\s\\]*)?$/i
-            : /^(?:https?|mms):\/\/[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?(?::[0-9]{1,5})?$/i).test(value),
+            : /^(?:https?|mms):\/\/[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?(?::[0-9]{1,5})?$/i).test(formatted),
           fullUrl
             ? `${input.label} must be a full HTTP, HTTPS, or MMS URL.`
             : `${input.label} must contain a protocol and server, with an optional port.`
         );
-        const url = new URL(value);
+        const url = new URL(formatted);
         requireValue(!url.port || Number(url.port) <= 65535, `${input.label} has an invalid port.`);
       }
     }
@@ -365,7 +386,9 @@ function validateInputs(value: unknown, depth = 0): InputDefinition[] {
       'min',
       'max',
       'maxLength',
+      'suffix',
       'format',
+      'printf',
       'visibleWhen', 'fields', 'maxRows', 'uniqueBy', 'addLabel', 'minFrom', 'maxFrom',
     ]);
     id(input.id);
@@ -380,7 +403,7 @@ function validateInputs(value: unknown, depth = 0): InputDefinition[] {
       scalar(input.default);
     }
     requireValue(
-      ['checkbox', 'toggle', 'radio', 'select', 'text', 'number', 'rows'].includes(input.control as string),
+      ['checkbox', 'toggle', 'radio', 'select', 'text', 'number', 'range', 'rows'].includes(input.control as string),
       'Unknown input control.'
     );
 
@@ -404,6 +427,11 @@ function validateInputs(value: unknown, depth = 0): InputDefinition[] {
       text(input.description, 'input description');
     }
 
+    if (input.suffix !== undefined) {
+      requireValue(input.control === 'range', 'Only range controls accept a suffix.');
+      text(input.suffix, 'range suffix', 32);
+    }
+
     if (input.format !== undefined) {
       requireValue(['filename', 'ipv4', 'hostname', 'url', 'url-origin', 'port'].includes(input.format as string), 'Unknown input format.');
       if (input.format === 'port') requireValue(input.control === 'number', 'Port inputs require a number control.');
@@ -411,6 +439,14 @@ function validateInputs(value: unknown, depth = 0): InputDefinition[] {
 
     if (input.maxLength !== undefined) {
       integer(input.maxLength, 'maximum length', 4096);
+    }
+
+    if (input.printf !== undefined) {
+      requireValue(input.control === 'text', 'Printf settings require a text control.');
+      const printf = object(input.printf, ['integerArgs', 'maxLength']);
+      integer(printf.integerArgs, 'printf integer argument count', 128);
+      integer(printf.maxLength, 'printf output length', 4096);
+      requireValue(printf.maxLength > 0, 'Printf output length must be positive.');
     }
 
     for (const key of ['min', 'max']) {
@@ -424,6 +460,10 @@ function validateInputs(value: unknown, depth = 0): InputDefinition[] {
 
     if (input.min !== undefined && input.max !== undefined) {
       requireValue((input.min as number) <= (input.max as number), 'Reversed numeric limits.');
+    }
+
+    if (input.control === 'range') {
+      requireValue(Number.isSafeInteger(input.min) && Number.isSafeInteger(input.max), 'Range controls require integer min and max limits.');
     }
 
     if (input.options !== undefined || input.control === 'radio' || input.control === 'select') {
@@ -445,7 +485,7 @@ function validateInputs(value: unknown, depth = 0): InputDefinition[] {
   for (const input of inputs) {
     for (const key of ['minFrom', 'maxFrom'] as const) {
       if (input[key] !== undefined) {
-        requireValue(input.control === 'number' && inputs.some((field) => field.id === input[key] && field.control === 'number'), 'Numeric bound references an unknown number input.');
+        requireValue(['number', 'range'].includes(input.control) && inputs.some((field) => field.id === input[key] && ['number', 'range'].includes(field.control)), 'Numeric bound references an unknown number input.');
       }
     }
     if (input.visibleWhen) {

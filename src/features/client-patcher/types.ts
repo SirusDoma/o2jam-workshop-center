@@ -14,7 +14,7 @@ export interface InputDefinition {
   id: string;
   label: string;
   description?: string;
-  control: 'checkbox' | 'toggle' | 'radio' | 'select' | 'text' | 'number' | 'rows';
+  control: 'checkbox' | 'toggle' | 'radio' | 'select' | 'text' | 'number' | 'range' | 'rows';
   default?: Value;
   options?: { label: string; value: Scalar }[];
   fields?: InputDefinition[];
@@ -26,7 +26,9 @@ export interface InputDefinition {
   min?: number;
   max?: number;
   maxLength?: number;
+  suffix?: string;
   format?: 'filename' | 'ipv4' | 'hostname' | 'url' | 'url-origin' | 'port';
+  printf?: { integerArgs: number; maxLength: number };
   visibleWhen?: Condition;
 }
 
