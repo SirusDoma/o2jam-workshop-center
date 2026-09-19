@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "id": "patcher-server-fallback",
+  "title": "Patch fallback servers",
+  "description": "Servers used when the initial connection fails.",
+  "category": "Patcher",
+  "order": 102,
+  "inputs": [
+    {
+      "id": "host-1",
+      "label": "IPv4 address",
+      "control": "text",
+      "maxLength": 15,
+      "format": "ipv4",
+      "group": "Fallback 1"
+    },
+    {
+      "id": "port-1",
+      "label": "Port",
+      "control": "number",
+      "format": "port",
+      "default": 15050,
+      "group": "Fallback 1"
+    },
+    {
+      "id": "host-2",
+      "label": "IPv4 address",
+      "control": "text",
+      "maxLength": 15,
+      "format": "ipv4",
+      "group": "Fallback 2"
+    },
+    {
+      "id": "port-2",
+      "label": "Port",
+      "control": "number",
+      "format": "port",
+      "default": 15050,
+      "group": "Fallback 2"
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "host-1"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 8D 4C 24 ?? C7 44 24 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 4C 24 ?? C7 44 24 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? C7 44 24 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 25 01 00 00 80"
+            }
+          ]
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "offset": 35,
+            "signature": "68 ?? ?? ?? ?? 8D 4C 24 ?? C7 44 24 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 4C 24 ?? C7 44 24 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? C7 44 24 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 25 01 00 00 80"
+          },
+          "original": "CA 3A 00 00",
+          "readCurrent": true,
+          "value": {
+            "input": "port-1"
+          },
+          "encoding": "u32le",
+          "size": 4
+        },
+        {
+          "type": "string",
+          "value": {
+            "input": "host-2"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 23,
+              "signature": "68 ?? ?? ?? ?? 8D 4C 24 ?? C7 44 24 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 4C 24 ?? C7 44 24 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? C7 44 24 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 25 01 00 00 80"
+            }
+          ]
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "offset": 48,
+            "signature": "68 ?? ?? ?? ?? 8D 4C 24 ?? C7 44 24 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 68 ?? ?? ?? ?? 8D 4C 24 ?? C7 44 24 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? C7 44 24 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 25 01 00 00 80"
+          },
+          "original": "CA 3A 00 00",
+          "readCurrent": true,
+          "value": {
+            "input": "port-2"
+          },
+          "encoding": "u32le",
+          "size": 4
+        }
+      ]
+    }
+  ]
+}

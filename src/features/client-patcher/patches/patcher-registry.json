@@ -53,6 +53,81 @@
           ]
         }
       ]
+    },
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "key"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 68 02 00 00 80 FF 15 ?? ?? ?? ?? 85 C0 75 ??"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 8D 8E ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 44 24 ?? 8D 8E ?? ?? ?? ??"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "key"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 8D 8F ?? ?? ?? ?? E8 ?? ?? ?? ?? BD ?? ?? ?? ?? 55"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 8D 8E ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B CE E8 ?? ?? ?? ??"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 68 02 00 00 80 FF D7 85 C0 74 ??"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 2C 85 C0 0F 84 ?? ?? ?? ??"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 89 74 24 ?? E8 ?? ?? ?? ?? 83 C4 0C 85 C0"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? C7 84 24 ?? ?? ?? ?? 00 00 00 00 E8 ?? ?? ?? ?? 8B 94 24 ?? ?? ?? ??"
+            },
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 18 8B CE 6A 01"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

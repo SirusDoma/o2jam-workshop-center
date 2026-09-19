@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "patcher-server-310",
+  "id": "patcher-server-ipv4",
   "title": "Patch metadata server",
   "description": "Server providing version info, FTP locations, and the game server list.",
   "category": "Patcher",
@@ -70,6 +70,41 @@
             "signature": "68 ?? ?? ?? ?? 52 50 FF 15 ?? ?? ?? ?? 83 C4 10 85 C0"
           },
           "original": "CA 3A 00 00",
+          "readCurrent": true,
+          "value": {
+            "input": "port"
+          },
+          "encoding": "u32le",
+          "size": 4
+        }
+      ]
+    },
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "host"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 8D 4C 24 ?? E8 ?? ?? ?? ?? 8D 4C 24 ?? C7 44 24 ?? ?? ?? ?? ?? 51 8D 4C 24 ?? E8 ?? ?? ?? ?? 8B 96 ?? ?? ?? ?? 8B 44 24 ?? 8B 4E 1C 42 89 96 ?? ?? ?? ?? 8B 54 24 ?? 68 ?? ?? ?? ?? 52 50 51 FF 15 ?? ?? ?? ?? 83 C4 10 85 C0"
+            }
+          ]
+        },
+        {
+          "type": "value",
+          "at": {
+            "section": ".text",
+            "offset": 22,
+            "signature": "68 ?? ?? ?? ?? 8D 4C 24 ?? E8 ?? ?? ?? ?? 8D 4C 24 ?? C7 44 24 ?? ?? ?? ?? ?? 51 8D 4C 24 ?? E8 ?? ?? ?? ?? 8B 96 ?? ?? ?? ?? 8B 44 24 ?? 8B 4E 1C 42 89 96 ?? ?? ?? ?? 8B 54 24 ?? 68 ?? ?? ?? ?? 52 50 51 FF 15 ?? ?? ?? ?? 83 C4 10 85 C0"
+          },
+          "original": "A5 3A 00 00",
           "readCurrent": true,
           "value": {
             "input": "port"

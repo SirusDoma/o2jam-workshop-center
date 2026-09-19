@@ -54,6 +54,26 @@
           ]
         }
       ]
+    },
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "url"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 6A 00 6A 00 6A 01 8D 8E ?? ?? ?? ?? 6A 68 51 E8 ?? ?? ?? ??"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

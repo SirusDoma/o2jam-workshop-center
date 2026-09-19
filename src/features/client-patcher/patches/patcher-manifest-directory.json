@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "patcher-manifest-directory",
+  "title": "FTP manifest directory",
+  "description": "Folder under the FTP root containing FileList manifests.",
+  "category": "Patcher",
+  "order": 105,
+  "inputs": [
+    {
+      "id": "directory",
+      "label": "Directory name",
+      "control": "text",
+      "maxLength": 64,
+      "format": "filename"
+    }
+  ],
+  "variants": [
+    {
+      "client": {
+        "version": "*"
+      },
+      "operations": [
+        {
+          "type": "string",
+          "value": {
+            "input": "directory"
+          },
+          "references": [
+            {
+              "section": ".text",
+              "offset": 1,
+              "signature": "68 ?? ?? ?? ?? 51 8D 95 ?? ?? ?? ?? 68 ?? ?? ?? ?? 52 E8 ?? ?? ?? ?? 8B 83 ?? ?? ?? ?? 83 C4 10 8D 4D ?? 6A 01 6A 15 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 8B F8 8D 85 ?? ?? ?? ?? 50 8B CF E8 ?? ?? ?? ?? 8B 4D 08"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
